@@ -12,7 +12,7 @@ use Illuminate\View\View;
 class AdminController extends Controller
 {
     public function ProjectList(){
-        dd('');
+       return view('admin.project.project_list');
     }
 
 }
