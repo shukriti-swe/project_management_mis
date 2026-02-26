@@ -1,0 +1,127 @@
+@extends('layouts.backend.app')
+
+@section('admin_content')
+
+<!--start page wrapper -->
+<div class="page-wrapper">
+    <div class="page-content">
+
+        <div class="flash-message">
+            @foreach (['danger', 'warning', 'success', 'info'] as $msg)
+                @if(Session::has('alert-' . $msg))
+                    <p class="alert alert-{{ $msg }}" role="alert">
+                        @if($msg == 'success')
+                            <strong><i class="icon fa fa-check"></i></strong>
+                        @elseif($msg == 'warning')
+                            <strong><i class="icon fa fa-warning"></i></strong>
+                        @elseif($msg == 'info')
+                            <strong><i class="icon fa fa-info"></i></strong>
+                        @elseif($msg == 'danger')
+                            <strong><i class="icon fa fa-ban"></i></strong>
+                        @endif
+                        {{ Session::get('alert-' . $msg) }}
+                    </p>
+                @endif
+            @endforeach
+        </div>
+
+        <main>
+            @if (isset($slot))
+                {{ $slot }}
+            @else
+                <p class="text-center text-red-500">কনটেন্ট পাওয়া যায়নি।</p>
+            @endif
+        </main>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
+            <div class="col">
+                <div class="card radius-10 bg-gradient-deepblue">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <h5 class="mb-0 text-white">9526</h5>
+                            <div class="ms-auto">
+                                <i class='bx bx-cart fs-3 text-white'></i>
+                            </div>
+                        </div>
+                        <div class="progress my-3 bg-light-transparent" style="height:3px;">
+                            <div class="progress-bar bg-white" role="progressbar" style="width: 55%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex align-items-center text-white">
+                            <p class="mb-0">Total Orders</p>
+                            <p class="mb-0 ms-auto"><span><i class='bx bx-up-arrow-alt'></i></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card radius-10 bg-gradient-orange">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <h5 class="mb-0 text-white">$8323</h5>
+                            <div class="ms-auto">
+                                <i class='bx bx-dollar fs-3 text-white'></i>
+                            </div>
+                        </div>
+                        <div class="progress my-3 bg-light-transparent" style="height:3px;">
+                            <div class="progress-bar bg-white" role="progressbar" style="width: 55%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex align-items-center text-white">
+                            <p class="mb-0">Total Revenue</p>
+                            <p class="mb-0 ms-auto"><span><i class='bx bx-up-arrow-alt'></i></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card radius-10 bg-gradient-ohhappiness">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <h5 class="mb-0 text-white">6200</h5>
+                            <div class="ms-auto">
+                                <i class='bx bx-group fs-3 text-white'></i>
+                            </div>
+                        </div>
+                        <div class="progress my-3 bg-light-transparent" style="height:3px;">
+                            <div class="progress-bar bg-white" role="progressbar" style="width: 55%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex align-items-center text-white">
+                            <p class="mb-0">Visitors</p>
+                            <p class="mb-0 ms-auto"><span><i class='bx bx-up-arrow-alt'></i></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card radius-10 bg-gradient-ibiza">
+                    <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 text-white">5630</h5>
+                        <div class="ms-auto">
+                            <i class='bx bx-envelope fs-3 text-white'></i>
+                        </div>
+                    </div>
+                    <div class="progress my-3 bg-light-transparent" style="height:3px;">
+                        <div class="progress-bar bg-white" role="progressbar" style="width: 55%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex align-items-center text-white">
+                        <p class="mb-0">Messages</p>
+                        <p class="mb-0 ms-auto"><span><i class='bx bx-up-arrow-alt'></i></span></p>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!--end page wrapper -->
+<!--start overlay-->
+<div class="overlay toggle-icon"></div>
+<!--end overlay-->
+<!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+<!--End Back To Top Button-->
+<footer class="page-footer">
+    <p class="mb-0">Copyright © 2021. All right reserved.</p>
+</footer>
+
+@endsection
