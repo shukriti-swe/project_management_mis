@@ -25,14 +25,6 @@
             @endforeach
         </div>
 
-        <main>
-            @if (isset($slot))
-                {{ $slot }}
-            @else
-                <p class="text-center text-red-500">কনটেন্ট পাওয়া যায়নি।</p>
-            @endif
-        </main>
-
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
             <div class="col">
                 <div class="card radius-10 bg-gradient-deepblue">

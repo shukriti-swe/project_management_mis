@@ -20,7 +20,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::any('/project-list', [AdminController::class, 'ProjectList'])->name('ProjectList');
+    Route::any('/project-list', [AdminController::class, 'projectList'])->name('projectList');
+    Route::any('/add-project', [App\Http\Controllers\AdminController::class, 'addProject'])->name('addProject');
+    Route::any('/save-project', [App\Http\Controllers\AdminController::class, 'saveProject'])->name('saveProject');
+    Route::any('/edit-project/{id}', [App\Http\Controllers\AdminController::class, 'editProject'])->name('editProject');
+    Route::any('/update-project', [App\Http\Controllers\AdminController::class, 'updateProject'])->name('updateProject');
+    Route::any('/delete-project/{id}', [App\Http\Controllers\AdminController::class, 'deleteProject'])->name('deleteProject');
 });
 
 require __DIR__.'/auth.php';

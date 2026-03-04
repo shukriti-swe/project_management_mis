@@ -65,7 +65,7 @@
     <script src="{{asset('admin_assets/js/ckeditor.js')}}"></script>
 	
     <script>
-        ClassicEditor.create( document.querySelector( '#editor' ),{
+        ClassicEditor.create( document.querySelector( '.editor' ),{
             ckfinder: {
                     uploadUrl: "{{route('ckeditor.upload').'?_token='.csrf_token()}}",
                 }
