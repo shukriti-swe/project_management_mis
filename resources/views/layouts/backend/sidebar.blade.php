@@ -70,6 +70,32 @@
 				</a>
 			</li> -->
 
+			<li>
+				<a href="javascript:;" class="has-arrow">
+					<div class="parent-icon"><i class="bx bx-user-circle"></i>
+					</div>
+					<div class="menu-title">Users</div>
+				</a>
+				<ul>
+					<li> <a href="{{ route('users.index') }}"><i class="bx bx-right-arrow-alt"></i>User List</a>
+					</li>
+					<li> <a href="{{ route('users.create') }}"><i class="bx bx-right-arrow-alt"></i>Add User</a>
+					</li>
+				</ul>
+			</li>
+
+			<li>
+				<a href="javascript:;" class="has-arrow">
+					<div class="parent-icon"><i class="bx bx-user-circle"></i>
+					</div>
+					<div class="menu-title">Roles & Premission</div>
+				</a>
+				<ul>
+					<li> <a href="{{ route('roles.index') }}"><i class="bx bx-right-arrow-alt"></i>Roles</a></li>
+					<li> <a href="{{ route('permissions.index') }}"><i class="bx bx-right-arrow-alt"></i>Permission</a></li>
+				</ul>
+			</li>
+
 		
 
 			<li class="menu-label">More Pages</li>
@@ -102,19 +128,7 @@
 				</ul>
 			</li>
 
-			<li>
-				<a href="javascript:;" class="has-arrow">
-					<div class="parent-icon"><i class="bx bx-user-circle"></i>
-					</div>
-					<div class="menu-title">Users</div>
-				</a>
-				<ul>
-					<li> <a href="{{ route('projectList') }}"><i class="bx bx-right-arrow-alt"></i>User List</a>
-					</li>
-					<li> <a href="{{ route('addProject') }}"><i class="bx bx-right-arrow-alt"></i>Add User</a>
-					</li>
-				</ul>
-			</li>
+			
 	</ul>
 	<!--end navigation-->
 </div>
