@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::any('/edit-project/{id}', [AdminController::class, 'editProject'])->name('editProject');
     Route::any('/update-project', [AdminController::class, 'updateProject'])->name('updateProject');
     Route::any('/delete-project/{id}', [AdminController::class, 'deleteProject'])->name('deleteProject');
+    Route::get('/project-details/{project}', [AdminController::class, 'show'])->name('projectDetails');
 
     Route::resource('/layers', LayerController::class)->names('layer');
 

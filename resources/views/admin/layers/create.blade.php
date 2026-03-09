@@ -47,11 +47,10 @@
                                 {{-- Status --}}
                                 <div class="col-md-3">
                                     <label class="form-label">Status</label>
-                                    <select class="form-select" name="status">
-                                        <option value="pending">Pending</option>
-                                        <option value="in_progress">In Progress</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="blocked">Blocked</option>
+                                    <select class="form-select" name="status_id">
+                                        @foreach($statuses as $status)
+                                            <option value="{{$status->id}}">{{$status->label}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
 

@@ -35,28 +35,28 @@
                 </div>
                 
                 <div class="table-responsive">
-                    <table id="example" class="table table-striped table-bordered" style="width:100%">
+                    <table id="example" class="table table-striped table-bordered table-hover" style="width:100%">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Start date</th>
                                 <th>End date</th>
-                                <th>FIle/image</th>
+{{--                                <th>FIle/image</th>--}}
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($projects as $project)
-                            <tr>
+                            <tr onclick="window.location='{{ route('projectDetails',$project->id) }}'" style="cursor:pointer;">
                                 <td>{{ $project->id }}</td>
                                 <td>{{ $project->title }}</td>
                                 <td>{{ $project->start_date }}</td>
                                 <td>{{ $project->end_date }}</td>
-                                <td style="text-align: center;">
-                                    <img style="height:70px;width:120px;" src="{{ asset('project/'.$project->image) }}">
-                                </td>
+{{--                                <td style="text-align: center;">--}}
+{{--                                    <img style="height:70px;width:120px;" src="{{ asset('project/'.$project->image) }}">--}}
+{{--                                </td>--}}
                                 <td>
                                     @if($project->status==1)
                                         {{ 'Active' }}

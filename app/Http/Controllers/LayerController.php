@@ -14,7 +14,9 @@ class LayerController extends Controller
     public function __construct(
         protected LayerService $layerService,
     )
-    {}
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -47,9 +49,9 @@ class LayerController extends Controller
     public function create()
     {
         $project = Project::first();
-//        dd($project);
+        $statuses = $project->statuses()->get();
         $parentLayers = Layer::orderBy('created_at', 'desc')->get();
-        return view('admin.layers.create', compact('project', 'parentLayers'));
+        return view('admin.layers.create', compact('project', 'parentLayers', 'statuses'));
     }
 
     /**
@@ -92,10 +94,22 @@ class LayerController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * @throws Throwable
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Layer $layer)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'status_id' => 'nullable|exists:statuses,id',
+            'project_id' => 'required|exists:projects,id',
+            'type' => 'required|in:task,container',
+            'parent_id' => 'nullable|exists:layers,id',
+            'start_time' => 'nullable|date',
+            'end_time' => 'nullable|date|after_or_equal:start_time',
+        ]);
+
+        $this->layerService->updateLayer($layer, $validated);
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Project;
@@ -23,9 +24,13 @@ class AdminController extends Controller
         return view('admin.project.add_project');
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function saveProject(Request $request){
         $request->validate([
             'title' => 'required',
+            'description' => 'nullable',
             'start_date' => 'required',
             'status' => 'required',
             // 'image' => 'required | file | mimes:jpg,png,jpeg| dimensions:max_height=38,max_width=168',
@@ -65,10 +70,15 @@ class AdminController extends Controller
 
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function updateProject(Request $request){
 
+//        dd($request->all());
         $request->validate([
             'title' => 'required',
+            'description' => 'nullable',
             'start_date' => 'required',
             'status' => 'required',
             // 'image' => 'required | file | mimes:jpg,png,jpeg| dimensions:max_height=38,max_width=168',
@@ -95,8 +105,9 @@ class AdminController extends Controller
             return redirect()->route('projectList')->with('alert-success','Project Updated successfully');
 
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             DB::rollback();
-            return redirect()->route('projectList')->with('alert-success','Something went wrong!');
+            return redirect()->route('projectList')->with('alert-error','Something went wrong!');
         }
     }
 
@@ -104,6 +115,26 @@ class AdminController extends Controller
         $project = Project::where('id',$id)->delete();
         return redirect()->route('projectList')->with('alert-success','Project Deleted successfully');
 
+    }
+
+    // Sampad Singha
+    public function show(Project $project)
+    {
+        $layers = $project->rootLayers()
+            ->defaultOrder()
+            ->with('status')
+            ->get();
+
+        $progress_percent = $project->layers()
+            ->where('type', 'task')
+            ->avg('progress_percent');
+
+        $project->progress_percent = round($progress_percent);
+
+        return view('admin.project.view_project', compact(
+            'project',
+            'layers'
+        ));
     }
 
 }
