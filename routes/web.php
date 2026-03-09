@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleController;
@@ -52,6 +53,8 @@ Route::middleware('auth')->group(function () {
     Route::any('/edit-project/{id}', [AdminController::class, 'editProject'])->name('editProject');
     Route::any('/update-project', [AdminController::class, 'updateProject'])->name('updateProject');
     Route::any('/delete-project/{id}', [AdminController::class, 'deleteProject'])->name('deleteProject');
+
+    Route::resource('/layers', LayerController::class)->names('layer');
 
 });
 
