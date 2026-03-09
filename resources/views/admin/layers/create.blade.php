@@ -14,8 +14,8 @@
                         <div class="card-body p-5">
 
                             <div class="card-title d-flex align-items-center">
-                                <div><i class="bx bx-layer me-1 font-22 text-danger"></i></div>
-                                <h5 class="mb-0 text-danger">Add Layer to Project</h5>
+                                <div><i class="bx bx-layer me-1 font-22"></i></div>
+                                <h5 class="mb-0">Add Layer to Project: <span class="text-danger">{{$project->title}}</span></h5>
                             </div>
 
                             <hr>
@@ -24,6 +24,7 @@
                                 @csrf
 
                                 <input type="hidden" name="project_id" value="{{ $project->id }}">
+{{--                                <input type="hidden" name="parent_id" value="{{ $parent? $parent->id : null }}">--}}
 
                                 {{-- Layer Name --}}
                                 <div class="col-md-6">

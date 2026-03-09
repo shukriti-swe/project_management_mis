@@ -46,9 +46,9 @@ class LayerController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        $project = Project::first();
+        $project = Project::findOrFail($request->input('project'));
         $statuses = $project->statuses()->get();
         $parentLayers = Layer::orderBy('created_at', 'desc')->get();
         return view('admin.layers.create', compact('project', 'parentLayers', 'statuses'));
@@ -79,9 +79,24 @@ class LayerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Layer $layer)
     {
-        //
+        $layer->load([
+            'children.status',
+            'status',
+            'project',
+            'ancestors'
+        ]);
+
+        $statuses = $layer->project->statuses;
+
+        $ancestors = $layer->ancestors;
+
+        return view('admin.layers.show', compact(
+            'layer',
+            'statuses',
+            'ancestors'
+        ));
     }
 
     /**

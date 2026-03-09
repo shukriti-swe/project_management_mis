@@ -1,5 +1,111 @@
 @extends('layouts.backend.app')
+@push('css')
+    <style>
+        body {
+            background: #fff;
+        }
+        /* Table container */
+        .table-modern {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
 
+        /* Header */
+        .table-modern thead th {
+            background: #f8fafc;
+            font-weight: 600;
+            font-size: 13px;
+            color: #495057;
+            border-bottom: 1px solid #e9ecef;
+            padding: 14px 16px;
+        }
+
+        /* Body cells */
+        .table-modern tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 14px;
+            color: #343a40;
+            vertical-align: middle;
+        }
+
+        /* Row hover */
+        .table-modern tbody tr {
+            transition: all 0.18s ease;
+        }
+
+        .table-modern tbody tr:hover {
+            background: #f8fbff;
+            box-shadow: inset 0 0 0 1px #e6f0ff;
+        }
+
+        /* Last row border cleanup */
+        .table-modern tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Table wrapper outline */
+        .table-modern-wrapper {
+            border: 1px solid #eef1f4;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* Status dot */
+        .table-modern .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Type circle (T / C) */
+        .layer-type-icon {
+            width: 22px;
+            height: 22px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .layer-type-icon[data-type="task"] {
+            background: #0d6efd;
+        }
+
+        .layer-type-icon[data-type="container"] {
+            background: #f59f00;
+        }
+
+        /* Action buttons */
+        .table-modern .btn-outline-primary {
+            border-color: #dee2e6;
+            color: #495057;
+        }
+
+        .table-modern .btn-outline-primary:hover {
+            background: #f1f5ff;
+            border-color: #d0d9ff;
+            color: #0d6efd;
+        }
+
+        /* subtle row cursor */
+        .table-modern tbody tr {
+            cursor: pointer;
+        }
+
+        /* smoother table spacing on responsive */
+        .table-modern td small {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+    </style>
+@endpush
 @section('admin_content')
 
     <div class="page-wrapper">
@@ -104,7 +210,7 @@
 
                             <div class="table-responsive">
 
-                                <table id="layersTable" class="table table-hover align-middle">
+                                <table id="layersTable" class="table Xtable-hover align-middle table-modern">
 
                                     <thead class="table-light">
                                     <tr>
@@ -120,8 +226,8 @@
                                     <tbody>
 
                                     @foreach($layers as $layer)
-
-                                        <tr data-href="{{ route('layer.show',$layer->id) }}" style="cursor:pointer"
+                                        <tr onclick="window.location='{{ route('layer.show',$layer->id) }}'"
+                                            style="cursor:pointer"
                                             class="layer-row">
 
                                             <td class="fw-semibold">
@@ -172,8 +278,10 @@
                                                 @else
 
                                                     <div class="d-flex align-items-center gap-2">
-                                                        <div id="progress-{{ $layer->id }}" style="width:32px;height:32px;"></div>
-                                                        <small class="text-muted">{{ $layer->progress_percent ?? 0 }}%</small>
+                                                        <div id="progress-{{ $layer->id }}"
+                                                             style="width:32px;height:32px;"></div>
+                                                        <small class="text-muted">{{ $layer->progress_percent ?? 0 }}
+                                                            %</small>
                                                     </div>
 
                                                 @endif
@@ -230,7 +338,7 @@
 
             new ProgressBar.Circle('#progress-{{ $layer->id }}', {
                 strokeWidth: 16,
-                color: '#0d6efd',
+                color: '{{ ($layer->progress_percent ?? 0) == 100 ? "#1e965f" : "#0d6efd" }}',
                 trailColor: '#c1d5ea',
                 trailWidth: 16,
                 easing: 'easeInOut',
