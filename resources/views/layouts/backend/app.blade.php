@@ -3,5 +3,5 @@
 @include('layouts.backend.nav')
 @stack('css')
 @yield('admin_content')
-@stack('js')
 @include('layouts.backend.footer')
+@stack('js')

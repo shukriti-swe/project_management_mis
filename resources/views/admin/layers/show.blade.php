@@ -4,7 +4,7 @@
     <style>
 
         body {
-            background: #fff
+            background: #fff;
         }
 
         .page-content {
@@ -27,13 +27,26 @@
             margin-right: 6px;
         }
 
-        /* STATUS BUTTON GROUP */
-        .btn-group-title{
-            font-size: 13px;
-            color: #6c757d;
-            margin-bottom: 6px;
-            margin-top: 20px;
+        .layer-title{
+            font-size: 28px;
+            font-family: Roboto, sans-serif!important;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 32px 0;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* STATUS BUTTON GROUP */
 
         .status-btn {
             border: 1px solid var(--status-color);
@@ -65,13 +78,8 @@
             height: 64px;
         }
 
-        /*#layer-progress svg {*/
-        /*    width: 100% !important;*/
-        /*    height: 100% !important;*/
-        /*}*/
-
         .description {
-            margin-top: 50px;
+            margin-top: 32px;
         }
 
         /* ASSIGNED USERS */
@@ -153,15 +161,6 @@
             text-align: right;
         }
 
-        /*.timeline-dot {*/
-        /*    width: 10px;*/
-        /*    height: 10px;*/
-        /*    border-radius: 50%;*/
-        /*    !*background:#adb5bd;*!*/
-        /*    background: #0ea5e9;*/
-        /*    margin-top: 6px;*/
-        /*}*/
-
         .timeline-content {
             font-size: 14px;
         }
@@ -171,6 +170,10 @@
         }
 
         /* TABLE */
+
+        .table-responsive{
+            overflow: visible;
+        }
 
         .table-modern {
             border-collapse: separate;
@@ -231,6 +234,61 @@
             display: inline-block;
         }
 
+        /* 3-dot trigger button */
+
+        .dropdown > button {
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* hover / focus / active state for trigger */
+
+        .dropdown > button:hover,
+        .dropdown > button:focus,
+        .dropdown > button:active {
+            background-color: #f1f3f5;
+            border: none;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* remove bootstrap focus outline */
+
+        .dropdown > button:focus-visible {
+            outline: none;
+        }
+
+        /* dropdown menu item hover */
+
+        .dropdown-menu .dropdown-item:hover,
+        .dropdown-menu .dropdown-item:focus,
+        .dropdown-menu .dropdown-item:active {
+            background-color: #f1f3f5;
+            color: inherit;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* optional: slightly smoother menu feel */
+
+        .dropdown-menu {
+            border-radius: 8px;
+            padding: 6px 0;
+        }
+
+        /* optional: softer icon alignment */
+
+        .dropdown-item i {
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
     </style>
 @endpush
 
@@ -258,7 +316,7 @@
                                 </a>
                             </li>
 
-                            @if($count<=4)
+                            @if($count<=2)
 
                                 @foreach($ancestors as $ancestor)
                                     <li class="breadcrumb-item">
@@ -269,16 +327,9 @@
                                 @endforeach
 
                             @else
+                                <li class="breadcrumb-item">....</li>
 
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('layer.show',$ancestors->first()->id) }}">
-                                        {{ $ancestors->first()->name }}
-                                    </a>
-                                </li>
-
-                                <li class="breadcrumb-item">…</li>
-
-                                @foreach($ancestors->slice(-3) as $ancestor)
+                                @foreach($ancestors->slice(-2) as $ancestor)
                                     <li class="breadcrumb-item">
                                         <a href="{{ route('layer.show',$ancestor->id) }}">
                                             {{ $ancestor->name }}
@@ -305,7 +356,6 @@
                         <div class="card-body p-4">
 
                             <div class="row align-items-start">
-
                                 <div class="col-lg-8">
 
                                     <div class="layer-badges mb-2">
@@ -319,59 +369,47 @@
                                                 {{ $layer->status->label }}
                                             </span>
                                         @endif
-
                                     </div>
 
-                                    <h2 class="fw-bold mb-2">{{ $layer->name }}</h2>
-
-                                    @if($layer->type==='task')
-
-                                        <h6 class="btn-group-title">Change Status</h6>
-
-                                        <div class="btn-group mb-3">
-
-                                            @foreach($statuses as $status)
-
-                                                <input type="radio"
-                                                       class="btn-check"
-                                                       name="status"
-                                                       id="status-{{ $status->id }}"
-                                                        {{ $layer->status_id==$status->id?'checked':'' }}>
-
-                                                <label
-                                                        class="btn status-btn {{ $layer->status_id==$status->id?'active':'' }}"
-                                                        style="--status-color:{{ $status->color }}"
-                                                        for="status-{{ $status->id }}">
-                                                    {{ $status->label }}
-                                                </label>
-
-                                            @endforeach
-
-                                        </div>
-
-                                    @endif
-
+                                    <h2 class="mb-2 layer-title">{{ $layer->name }}</h2>
                                 </div>
-
 
                                 <div class="col-lg-4">
-
                                     <div class="header-progress">
-
                                         <div id="layer-progress"></div>
-
-                                        {{--                                        <div class="progress-text">--}}
-                                        {{--                                            {{ $layer->progress_percent ?? 0 }}%--}}
-                                        {{--                                        </div>--}}
-
-                                        <a href="{{ route('layer.edit',$layer->id) }}" class="btn btn-primary btn-sm">
-                                            Edit {{ $layer->type==='task'?'Task':'Layer' }}
-                                        </a>
-
                                     </div>
-
                                 </div>
+                            </div>
 
+                            <div class="align-items-start action-bar">
+                                <div class="status-group">
+                                    @if($layer->type==='task')
+                                        <div class="btn-group">
+                                            @foreach($statuses as $status)
+                                                <a href="#"
+                                                   class="btn status-btn change-status {{ $layer->status_id == $status->id ? 'active' : '' }}"
+                                                   data-url="{{ route('layer.updateStatus',['layer'=>$layer->id,'status'=>$status->id]) }}"
+                                                   style="--status-color: {{ $status->color }}">
+                                                    {{ $status->label }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="action-group">
+                                    <a href="{{ route('layer.edit',$layer->id) }}" class="btn btn-primary btn-sm">
+                                        Edit {{ $layer->type==='task'?'Task':'Layer' }}
+                                    </a>
+                                    <form action="{{route('layer.destroy',$layer->id)}}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="hidden" name="id" value="{{ $layer->id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Are you sure you want to delete this {{ $layer->type }}?')">
+                                            {{'Delete' . ($layer->type==='task'?' Task':' Layer') }}
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
 
                             <hr>
@@ -519,7 +557,13 @@
                         <div class="card border-0 shadow-sm">
                             <div class="card-body p-4">
 
-                                <div class="section-title">CHILDREN</div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="section-title">CHILDREN</div>
+
+                                    <a href="{{ route('layer.create',['project'=>$layer->project_id, 'parent' => $layer->id]) }}"
+                                       class="btn btn-info btn-sm">
+                                        Add Child </a>
+                                </div>
 
                                 <div class="table-responsive">
 
@@ -598,10 +642,48 @@
 
                                                 <td class="text-end">
 
-                                                    <a href="{{ route('layer.edit',$child->id) }}"
-                                                       class="btn btn-sm btn-outline-primary">
-                                                        Edit
-                                                    </a>
+                                                    <div class="dropdown" onclick="event.stopPropagation()">
+
+                                                        <button
+                                                                class="btn btn-md btn-light bg-transparent border-0"
+                                                                type="button"
+                                                                data-bs-toggle="dropdown"
+                                                                data-bs-display="static"
+                                                                aria-expanded="false">
+
+                                                            <i class="bx bx-dots-vertical-rounded"></i>
+
+                                                        </button>
+
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+
+                                                            <li>
+                                                                <a class="dropdown-item"
+                                                                   href="{{ route('layer.edit',$child->id) }}">
+                                                                    <i class="bx bx-edit me-1"></i>
+                                                                    Edit
+                                                                </a>
+                                                            </li>
+
+                                                            <li>
+                                                                <form method="POST"
+                                                                      action="{{ route('layer.destroy',$child->id) }}"
+                                                                      onsubmit="return confirm('Delete this layer?')">
+
+                                                                    @csrf
+                                                                    @method('DELETE')
+
+                                                                    <button type="submit" class="dropdown-item text-danger">
+                                                                        <i class="bx bx-trash me-1"></i>
+                                                                        Delete
+                                                                    </button>
+
+                                                                </form>
+                                                            </li>
+
+                                                        </ul>
+
+                                                    </div>
 
                                                 </td>
 
@@ -625,6 +707,21 @@
 
         </div>
     </div>
+    @if(session('success'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                showToast(@json(session('success')), 'success');
+            });
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                showToast(@json(session('error')), 'error');
+            });
+        </script>
+    @endif
 
 @endsection
 
@@ -675,6 +772,38 @@
             @endif
 
             @endforeach
+
+            document.querySelectorAll('.change-status').forEach(btn => {
+
+                btn.addEventListener('click', function(e){
+
+                    e.preventDefault();
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = this.dataset.url;
+
+                    // CSRF token
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+
+                    // PATCH method
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'PATCH';
+
+                    form.appendChild(csrf);
+                    form.appendChild(method);
+
+                    document.body.appendChild(form);
+                    form.submit();
+
+                });
+
+            });
 
         });
     </script>

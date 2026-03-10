@@ -51,7 +51,8 @@ class LayerController extends Controller
         $project = Project::findOrFail($request->input('project'));
         $statuses = $project->statuses()->get();
         $parentLayers = Layer::orderBy('created_at', 'desc')->get();
-        return view('admin.layers.create', compact('project', 'parentLayers', 'statuses'));
+        $parent = Layer::find($request->input('parent'));
+        return view('admin.layers.create', compact('project', 'parentLayers', 'statuses', 'parent'));
     }
 
     /**
@@ -60,20 +61,32 @@ class LayerController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status_id' => 'nullable|exists:statuses,id',
-            'project_id' => 'required|exists:projects,id',
-            'type' => 'required|in:task,container',
-            'parent_id' => 'nullable|exists:layers,id',
-            'start_time' => 'nullable|date',
-            'end_time' => 'nullable|date|after_or_equal:start_time',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'status_id' => 'nullable|exists:statuses,id',
+                'project_id' => 'required|exists:projects,id',
+                'type' => 'required|in:task,container',
+                'parent_id' => 'nullable|exists:layers,id',
+                'start_time' => 'nullable|date',
+                'end_time' => 'nullable|date|after_or_equal:start_time',
+            ]);
 
-        $this->layerService->createLayer($validated);
+            $this->layerService->createLayer($validated);
 
-        return redirect()->back()->with('success', 'Layer has been created.');
+            if ($request->parent_id) {
+                return redirect()
+                    ->route('layer.show', $request->parent_id)
+                    ->with('success', 'Layer has been created.');
+            }
+
+            return redirect()
+                ->route('projectDetails', $request->project_id)
+                ->with('success', 'Layer has been created.');
+        } catch (Throwable $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -102,9 +115,12 @@ class LayerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Request $request, Layer $layer)
     {
-        //
+        $project = Project::findOrFail($layer->project_id);
+        $statuses = $project->statuses()->get();
+        $parent = Layer::find($layer->parent_id);
+        return view('admin.layers.edit', compact('project', 'statuses', 'parent', 'layer'));
     }
 
     /**
@@ -113,25 +129,61 @@ class LayerController extends Controller
      */
     public function update(Request $request, Layer $layer)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status_id' => 'nullable|exists:statuses,id',
-            'project_id' => 'required|exists:projects,id',
-            'type' => 'required|in:task,container',
-            'parent_id' => 'nullable|exists:layers,id',
-            'start_time' => 'nullable|date',
-            'end_time' => 'nullable|date|after_or_equal:start_time',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'status_id' => 'nullable|exists:statuses,id',
+                'project_id' => 'required|exists:projects,id',
+                'type' => 'required|in:task,container',
+                'parent_id' => 'nullable|exists:layers,id',
+                'start_time' => 'nullable|date',
+                'end_time' => 'nullable|date|after_or_equal:start_time',
+            ]);
 
-        $this->layerService->updateLayer($layer, $validated);
+            $this->layerService->updateLayer($layer, $validated);
+
+            return redirect()
+                ->route('layer.show', $layer->id)
+                ->with('success', 'Layer has been updated.');
+
+        } catch (Throwable $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    public function updateStatus(Request $request, Layer $layer, $status)
+    {
+        try {
+            $this->layerService->changeStatus($layer, $status);
+
+            return back()->with('success', 'Status updated successfully.');
+
+        } catch (Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Layer $layer)
     {
-        //
+        try {
+            $this->layerService->deleteLayer($layer);
+
+            if ($layer->parent_id) {
+                return redirect()
+                    ->route('layer.show', $layer->parent_id)
+                    ->with('success', 'Layer has been deleted.');
+            }
+
+            return redirect()
+                ->route('projectDetails', $layer->project_id)
+                ->with('success', 'Layer has been deleted.');
+
+        } catch (Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

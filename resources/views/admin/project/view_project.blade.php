@@ -4,6 +4,7 @@
         body {
             background: #fff;
         }
+
         /* Table container */
         .table-modern {
             border-collapse: separate;
@@ -81,6 +82,10 @@
             background: #f59f00;
         }
 
+        .table-responsive{
+            overflow: visible;
+        }
+
         /* Action buttons */
         .table-modern .btn-outline-primary {
             border-color: #dee2e6;
@@ -102,6 +107,61 @@
         .table-modern td small {
             font-size: 12px;
             color: #6c757d;
+        }
+
+        /* 3-dot trigger button */
+
+        .dropdown > button {
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* hover / focus / active state for trigger */
+
+        .dropdown > button:hover,
+        .dropdown > button:focus,
+        .dropdown > button:active {
+            background-color: #f1f3f5;
+            border: none;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* remove bootstrap focus outline */
+
+        .dropdown > button:focus-visible {
+            outline: none;
+        }
+
+        /* dropdown menu item hover */
+
+        .dropdown-menu .dropdown-item:hover,
+        .dropdown-menu .dropdown-item:focus,
+        .dropdown-menu .dropdown-item:active {
+            background-color: #f1f3f5;
+            color: inherit;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* optional: slightly smoother menu feel */
+
+        .dropdown-menu {
+            border-radius: 8px;
+            padding: 6px 0;
+        }
+
+        /* optional: softer icon alignment */
+
+        .dropdown-item i {
+            font-size: 14px;
+            vertical-align: middle;
         }
 
     </style>
@@ -302,9 +362,47 @@
 
                                             <td class="text-end">
 
-                                                <a href="{{ route('layer.edit',$layer->id) }}"
-                                                   class="btn btn-sm btn-outline-primary">
-                                                    Edit </a>
+                                                <div class="dropdown" onclick="event.stopPropagation()">
+
+                                                    <button
+                                                            class="btn btn-md btn-light bg-transparent border-0"
+                                                            type="button"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false">
+
+                                                        <i class="bx bx-dots-vertical-rounded"></i>
+
+                                                    </button>
+
+                                                    <ul class="dropdown-menu dropdown-menu-end">
+
+                                                        <li>
+                                                            <a class="dropdown-item"
+                                                               href="{{ route('layer.edit',$layer->id) }}">
+                                                                <i class="bx bx-edit me-1"></i>
+                                                                Edit
+                                                            </a>
+                                                        </li>
+
+                                                        <li>
+                                                            <form method="POST"
+                                                                  action="{{ route('layer.destroy',$layer->id) }}"
+                                                                  onsubmit="return confirm('Delete this layer?')">
+
+                                                                @csrf
+                                                                @method('DELETE')
+
+                                                                <button type="submit" class="dropdown-item text-danger">
+                                                                    <i class="bx bx-trash me-1"></i>
+                                                                    Delete
+                                                                </button>
+
+                                                            </form>
+                                                        </li>
+
+                                                    </ul>
+
+                                                </div>
 
                                             </td>
 
@@ -327,7 +425,21 @@
 
         </div>
     </div>
+    @if(session('success'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                showToast(@json(session('success')), 'success');
+            });
+        </script>
+    @endif
 
+    @if(session('error'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                showToast(@json(session('error')), 'error');
+            });
+        </script>
+    @endif
 @endsection
 
 @push('js')

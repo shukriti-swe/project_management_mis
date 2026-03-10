@@ -6,38 +6,51 @@
         <div class="page-content">
             <div class="row">
                 <div class="col-xl-10 mx-auto">
-
                     <h6 class="mb-0 text-uppercase">Hierarchy Management</h6>
                     <hr/>
 
-                    <div class="card border-top border-0 border-4 border-danger">
+                    <div class="card border-top border-0 border-4 border-primary">
                         <div class="card-body p-5">
 
                             <div class="card-title d-flex align-items-center">
-                                <div><i class="bx bx-layer me-1 font-22"></i></div>
-                                <h5 class="mb-0">{{$parent? 'Add Sub Layer to: ' : 'Add Layer to Project: '}}
-                                    <span class="text-danger">{{$parent ? $parent->name : $project->title}}</span></h5>
+                                <div><i class="bx bx-edit me-1 font-22"></i></div>
+                                <h5 class="mb-0">
+                                    Edit Layer:
+                                    <span class="text-primary">{{ $layer->name }}</span>
+                                </h5>
                             </div>
 
                             <hr>
 
-                            <form class="row g-4" method="POST" action="{{ route('layer.store') }}" enctype="multipart/form-data">
-                                @csrf
+                            <form class="row g-4"
+                                  method="POST"
+                                  action="{{ route('layer.update', $layer->id) }}">
 
-                                <input type="hidden" name="project_id" value="{{ $project->id }}">
-                                <input type="hidden" name="parent_id" value="{{ $parent? $parent->id : null }}">
+                                @csrf
+                                @method('PUT')
+
+                                <input type="hidden"
+                                       name="project_id"
+                                       value="{{ old('project_id', $layer->project_id) }}">
+
+                                <input type="hidden"
+                                       name="parent_id"
+                                       value="{{ old('parent_id', $layer->parent_id) }}">
 
                                 {{-- Layer Name --}}
                                 <div class="col-md-6">
                                     <label class="form-label">Layer Name</label>
+
                                     <div class="input-group">
-                                        <span class="input-group-text bg-transparent"><i class='bx bx-tag'></i></span>
+                                <span class="input-group-text bg-transparent">
+                                    <i class='bx bx-tag'></i>
+                                </span>
+
                                         <input
                                                 type="text"
                                                 name="name"
-                                                value="{{old('name')}}"
+                                                value="{{ old('name', $layer->name) }}"
                                                 class="form-control border-start-0"
-                                                placeholder="Phase 1, Module A..."
                                                 required>
                                     </div>
                                 </div>
@@ -45,22 +58,38 @@
                                 {{-- Layer Type --}}
                                 <div class="col-md-3">
                                     <label class="form-label">Layer Type</label>
+
                                     <select class="form-select" name="type" id="layer-type">
-                                        <option value="container" {{ old('type') == 'container' ? 'selected' : '' }}>Container</option>
-                                        <option value="task" {{ old('type') == 'task' ? 'selected' : '' }}>Task</option>
+
+                                        <option value="container"
+                                                {{ old('type', $layer->type) == 'container' ? 'selected' : '' }}>
+                                            Container
+                                        </option>
+
+                                        <option value="task"
+                                                {{ old('type', $layer->type) == 'task' ? 'selected' : '' }}>
+                                            Task
+                                        </option>
+
                                     </select>
                                 </div>
 
                                 {{-- Status --}}
                                 <div class="col-md-3">
-                                    <div id="status-wrapper" style="display: none">
+                                    <div id="status-wrapper" style="{{ old('type', $layer->type ?? 'container') === 'task' ? '' : 'display:none;' }}">
                                         <label class="form-label">Status</label>
+
                                         <select class="form-select" name="status_id">
+
                                             @foreach($statuses as $status)
-                                                <option value="{{ $status->id }}" {{ old('status_id') == $status->id ? 'selected' : '' }}>
+
+                                                <option value="{{ $status->id }}"
+                                                        {{ old('status_id', $layer->status_id) == $status->id ? 'selected' : '' }}>
                                                     {{ $status->label }}
                                                 </option>
+
                                             @endforeach
+
                                         </select>
                                     </div>
                                 </div>
@@ -68,27 +97,44 @@
                                 {{-- Start Time --}}
                                 <div class="col-md-3">
                                     <label class="form-label">Start Time</label>
-                                    <input type="datetime-local" name="start_time" value="{{ old('start_time') }}" class="form-control">
+
+                                    <input
+                                            type="datetime-local"
+                                            name="start_time"
+                                            value="{{ old('start_time', optional($layer->start_time)->format('Y-m-d\TH:i')) }}"
+                                            class="form-control">
                                 </div>
 
                                 {{-- End Time --}}
                                 <div class="col-md-3">
                                     <label class="form-label">End Time</label>
-                                    <input type="datetime-local" name="end_time" value="{{ old('end_time') }}" class="form-control">
+
+                                    <input
+                                            type="datetime-local"
+                                            name="end_time"
+                                            value="{{ old('end_time', optional($layer->end_time)->format('Y-m-d\TH:i')) }}"
+                                            class="form-control">
                                 </div>
 
                                 {{-- Description --}}
                                 <div class="col-12">
                                     <label class="form-label">Description</label>
-                                    <textarea class="form-control editor" name="description" rows="4">{{ old('description') }}</textarea>
+                                    <textarea class="form-control editor" name="description" rows="4">{{ old('description', $layer->description) }}</textarea>
                                 </div>
 
                                 {{-- Buttons --}}
                                 <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-danger px-5">Save Layer</button>
-                                    <a href="{{ url()->previous() }}" class="btn btn-outline-secondary px-4">Back</a>
-                                </div>
 
+                                    <button type="submit" class="btn btn-primary px-5">
+                                        Update Layer
+                                    </button>
+
+                                    <a href="{{ url()->previous() }}"
+                                       class="btn btn-outline-secondary px-4">
+                                        Back
+                                    </a>
+
+                                </div>
                             </form>
 
                         </div>
@@ -97,6 +143,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 
 @endsection
