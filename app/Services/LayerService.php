@@ -16,6 +16,7 @@ class LayerService
 
     /**
      * Change task status
+     * @throws Exception
      */
     public function changeStatus(Layer $layer, int $statusId): void
     {
@@ -79,7 +80,8 @@ class LayerService
             $parentChanged = isset($data['parent_id']) && $data['parent_id'] != $layer->parent_id;
 
             if ($layer->type === 'task' && $statusChanged) {
-                $data['progress_percent'] = $this->resolveTaskProgress($data['status_id']);
+                $this->statusService->updateTaskStatus($layer, $data['status_id']);
+                unset($data['status_id']);
             }
 
             if ($parentChanged) {
@@ -110,7 +112,7 @@ class LayerService
 
             }
 
-            if ($statusChanged || $parentChanged) {
+            if ($parentChanged) {
 
                 if ($layer->parent) {
                     $this->statusService->calculate($layer->parent);
@@ -145,13 +147,19 @@ class LayerService
                     );
                 }
 
+                $progress = $this->resolveTaskProgress($statusId);
+
                 $layer->status_id = $statusId;
-                $layer->progress_percent = $this->resolveTaskProgress($statusId);
+                $layer->progress_percent = $progress;
+                $layer->total_tasks = 1;
+                $layer->completed_tasks = $progress === 100 ? 1 : 0;
 
             } else {
 
                 $layer->status_id = null;
                 $layer->progress_percent = 0;
+                $layer->total_tasks = 0;
+                $layer->completed_tasks = 0;
 
             }
 
@@ -172,10 +180,19 @@ class LayerService
         $type = $data['type'] ?? 'container';
 
         if ($type === 'task') {
-            $data['progress_percent'] = $this->resolveTaskProgress($data['status_id'] ?? null);
+
+            $progress = $this->resolveTaskProgress($data['status_id'] ?? null);
+
+            $data['progress_percent'] = $progress;
+            $data['total_tasks'] = 1;
+            $data['completed_tasks'] = $progress === 100 ? 1 : 0;
+
         } else {
+
             $data['progress_percent'] = 0;
             $data['status_id'] = null;
+            $data['total_tasks'] = 0;
+            $data['completed_tasks'] = 0;
         }
     }
 

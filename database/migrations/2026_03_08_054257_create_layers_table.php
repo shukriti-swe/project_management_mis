@@ -20,6 +20,8 @@ return new class extends Migration
 
             $table->foreignId('status_id')->nullable()->constrained('statuses')->onDelete('set null');
             $table->integer('progress_percent')->default(0);
+            $table->unsignedInteger('total_tasks')->default(0);
+            $table->unsignedInteger('completed_tasks')->default(0);
 
             $table->enum('type', ['container', 'task'])->default('container');
             $table->dateTime('start_time')->nullable();

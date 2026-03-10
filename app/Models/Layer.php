@@ -16,6 +16,8 @@ class Layer extends Model
         'status_id',
         'project_id',
         'progress_percent',
+        'total_tasks',
+        'completed_tasks',
         'type',
         'start_time',
         'end_time'
@@ -23,6 +25,8 @@ class Layer extends Model
 
     protected $casts = [
         'progress_percent' => 'integer',
+        'total_tasks' => 'integer',
+        'completed_tasks' => 'integer',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];
