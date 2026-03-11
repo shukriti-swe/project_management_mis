@@ -107,9 +107,9 @@ class AdminController extends Controller
 
     }
 
-    public function layerList(){
-        // $layers = Layer::get()->all();
-        // return view('admin.layer.layer_list', compact('layers'));
-    }
+    // public function layerList(){
+    //     // $layers = Layer::get()->all();
+    //     // return view('admin.layer.layer_list', compact('layers'));
+    // }
 
 }
