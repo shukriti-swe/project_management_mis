@@ -32,6 +32,7 @@
 <script src="{{asset('admin_assets/plugins/fancy-file-uploader/jquery.iframe-transport.js')}}"></script>
 <script src="{{asset('admin_assets/plugins/fancy-file-uploader/jquery.fancy-fileupload.js')}}"></script>
 <script src="{{asset('admin_assets/plugins/Drag-And-Drop/dist/imageuploadify.min.js')}}"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
     function showToast(message, type = 'success') {

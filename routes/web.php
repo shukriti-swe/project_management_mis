@@ -20,25 +20,23 @@ Route::middleware('auth')->group(function () {
 
     // Route::middleware(['role:admin'])->group(function () {
 
-        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
-        Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
-        Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
-        Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
-        Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.delete');
-        
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.delete');
 
-        Route::get('/users/{user}/roles', [UserRoleController::class, 'edit'])->name('users.roles.edit');
-        Route::post('/users/{user}/roles', [UserRoleController::class, 'update'])->name('users.roles.update');
 
-        Route::resource('roles', RoleController::class);
-        Route::get('/permissions', [RoleController::class, 'permissionList'])->name('permissions.index');
-        Route::post('/permissions', [RoleController::class, 'storePermission'])->name('permissions.store');
-        Route::get('/permissions/{permission}/edit', [RoleController::class, 'editPermission'])->name('permissions.edit');
-        Route::put('/permissions/{permission}', [RoleController::class, 'updatePermission'])->name('permissions.update');
-        Route::delete('/permissions/{permission}', [RoleController::class, 'deletePermission'])->name('permissions.delete');
+    Route::get('/users/{user}/roles', [UserRoleController::class, 'edit'])->name('users.roles.edit');
+    Route::post('/users/{user}/roles', [UserRoleController::class, 'update'])->name('users.roles.update');
 
-        
+    Route::resource('roles', RoleController::class);
+    Route::get('/permissions', [RoleController::class, 'permissionList'])->name('permissions.index');
+    Route::post('/permissions', [RoleController::class, 'storePermission'])->name('permissions.store');
+    Route::get('/permissions/{permission}/edit', [RoleController::class, 'editPermission'])->name('permissions.edit');
+    Route::put('/permissions/{permission}', [RoleController::class, 'updatePermission'])->name('permissions.update');
+    Route::delete('/permissions/{permission}', [RoleController::class, 'deletePermission'])->name('permissions.delete');
     // });
 
     Route::post('/ckeditor-upload', [ProfileController::class, 'ckeditorUpload'])->name('ckeditor.upload');
@@ -62,4 +60,4 @@ Route::middleware('auth')->group(function () {
 
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -53,10 +53,26 @@ class LayerService
     public function createLayer(array $data): Layer
     {
         return DB::transaction(function () use ($data) {
+            $users = $data['users'] ?? [];
 
             $this->initializeProgress($data);
 
             $layer = $this->createNode($data);
+
+            // assign users
+            if (!empty($users)) {
+
+                $attachData = [];
+
+                foreach ($users as $userId) {
+                    $attachData[$userId] = [
+                        'assigned_by' => auth()->id(),
+                        'assigned_at' => now(),
+                    ];
+                }
+
+                $layer->users()->attach($attachData);
+            }
 
             if ($layer->parent) {
                 $this->statusService->calculate($layer->parent);
@@ -73,6 +89,8 @@ class LayerService
     public function updateLayer(Layer $layer, array $data): Layer
     {
         return DB::transaction(function () use ($layer, $data) {
+            $users = $data['users'] ?? [];
+            unset($data['users']);
 
             $oldParent = $layer->parent;
 
@@ -122,6 +140,25 @@ class LayerService
                     $this->statusService->calculate($oldParent);
                 }
             }
+
+            $assigner = auth()->id();
+            $now = now();
+
+            $syncData = [];
+
+            $existingAssignments = $layer->users->keyBy('id');
+
+            foreach ($users as $userId) {
+
+                $existing = $existingAssignments->get($userId);
+
+                $syncData[$userId] = [
+                    'assigned_by' => $assigner,
+                    'assigned_at' => $existing?->pivot->assigned_at ?? $now
+                ];
+            }
+
+            $layer->users()->sync($syncData);
 
             return $layer;
         });

@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        // Correct: This creates 5 users in the database
+        User::factory()->count(5)->create();
+
         $project = Project::create([
             'title' => 'Project Management System MIS',
             'description' => '<h5><strong>About Laravel</strong></h5><p>Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:</p><ul><li>Simple, fast routing engine.</li><li>Powerful dependency injection container.</li><li>Multiple back-ends for session and cache storage.</li><li>Expressive, intuitive database ORM.</li><li>Database agnostic schema migrations.</li><li>Robust background job processing.</li><li>Real-time event broadcasting.</li></ul><p>Laravel is accessible, powerful, and provides tools required for large, robust applications.</p>',

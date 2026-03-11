@@ -205,8 +205,9 @@
 
                                 <div class="col-lg-4">
 
-                                    <div class="small text-muted mb-1">
-                                        Project Progress
+                                    <div class="d-flex small text-muted mb-1">
+                                        <span>Project Progress</span>
+                                        <span class="ms-auto">Tasks {{$completed_tasks}} / {{$total_tasks}}</span>
                                     </div>
 
                                     <div class="progress" style="height:10px;">

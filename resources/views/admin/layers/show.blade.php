@@ -376,6 +376,9 @@
 
                                 <div class="col-lg-4">
                                     <div class="header-progress">
+                                        <div class="text-muted font-16">
+                                            <span class="">Tasks {{$layer->completed_tasks}} / {{$layer->total_tasks}}</span>
+                                        </div>
                                         <div id="layer-progress"></div>
                                     </div>
                                 </div>
@@ -436,29 +439,16 @@
 
                             <div class="assigned-users">
 
-                                <div class="assigned-user">
-                                    <img src="https://i.pravatar.cc/60?img=12">
-                                    <div class="user-name">Sarah Khan</div>
-                                    <div class="assigned-meta">Assigned by Admin • 2 hours ago</div>
-                                </div>
-
-                                <div class="assigned-user">
-                                    <img src="https://i.pravatar.cc/60?img=25">
-                                    <div class="user-name">John Miller</div>
-                                    <div class="assigned-meta">Assigned by Sarah • Yesterday</div>
-                                </div>
-
-                                <div class="assigned-user">
-                                    <img src="https://i.pravatar.cc/60?img=32">
-                                    <div class="user-name">Alex Rahman</div>
-                                    <div class="assigned-meta">Assigned by Admin • 3 days ago</div>
-                                </div>
-
-                                <div class="assigned-user">
-                                    <img src="https://i.pravatar.cc/60?img=41">
-                                    <div class="user-name">Nadia Ahmed</div>
-                                    <div class="assigned-meta">Assigned by John • 1 week ago</div>
-                                </div>
+                                @foreach($layer->users as $user)
+                                    <div class="assigned-user">
+                                        <img src="https://i.pravatar.cc/60?img=12" alt="User Avatar">
+                                        <div class="user-name">{{$user->name}}<br>[{{$user->email}}]</div>
+                                        <div class="assigned-meta">
+                                            <p class="m-0">Assigned by {{$user->pivot->assignedBy->name}}</p>
+                                            <p class="m-0">{{ $user->pivot->assigned_at->diffForHumans() }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
 
                             </div>
 

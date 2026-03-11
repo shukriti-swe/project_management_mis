@@ -116,6 +116,19 @@
                                             class="form-control">
                                 </div>
 
+                                <div class="col-6">
+                                    <label class="form-label">Assign Users</label>
+
+                                    <select name="users[]" class="form-select user-select" multiple>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}"
+                                                    {{ $layer->users->contains($user->id) ? 'selected' : '' }}>
+                                                {{ $user->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 {{-- Description --}}
                                 <div class="col-12">
                                     <label class="form-label">Description</label>
@@ -165,6 +178,13 @@
 
             toggleStatus(); // initial render
             typeSelect.addEventListener('change', toggleStatus);
+        });
+
+        $(document).ready(function () {
+            $('.user-select').select2({
+                placeholder: "Search users",
+                width: '100%'
+            });
         });
     </script>
 @endpush

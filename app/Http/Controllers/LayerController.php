@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Layer;
 use App\Models\Project;
+use App\Models\User;
 use App\Services\LayerService;
 use Illuminate\Http\Request;
 use Throwable;
@@ -48,11 +49,19 @@ class LayerController extends Controller
      */
     public function create(Request $request)
     {
+        $users = User::all();
         $project = Project::findOrFail($request->input('project'));
         $statuses = $project->statuses()->get();
         $parentLayers = Layer::orderBy('created_at', 'desc')->get();
         $parent = Layer::find($request->input('parent'));
-        return view('admin.layers.create', compact('project', 'parentLayers', 'statuses', 'parent'));
+        return view('admin.layers.create',
+            compact(
+                'project',
+                'parentLayers',
+                'statuses',
+                'parent',
+                'users'
+            ));
     }
 
     /**
@@ -71,6 +80,9 @@ class LayerController extends Controller
                 'parent_id' => 'nullable|exists:layers,id',
                 'start_time' => 'nullable|date',
                 'end_time' => 'nullable|date|after_or_equal:start_time',
+
+                'users' => 'nullable|array',
+                'users.*' => 'exists:users,id'
             ]);
 
             $this->layerService->createLayer($validated);
@@ -98,8 +110,11 @@ class LayerController extends Controller
             'children.status',
             'status',
             'project',
-            'ancestors'
+            'ancestors',
+            'users'
         ]);
+
+//        dd($layer->users->first()->pivot);
 
         $statuses = $layer->project->statuses;
 
@@ -117,10 +132,11 @@ class LayerController extends Controller
      */
     public function edit(Request $request, Layer $layer)
     {
+        $users = User::all();
         $project = Project::findOrFail($layer->project_id);
         $statuses = $project->statuses()->get();
         $parent = Layer::find($layer->parent_id);
-        return view('admin.layers.edit', compact('project', 'statuses', 'parent', 'layer'));
+        return view('admin.layers.edit', compact('project', 'statuses', 'parent', 'layer', 'users'));
     }
 
     /**
@@ -139,6 +155,9 @@ class LayerController extends Controller
                 'parent_id' => 'nullable|exists:layers,id',
                 'start_time' => 'nullable|date',
                 'end_time' => 'nullable|date|after_or_equal:start_time',
+
+                'users' => 'nullable|array',
+                'users.*' => 'exists:users,id'
             ]);
 
             $this->layerService->updateLayer($layer, $validated);
