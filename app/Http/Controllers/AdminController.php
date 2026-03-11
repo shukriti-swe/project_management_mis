@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Project;
+// use App\Models\Layer;
 use DB;
 
 class AdminController extends Controller
@@ -44,7 +45,7 @@ class AdminController extends Controller
             $project->description = $request->description;
             $project->start_date  = $request->start_date;
             $project->end_date    = $request->end_date;
-            $project->status      = $request->status;
+            $project->status      = $request->status; 
         
             if($request->hasFile('image')){
                 $image = $request->file('image');
@@ -117,6 +118,7 @@ class AdminController extends Controller
 
     }
 
+
     // Sampad Singha
     public function show(Project $project)
     {
@@ -153,5 +155,11 @@ class AdminController extends Controller
         // return view('admin.layer.layer_list', compact('layers'));
 
     }
+
+    // public function layerList(){
+    //     // $layers = Layer::get()->all();
+    //     // return view('admin.layer.layer_list', compact('layers'));
+    // }
+
 
 }

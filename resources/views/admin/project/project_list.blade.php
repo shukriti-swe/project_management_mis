@@ -104,5 +104,21 @@
         <p class="mb-0">Copyright © 2021. All right reserved.</p>
     </footer>
 
+
+<script>
+    $(document).ready(function() {
+        var table = $('#example').DataTable({
+            lengthChange: true,
+            ordering: true,
+            info: true
+        });
+
+        $('#statusFilter').on('change', function() {
+            var filterValue = $(this).val();
+            table.column(5).search(filterValue ? '^' + filterValue + '$' : '', true, false).draw();
+        });
+    });
+</script>
+
 @endsection
 
