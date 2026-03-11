@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Project;
+// use App\Models\Layer;
 use DB;
 
 class AdminController extends Controller
@@ -39,7 +40,7 @@ class AdminController extends Controller
             $project->description = $request->description;
             $project->start_date  = $request->start_date;
             $project->end_date    = $request->end_date;
-            $project->status      = $request->status;
+            $project->status      = $request->status; 
         
             if($request->hasFile('image')){
                 $image = $request->file('image');
@@ -104,6 +105,11 @@ class AdminController extends Controller
         $project = Project::where('id',$id)->delete();
         return redirect()->route('projectList')->with('alert-success','Project Deleted successfully');
 
+    }
+
+    public function layerList(){
+        // $layers = Layer::get()->all();
+        // return view('admin.layer.layer_list', compact('layers'));
     }
 
 }

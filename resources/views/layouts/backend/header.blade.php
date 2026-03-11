@@ -15,6 +15,8 @@
 	
 	<!--favicon-->
 	<link rel="icon" href="{{asset('assets/images/favicon-32x32.png')}}" type="image/png" />
+
+	<script src="{{asset('admin_assets/js/jquery.min.js')}}"></script>
 	<!--plugins-->
 	<link href="{{asset('admin_assets/plugins/vectormap/jquery-jvectormap-2.0.2.css')}}" rel="stylesheet"/>
 	<link href="{{asset('admin_assets/plugins/simplebar/css/simplebar.css')}}" rel="stylesheet" />

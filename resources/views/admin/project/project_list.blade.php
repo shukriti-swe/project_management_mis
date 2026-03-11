@@ -29,9 +29,20 @@
                     @endforeach
                 </div>
 
-                <div style="text-align:right;">
-                    <a class="btn btn-success" href="{{ route('addProject') }}">Add Project</a>
-                    <br><br>
+                
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Filter :</label>
+                        <select id="statusFilter" class="form-select" style="width: 200px; display: inline-block;">
+                            <option value="">All Project</option>
+                            <option value="Active">Active</option>
+                            <option value="In-Active">In-Active</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" style="text-align:right;">
+                        <a class="btn btn-success" href="{{ route('addProject') }}">Add Project</a>
+                    </div>
                 </div>
                 
                 <div class="table-responsive">
@@ -73,7 +84,6 @@
                             </tr>
                             @endforeach
                         </tbody>
-                        
                     </table>
                 </div>
             </div>
@@ -82,11 +92,27 @@
 </div>
 <!--end page wrapper -->
 
-<!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
-<!--End Back To Top Button-->
+<a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+
 <footer class="page-footer">
     <p class="mb-0">Copyright © 2021. All right reserved.</p>
 </footer>
+
+
+<script>
+    $(document).ready(function() {
+        var table = $('#example').DataTable({
+            lengthChange: true,
+            ordering: true,
+            info: true
+        });
+
+        $('#statusFilter').on('change', function() {
+            var filterValue = $(this).val();
+            table.column(5).search(filterValue ? '^' + filterValue + '$' : '', true, false).draw();
+        });
+    });
+</script>
 
 @endsection
 

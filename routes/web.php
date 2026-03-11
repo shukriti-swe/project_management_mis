@@ -53,6 +53,14 @@ Route::middleware('auth')->group(function () {
     Route::any('/update-project', [AdminController::class, 'updateProject'])->name('updateProject');
     Route::any('/delete-project/{id}', [AdminController::class, 'deleteProject'])->name('deleteProject');
 
+
+    Route::any('/layer-list', [AdminController::class, 'layerList'])->name('layerList');
+    Route::any('/add-layer', [AdminController::class, 'addLayer'])->name('addLayer');
+    Route::any('/save-project', [AdminController::class, 'saveProject'])->name('saveProject');
+    Route::any('/edit-project/{id}', [AdminController::class, 'editProject'])->name('editProject');
+    Route::any('/update-project', [AdminController::class, 'updateProject'])->name('updateProject');
+    Route::any('/delete-project/{id}', [AdminController::class, 'deleteProject'])->name('deleteProject');
+
 });
 
 require __DIR__.'/auth.php';
