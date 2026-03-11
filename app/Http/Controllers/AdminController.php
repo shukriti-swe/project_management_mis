@@ -144,6 +144,14 @@ class AdminController extends Controller
             'total_tasks',
             'completed_tasks',
         ));
+
+        
+    }
+
+    public function layerList(){
+        // $layers = Layer::get()->all();
+        // return view('admin.layer.layer_list', compact('layers'));
+
     }
 
 }
