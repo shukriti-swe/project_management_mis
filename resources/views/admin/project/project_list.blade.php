@@ -73,6 +73,7 @@
     <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
+
             <h6 class="mb-0 text-uppercase">Project</h6>
             <hr/>
             <div class="card">

@@ -47,6 +47,11 @@ class Layer extends Model
         return $this->type === 'task';
     }
 
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(LayerType::class);
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'layer_users')

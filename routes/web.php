@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\LayerController;
+use App\Http\Controllers\LayerTypeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\LayerTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
