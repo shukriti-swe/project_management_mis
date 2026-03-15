@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Layer;
 use App\Models\Project;
 use App\Models\User;
+use App\Models\Status;
+use App\Models\LayerType;
+use App\Models\LayerUser;
 use App\Services\LayerService;
 use Illuminate\Http\Request;
 use Throwable;
+use DB;
+use Carbon\Carbon;
 
 class LayerController extends Controller
 {
@@ -205,4 +210,91 @@ class LayerController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+
+    public function layerList(){
+        $layers = Layer::all();
+        $layerTypes = LayerType::all();
+        $projects = Project::all();
+        $users     = User::select('id', 'name', 'email')->get();
+
+        return view('admin.layers.layer_list', compact('layers','layerTypes','projects','users'));
+    }
+
+    public function updateLayerStatus(Request $request) {
+        $status = Status::create([
+            'label' => $request->title,
+            'project_id' => $request->project_id,
+        ]);
+    
+        Layer::where('id', $request->layer_id)->update([
+            'status_id' => $status->id
+        ]);
+    
+        return response()->json(['success' => true]);
+    }
+
+    public function storeLayer(Request $request)
+    {
+
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'project_id'    => 'required',
+            'layer_type_id' => 'required',
+            'start_time'    => 'required|date',
+            'end_time'      => 'required|date|after_or_equal:start_time',
+            'status_id'     => 'required|in:0,1',
+        ]);
+
+        $duration = $request->duration;
+        if (empty($duration)) {
+            $start = \Carbon\Carbon::parse($request->start_time);
+            $end   = \Carbon\Carbon::parse($request->end_time);
+            $duration = $start->diffInDays($end) + 1;
+        }
+
+        $layer = new Layer();
+        $layer->name            = $request->name;
+        $layer->project_id      = $request->project_id;
+        $layer->layer_type_id   = $request->layer_type_id;
+        $layer->start_time      = $request->start_time;
+        $layer->end_time        = $request->end_time;
+        $layer->status_id       = $request->status_id;
+        $layer->duration        = $duration;
+        
+
+        $layer->parent_id = $request->parent_id ?: null;
+        $layer->description     = $request->description ?: null;
+        
+        $layer->save();
+
+        if ($request->has('assigned_user_ids')) {
+            $syncData = [];
+            foreach ($request->assigned_user_ids as $userId) {
+                $syncData[$userId] = [
+                    'assigned_by' => auth()->id(),
+                    'assigned_at' => now(),
+                ];
+            }
+
+            $layer->users()->sync($syncData);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateLayerType(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100|unique:layer_types,title'
+        ]);
+
+        $type = LayerType::create(['title' => $validated['name']]);
+
+        return response()->json([
+            'success' => true,
+            'id'      => $type->id,
+            'name'    => $type->title
+        ]);
+    }
 }
+   

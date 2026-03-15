@@ -102,6 +102,16 @@
 				<li><a href="{{ route('addProject') }}"><i class="bx bx-right-arrow-alt"></i>Add Project</a></li>
 			</ul>
 		</li>
+		<li>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class="bx bx-user-circle"></i></div>
+                <div class="menu-title">Layer Types</div>
+            </a>
+            <ul>
+                <li><a href="{{ route('layerType.index') }}"><i class="bx bx-right-arrow-alt"></i>Layer Type List</a></li>
+                <li><a href="{{ route('layerType.create') }}"><i class="bx bx-right-arrow-alt"></i>Add Type</a></li>
+            </ul>
+        </li>
 
 		<li>
 			<a href="javascript:;" class="has-arrow">
@@ -110,7 +120,7 @@
 			</a>
 			<ul>
 				<li><a href="{{ route('layerList') }}"><i class="bx bx-right-arrow-alt"></i>Layer List</a></li>
-				<li><a href="{{ route('addLayer') }}"><i class="bx bx-right-arrow-alt"></i>Add Layer</a></li>
+				<li><a href="{{ route('layer.create') }}"><i class="bx bx-right-arrow-alt"></i>Add Layer</a></li>
 			</ul>
 		</li>
 

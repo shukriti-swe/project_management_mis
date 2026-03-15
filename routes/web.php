@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\LayerTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -58,13 +59,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/layers/{layer}/status/{status}', [LayerController::class, 'updateStatus'])
         ->name('layer.updateStatus');
 
+    Route::resource('layer-types', LayerTypeController::class)->names('layerType')->except('show');
 
-    Route::any('/layer-list', [AdminController::class, 'layerList'])->name('layerList');
-    Route::any('/add-layer', [AdminController::class, 'addLayer'])->name('addLayer');
-    Route::any('/save-project', [AdminController::class, 'saveProject'])->name('saveProject');
-    Route::any('/edit-project/{id}', [AdminController::class, 'editProject'])->name('editProject');
-    Route::any('/update-project', [AdminController::class, 'updateProject'])->name('updateProject');
-    Route::any('/delete-project/{id}', [AdminController::class, 'deleteProject'])->name('deleteProject');
+
+    Route::any('/layer-list', [LayerController::class, 'layerList'])->name('layerList');
+    Route::post('/store-layers', [LayerController::class, 'storeLayer'])->name('storeLayer');
+    Route::any('/update-layer-status', [LayerController::class, 'updateLayerStatus'])->name('updateLayerStatus');
+    Route::any('/layer-types-store', [LayerController::class, 'updateLayerType'])->name('layer-types.store');
 
 });
 
