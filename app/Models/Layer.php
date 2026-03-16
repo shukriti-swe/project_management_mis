@@ -20,6 +20,7 @@ class Layer extends Model
         'total_tasks',
         'completed_tasks',
         'type',
+        'layer_type_id',
         'start_time',
         'end_time'
     ];

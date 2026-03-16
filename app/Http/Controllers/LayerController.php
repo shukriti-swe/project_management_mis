@@ -10,6 +10,7 @@ use App\Models\LayerType;
 use App\Models\LayerUser;
 use App\Services\LayerService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 use DB;
 use Carbon\Carbon;
@@ -137,11 +138,19 @@ class LayerController extends Controller
      */
     public function edit(Request $request, Layer $layer)
     {
+//        dd($layer);
         $users = User::all();
         $project = Project::findOrFail($layer->project_id);
         $statuses = $project->statuses()->get();
+        $layerTypes = LayerType::all();
+
         $parent = Layer::find($layer->parent_id);
-        return view('admin.layers.edit', compact('project', 'statuses', 'parent', 'layer', 'users'));
+        $layers = Layer::whereNotIn('id',
+            $layer->descendants()->pluck('id')->push($layer->id)
+        )->orderBy('created_at', 'desc')->get();
+        $projects = Project::all();
+
+        return view('admin.layers.edit', compact('project', 'statuses', 'parent', 'layer', 'users', 'layers', 'projects', 'layerTypes'));
     }
 
     /**
@@ -155,8 +164,9 @@ class LayerController extends Controller
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'status_id' => 'nullable|exists:statuses,id',
+                'layer_type_id' => 'required|exists:layer_types,id',
                 'project_id' => 'required|exists:projects,id',
-                'type' => 'required|in:task,container',
+//                'type' => 'required|in:task,container',
                 'parent_id' => 'nullable|exists:layers,id',
                 'start_time' => 'nullable|date',
                 'end_time' => 'nullable|date|after_or_equal:start_time',
@@ -172,6 +182,7 @@ class LayerController extends Controller
                 ->with('success', 'Layer has been updated.');
 
         } catch (Throwable $e) {
+            dd($e->getMessage());
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
     }
@@ -203,7 +214,7 @@ class LayerController extends Controller
             }
 
             return redirect()
-                ->route('projectDetails', $layer->project_id)
+                ->back()
                 ->with('success', 'Layer has been deleted.');
 
         } catch (Throwable $e) {
@@ -243,12 +254,13 @@ class LayerController extends Controller
             'start_time'    => 'required|date',
             'end_time'      => 'required|date|after_or_equal:start_time',
             'status_id'     => 'required|in:0,1',
+            'parent_id'     => 'nullable|exists:layers,id',
         ]);
 
         $duration = $request->duration;
         if (empty($duration)) {
-            $start = \Carbon\Carbon::parse($request->start_time);
-            $end   = \Carbon\Carbon::parse($request->end_time);
+            $start = Carbon::parse($request->start_time);
+            $end   = Carbon::parse($request->end_time);
             $duration = $start->diffInDays($end) + 1;
         }
 
@@ -295,6 +307,35 @@ class LayerController extends Controller
             'id'      => $type->id,
             'name'    => $type->title
         ]);
+    }
+
+    public function inlineUpdate(Request $request)
+    {
+        $request->validate([
+            'id'     => 'required|exists:layers,id',
+            'column' => 'required|string',
+            'value'  => 'nullable'
+        ]);
+
+        $layer = Layer::findOrFail($request->id);
+
+        if ($request->column === 'assigned_user_ids') {
+            $syncData = [];
+            if (!empty($request->value)) {
+                foreach ($request->value as $userId) {
+                    $syncData[$userId] = [
+                        'assigned_by' => auth()->id(),
+                        'assigned_at' => now(),
+                    ];
+                }
+            }
+            $layer->users()->sync($syncData);
+        } else {
+            $layer->{$request->column} = $request->value ?: null;
+            $layer->save();
+        }
+
+        return response()->json(['success' => true]);
     }
 }
    

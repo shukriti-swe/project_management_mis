@@ -113,17 +113,6 @@
             </ul>
         </li>
 
-        <li>
-            <a href="javascript:;" class="has-arrow">
-                <div class="parent-icon"><i class="bx bx-user-circle"></i></div>
-                <div class="menu-title">Layer Types</div>
-            </a>
-            <ul>
-                <li><a href="{{ route('layerType.index') }}"><i class="bx bx-right-arrow-alt"></i>Layer Type List</a></li>
-                <li><a href="{{ route('layerType.create') }}"><i class="bx bx-right-arrow-alt"></i>Add Type</a></li>
-            </ul>
-        </li>
-
 		<li>
 			<a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
