@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\LayerController;
+use App\Http\Controllers\LayerTypeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\LayerTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/store-layers', [LayerController::class, 'storeLayer'])->name('storeLayer');
     Route::any('/update-layer-status', [LayerController::class, 'updateLayerStatus'])->name('updateLayerStatus');
     Route::any('/layer-types-store', [LayerController::class, 'updateLayerType'])->name('layer-types.store');
+    Route::post('/layers/inline-update', [LayerController::class, 'inlineUpdate'])->name('layers.inlineUpdate');
 
 });
 

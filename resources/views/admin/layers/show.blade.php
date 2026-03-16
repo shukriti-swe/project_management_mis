@@ -27,9 +27,9 @@
             margin-right: 6px;
         }
 
-        .layer-title{
+        .layer-title {
             font-size: 28px;
-            font-family: Roboto, sans-serif!important;
+            font-family: Roboto, sans-serif !important;
             font-weight: 600;
             letter-spacing: 1px;
         }
@@ -171,7 +171,7 @@
 
         /* TABLE */
 
-        .table-responsive{
+        .table-responsive {
             overflow: visible;
         }
 
@@ -663,7 +663,8 @@
                                                                     @csrf
                                                                     @method('DELETE')
 
-                                                                    <button type="submit" class="dropdown-item text-danger">
+                                                                    <button type="submit"
+                                                                            class="dropdown-item text-danger">
                                                                         <i class="bx bx-trash me-1"></i>
                                                                         Delete
                                                                     </button>
@@ -765,7 +766,7 @@
 
             document.querySelectorAll('.change-status').forEach(btn => {
 
-                btn.addEventListener('click', function(e){
+                btn.addEventListener('click', function (e) {
 
                     e.preventDefault();
 

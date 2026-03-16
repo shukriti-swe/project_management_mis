@@ -2,49 +2,181 @@
 
 @section('admin_content')
 
-<style>
-    /* Select2 পজিশন এবং Z-index ফিক্স */
-    .select2-container {
-        display: block !important;
-        width: 100% !important;
-    }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.6.0/pagination.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet">
 
-    .select2-container--open {
-        z-index: 10000 !important; /* মোডালের z-index সাধারণত 1055 হয়, তাই এটি আরও বেশি হওয়া চাই */
-    }
+    <style>
+        /* Select2 পজিশন এবং Z-index ফিক্স */
+        .select2-container {
+            display: block !important;
+            width: 100% !important;
+        }
 
-    /* Multiple Select এর ডিজাইন ফিক্স */
-    .select2-container--bootstrap4 .select2-selection--multiple {
-        min-height: 40px !important;
-        padding: 2px 8px !important;
-        border: 1px solid #ced4da !important;
-        display: flex !important;
-        align-items: center !important;
-    }
+        .select2-container--open {
+            z-index: 10000 !important; /* মোডালের z-index সাধারণত 1055 হয়, তাই এটি আরও বেশি হওয়া চাই */
+        }
 
-    /* ইনপুট ফিল্ড পজিশন ফিক্স */
-    .select2-container--bootstrap4 .select2-search--inline .select2-search__field {
-        margin-top: 0 !important;
-        height: 32px !important;
-    }
+        /* Multiple Select এর ডিজাইন ফিক্স */
+        .select2-container--bootstrap4 .select2-selection--multiple {
+            min-height: 40px !important;
+            padding: 2px 8px !important;
+            border: 1px solid #ced4da !important;
+            display: flex !important;
+            align-items: center !important;
+        }
 
-    /* Single Select এর হাইট ফিক্স */
-    .select2-container--bootstrap4 .select2-selection--single {
-        height: 38px !important;
-        line-height: 38px !important;
-    }
+        /* ইনপুট ফিল্ড পজিশন ফিক্স */
+        .select2-container--bootstrap4 .select2-search--inline .select2-search__field {
+            margin-top: 0 !important;
+            height: 32px !important;
+        }
 
-    /* ড্রপডাউন লিস্টের পজিশন যাতে উল্টাপাল্টা না হয় */
-    .select2-dropdown {
-        border: 1px solid #ced4da !important;
-        z-index: 10001 !important;
-    }
-</style>
+        /* Single Select এর হাইট ফিক্স */
+        .select2-container--bootstrap4 .select2-selection--single {
+            height: 38px !important;
+            line-height: 38px !important;
+        }
+
+        /* ড্রপডাউন লিস্টের পজিশন যাতে উল্টাপাল্টা না হয় */
+        .select2-dropdown {
+            border: 1px solid #ced4da !important;
+            z-index: 10001 !important;
+        }
+    </style>
+
+    <style>
+        /* CHILD CARD GRID */
+
+        .child-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transition: .18s;
+        }
+
+        .child-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+            border-color: #dee2e6;
+        }
+
+        .child-card-body {
+            padding: 18px;
+            flex-grow: 1;
+        }
+
+        .child-card-footer {
+            border-top: 1px solid #f1f3f5;
+            padding: 12px 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .child-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .child-description {
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.5;
+            margin-top: 6px;
+
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            height: calc(1.5em * 3); /* reserve space for 3 lines */
+        }
+
+        .child-dates {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+
+        .child-actions .btn {
+            font-size: 12px;
+            padding: 4px 10px;
+        }
+    </style>
+
+    <style>
+        /* overall font */
+        .fc {
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #444;
+        }
+
+        /* header title */
+        .fc-toolbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* day numbers */
+        .fc-daygrid-day-number {
+            color: #555;
+            font-weight: 500;
+        }
+
+        /* calendar cell hover */
+        .fc-daygrid-day:hover {
+            background: #f8f9fa;
+        }
+
+        /* event highlight */
+        .fc-bg-event {
+            background: #0d6efd20 !important;
+        }
+
+        /* toolbar buttons */
+        .fc .fc-button {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            color: #444;
+        }
+
+        .fc .fc-button:hover {
+            background: #f1f3f5;
+            color: #444;
+        }
+
+        /* remove heavy borders */
+        .fc-theme-standard td,
+        .fc-theme-standard th {
+            border-color: #f1f3f5;
+        }
+
+        .fc-event-title {
+            text-align: center;
+            width: 100%;
+        }
+
+        .fc-daygrid-event {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+    </style>
 
     <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
-            <h6 class="mb-0 text-uppercase">Project</h6>
+            <h6 class="mb-0 text-uppercase">Layers</h6>
             <hr/>
             <div class="card">
                 <div class="card-body">
@@ -68,7 +200,6 @@
                         @endforeach
                     </div>
 
-                    
 
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -79,9 +210,10 @@
                                 <option value="In-Active">In-Active</option>
                             </select>
                         </div>
-                        
+
                         <div class="col-md-6" style="text-align:right;">
-                            <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addLayerModal">Add Layer</a>
+                            <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addLayerModal">Add
+                                Layer</a>
                         </div>
                     </div>
 
@@ -91,6 +223,9 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
+                                <th>Project</th>
+                                <th>user</th>
+                                <th>Layer</th>
                                 <th>Start date</th>
                                 <th>End date</th>
                                 <th>Duration</th>
@@ -103,12 +238,52 @@
                                 <tr>
                                     <td>{{ $layer->id }}</td>
                                     <td>{{ $layer->name }}</td>
+                                    <td style="width: 200px;">
+                                        <select class="form-select inline-select" data-id="{{ $layer->id }}" data-column="project_id">
+                                            <option value="">No Project</option>
+                                            @foreach($projects as $project)
+                                                <option value="{{ $project->id }}" {{ $layer->project_id == $project->id ? 'selected' : '' }}>
+                                                    {{ $project->title }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+
+                                    <td style="width: 250px;">
+                                        <select class="form-select inline-select-multiple" data-id="{{ $layer->id }}" data-column="assigned_user_ids" multiple>
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}" {{ in_array($user->id, $layer->users->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                                    {{ $user->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+
+                                    <td style="width: 200px;">
+                                        <select class="form-select inline-select" data-id="{{ $layer->id }}" data-column="parent_id">
+                                            <option value="">No Parent</option>
+                                            @foreach($layers as $l)
+                                                @if($l->id != $layer->id) <option value="{{ $l->id }}" {{ $layer->parent_id == $l->id ? 'selected' : '' }}>
+                                                    {{ $l->name }}
+                                                </option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </td>
                                     <td>{{ $layer->start_time }}</td>
-                                    <td>{{ $layer->start_time }}</td>
-                                    <td>{{ $layer->duration }}</td>
+                                    <td>{{ $layer->end_time }}</td>
                                     <td>
-                                        <button type="button" 
-                                                class="btn btn-sm btn-outline-primary update-status-btn" 
+                                        <button
+                                                class="btn btn-info viewCalendar"
+                                                data-start="{{ $layer->start_time }}"
+                                                data-end="{{ $layer->end_time }}"
+                                                data-title="{{ $layer->title }}">
+                                            Calendar
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary update-status-btn"
                                                 data-id="{{ $layer->id }}" data-index="{{ $layer->project_id }}"
                                                 data-current-status="{{ $layer->status_id == 1 ? 'Active' : 'In-Active' }}">
                                             {{ $layer->status_id == 1 ? 'Active' : 'In-Active' }} <i class="bx bx-edit-alt"></i>
@@ -116,8 +291,8 @@
                                     </td>
                                     <td>
                                         <div>
-                                            <a href="{{ route('editProject',$layer->id) }}" class="btn btn-warning">Edit</a>
-                                            <a href="{{ route('deleteProject',$layer->id) }}" class="btn btn-danger">Delete</a>
+                                            <a href="{{ route('layer.edit',$layer->id) }}" class="btn btn-warning">Edit</a>
+                                            <a href="{{ route('layer.destroy',$layer->id) }}" class="btn btn-danger">Delete</a>
                                         </div>
                                     </td>
                                 </tr>
@@ -126,115 +301,254 @@
 
                         </table>
                     </div>
+
+                </div>
+            </div>
+
+            <h6 class="mb-0 text-uppercase">Card View</h6>
+            <hr/>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-4" id="layerContainer">
+
+                        @foreach($layers as $child)
+
+                            <div class="col-xl-3 col-lg-4 col-md-6 layer-item">
+
+                                <div class="child-card">
+
+                                    <div class="child-card-body">
+
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+
+                                            {{--                                    <span class="layer-type-icon"--}}
+                                            {{--                                          data-type="{{ $child->type }}">--}}
+                                            {{--                                        {{ $child->type === 'task' ? 'T' : 'C' }}--}}
+                                            {{--                                    </span>--}}
+
+                                            <h6 class="child-title m-0">
+                                                {{ $child->name }}
+                                            </h6>
+
+                                        </div>
+
+                                        <div>
+                                            <div class="child-status mb-2">
+                                                @if($child->status)
+
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="status-dot" style="background:{{ $child->status->color }}"></span>
+                                                        <span style="color:{{ $child->status->color }}">{{ $child->status->label }}</span>
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">No Status</span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                @if($child->parent)
+                                                    <small class="text-muted">Parent: {{ $child->parent?->name }}</small>
+                                                @else
+                                                    <small class="text-muted">No Parent (Top Layer)</small>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <div class="child-description">
+                                            {{ \Illuminate\Support\Str::limit(strip_tags($child->description),120) }}
+                                        </div>
+
+                                        <div class="child-dates">
+
+                                            <div>
+                                                <small class="text-muted">Start</small>
+                                                <div>{{ $child->start_time?->format('d M Y') ?? '—' }}</div>
+                                            </div>
+
+                                            <div>
+                                                <small class="text-muted">End</small>
+                                                <div>{{ $child->end_time?->format('d M Y') ?? '—' }}</div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="child-card-footer child-actions">
+
+                                        <a href="{{ route('layer.show',$child->id) }}"
+                                           class="btn btn-sm btn-light">
+                                            View
+                                        </a>
+
+                                        <a href="{{ route('layer.edit',$child->id) }}"
+                                           class="btn btn-sm btn-primary">
+                                            Edit
+                                        </a>
+
+                                        <form method="POST"
+                                              action="{{ route('layer.destroy',$child->id) }}"
+                                              onsubmit="return confirm('Delete this layer?')"
+                                              class="d-inline">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger">
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        @endforeach
+
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between my-4">
+
+                    <div class="ms-4" id="layerStats"></div>
+
+                    <div id="layerPagination"></div>
+
+                    <div style="width:120px"></div>
+
                 </div>
             </div>
         </div>
     </div>
 
     <div class="modal fade" id="addLayerModal" tabindex="-1" aria-labelledby="addLayerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addLayerModalLabel">Add New Layer</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLayerModalLabel">Add New Layer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="addLayerForm" method="POST" action="{{ route('storeLayer') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Layer Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Authentication Layer"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Project <span class="text-danger">*</span></label>
+                            <select name="project_id" class="form-select single-select-no-parent" required>
+                                <option value="">-- Select Project --</option>
+                                @foreach($projects as $project)
+                                    <option value="{{ $project->id }}">{{ $project->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Parent Layer</label>
+                                <select name="parent_id" class="form-select single-select">
+                                    <option value="">-- No Parent (This is a top layer) --</option>
+                                    @foreach($layers as $l)
+                                        <option value="{{ $l->id }}">{{ $l->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold">Description</label>
+                                <textarea name="description" class="form-control" rows="2"
+                                          placeholder="Write layer details here..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Layer Type <span class="text-danger">*</span></label>
+                                <select name="layer_type_id" id="layerTypeSelect" class="form-select" required>
+                                    <option value="">-- Select or type new --</option>
+                                    @foreach($layerTypes as $type)
+                                        <option value="{{ $type->id }}">{{ $type->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Assigned Users</label>
+                                <select name="assigned_user_ids[]" id="assignedUsers"
+                                        class="form-select multiple-select" multiple>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
+                                <input type="date" name="start_time" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">End Date <span class="text-danger">*</span></label>
+                                <input type="date" name="end_time" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Duration (days)</label>
+                                <input type="number" name="duration" class="form-control" min="1"
+                                       placeholder="Auto-calculate if empty">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Status <span class="text-danger">*</span></label>
+                                <select name="status_id" class="form-select single-select" required>
+                                    <option value="1" selected>Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="saveLayerBtn">
+                            <i class="bx bx-save me-1"></i> Save Layer
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <form id="addLayerForm" method="POST" action="{{ route('storeLayer') }}">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Layer Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Authentication Layer" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Project <span class="text-danger">*</span></label>
-                        <select name="project_id" class="form-select single-select-no-parent" required>
-                            <option value="">-- Select Project --</option>
-                            @foreach($projects as $project)
-                                <option value="{{ $project->id }}">{{ $project->title }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Parent Layer</label>
-                            <select name="parent_layer_id" class="form-select single-select">
-                                <option value="">-- No Parent (This is a top layer) --</option>
-                                @foreach($layers as $l)
-                                    <option value="{{ $l->id }}">{{ $l->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Description</label>
-                            <textarea name="description" class="form-control" rows="2" placeholder="Write layer details here..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Layer Type <span class="text-danger">*</span></label>
-                            <select name="layer_type_id" id="layerTypeSelect" class="form-select" required>
-                                <option value="">-- Select or type new --</option>
-                                @foreach($layerTypes as $type)
-                                    <option value="{{ $type->id }}">{{ $type->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Assigned Users</label>
-                            <select name="assigned_user_ids[]" id="assignedUsers" class="form-select multiple-select" multiple>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
-                            <input type="date" name="start_time" class="form-control" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">End Date <span class="text-danger">*</span></label>
-                            <input type="date" name="end_time" class="form-control" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Duration (days)</label>
-                            <input type="number" name="duration" class="form-control" min="1" placeholder="Auto-calculate if empty">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Status <span class="text-danger">*</span></label>
-                            <select name="status_id" class="form-select single-select" required>
-                                <option value="1" selected>Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="saveLayerBtn">
-                        <i class="bx bx-save me-1"></i> Save Layer
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 
+    <div class="modal fade" id="calendarModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
 
+                <div class="modal-header">
+                    <h5 class="modal-title">Project Date Range</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="calendar"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 
     <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
@@ -251,7 +565,8 @@
                         <input type="hidden" id="project_id" name="project_id">
                         <div class="mb-3">
                             <label class="form-label">Status Title</label>
-                            <input type="text" class="form-control" id="status_title" name="title" placeholder="e.g. Completed, Pending, On Hold" required>
+                            <input type="text" class="form-control" id="status_title" name="title"
+                                   placeholder="e.g. Completed, Pending, On Hold" required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -268,115 +583,305 @@
     </footer>
 
 
-<script>
-    $(document).ready(function() {
-    
-    // ১. Select2 ইনিশিয়ালাইজেশন (মোডাল ড্রপডাউন ইস্যু ফিক্সড)
-    function initSelect2() {
-        $('.single-select, .single-select-no-parent').select2({
-            theme: 'bootstrap4',
-            width: '100%',
-            dropdownParent: $('#addLayerModal')
-        });
 
-        $('.multiple-select').select2({
-            theme: 'bootstrap4',
-            width: '100%',
-            placeholder: "Select users...",
-            allowClear: true,
-            dropdownParent: $('#addLayerModal')
-        });
+    <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+    <script>
 
-        $('#layerTypeSelect').select2({
-            theme: 'bootstrap4',
-            width: '100%',
-            tags: true,
-            dropdownParent: $('#addLayerModal'),
-            createTag: function (params) {
-                var term = $.trim(params.term);
-                if (term === '') return null;
-                return { id: term, text: term, newTag: true };
-            }
-        });
-    }
+        $(document).ready(function () {
 
-    // মোডাল খোলার পর Select2 লোড করা (পজিশন ঠিক রাখার জন্য)
-    $('#addLayerModal').on('shown.bs.modal', function () {
-        $('.select2-init').select2({
-            theme: 'bootstrap4',
-            width: '100%',
-            dropdownParent: $('#addLayerModal'), // এটি অত্যন্ত জরুরি
-            placeholder: "Select an option"
-        });
-    });
+            // ১. Select2 ইনিশিয়ালাইজেশন (মোডাল ড্রপডাউন ইস্যু ফিক্সড)
+            function initSelect2() {
+                $('.single-select, .single-select-no-parent').select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    dropdownParent: $('#addLayerModal')
+                });
 
-    // ২. নতুন Layer Type অটো সেভ (Select2 tags)
-    $('#layerTypeSelect').on('select2:select', function(e) {
-        var data = e.params.data;
-        var $select = $(this);
+                $('.multiple-select').select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    placeholder: "Select users...",
+                    allowClear: true,
+                    dropdownParent: $('#addLayerModal')
+                });
 
-        if (data.newTag) {
-            $.ajax({
-                url: "{{ route('layer-types.store') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    name: data.text
-                },
-                success: function(response) {
-                    if (response.success) {
-                        var newOption = new Option(data.text, response.id, false, true);
-                        $select.find('option[value="' + data.id + '"]').remove();
-                        $select.append(newOption).trigger('change');
-                        alertify.success("New type added!");
+                $('#layerTypeSelect').select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    tags: true,
+                    dropdownParent: $('#addLayerModal'),
+                    createTag: function (params) {
+                        var term = $.trim(params.term);
+                        if (term === '') return null;
+                        return {id: term, text: term, newTag: true};
                     }
+                });
+            }
+
+            // মোডাল খোলার পর Select2 লোড করা (পজিশন ঠিক রাখার জন্য)
+            $('#addLayerModal').on('shown.bs.modal', function () {
+                $('.select2-init').select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    dropdownParent: $('#addLayerModal'), // এটি অত্যন্ত জরুরি
+                    placeholder: "Select an option"
+                });
+            });
+
+            // ২. নতুন Layer Type অটো সেভ (Select2 tags)
+            $('#layerTypeSelect').on('select2:select', function (e) {
+                var data = e.params.data;
+                var $select = $(this);
+
+                if (data.newTag) {
+                    $.ajax({
+                        url: "{{ route('layer-types.store') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            name: data.text
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                var newOption = new Option(data.text, response.id, false, true);
+                                $select.find('option[value="' + data.id + '"]').remove();
+                                $select.append(newOption).trigger('change');
+                                alertify.success("New type added!");
+                            }
+                        }
+                    });
                 }
             });
-        }
-    });
 
-    // ৩. ফর্ম সাবমিট (AJAX) - লোডিং স্পিনার ছাড়া শুধু এলার্ট
-    $('#addLayerForm').on('submit', function(e) {
-        e.preventDefault();
+            // ৩. ফর্ম সাবমিট (AJAX) - লোডিং স্পিনার ছাড়া শুধু এলার্ট
+            $('#addLayerForm').on('submit', function (e) {
+                e.preventDefault();
 
-        const $form = $(this);
-        const $btn = $('#saveLayerBtn');
+                const $form = $(this);
+                const $btn = $('#saveLayerBtn');
 
-        $btn.prop('disabled', true); // ডাবল ক্লিক রোধ করতে
+                $btn.prop('disabled', true); // ডাবল ক্লিক রোধ করতে
 
-        $.ajax({
-            url: $form.attr('action'),
-            method: "POST",
-            data: $form.serialize(),
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    alertify.success('Layer saved successfully!');
-                    $('#addLayerModal').modal('hide');
-                    $form[0].reset();
-                    
-                    // ১.৫ সেকেন্ড পর পেজ রিলোড হবে যাতে মেসেজ দেখা যায়
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1500);
-                }
-            },
-            error: function(xhr) {
-                $btn.prop('disabled', false); // ভুল হলে বাটন আবার সচল হবে
-                let msg = 'Something went wrong!';
-                if (xhr.responseJSON && xhr.responseJSON.errors) {
-                    msg = Object.values(xhr.responseJSON.errors)[0][0];
-                }
-                alertify.error(msg);
-            }
+                $.ajax({
+                    url: $form.attr('action'),
+                    method: "POST",
+                    data: $form.serialize(),
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            alertify.success('Layer saved successfully!');
+                            $('#addLayerModal').modal('hide');
+                            $form[0].reset();
+
+                            // ১.৫ সেকেন্ড পর পেজ রিলোড হবে যাতে মেসেজ দেখা যায়
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1500);
+                        }
+                    },
+                    error: function (xhr) {
+                        $btn.prop('disabled', false); // ভুল হলে বাটন আবার সচল হবে
+                        let msg = 'Something went wrong!';
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            msg = Object.values(xhr.responseJSON.errors)[0][0];
+                        }
+                        alertify.error(msg);
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('.inline-select').select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
 
+            $('.inline-select-multiple').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: "Select Users"
+            });
 
+            $(document).on('change', '.inline-select, .inline-select-multiple', function() {
+                let $this = $(this);
+                let id = $this.data('id');
+                let column = $this.data('column');
+                let value = $this.val();
+
+                $.ajax({
+                    url: "{{ route('layers.inlineUpdate') }}",
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id: id,
+                        column: column,
+                        value: value
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alertify.success('Updated successfully!');
+                        }
+                    },
+                    error: function() {
+                        alertify.error('Update failed!');
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('.inline-select').select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+
+            $('.inline-select-multiple').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: "Select Users"
+            });
+
+            $(document).on('change', '.inline-select, .inline-select-multiple', function() {
+                let $this = $(this);
+                let id = $this.data('id');
+                let column = $this.data('column');
+                let value = $this.val();
+
+                $.ajax({
+                    url: "{{ route('layers.inlineUpdate') }}",
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id: id,
+                        column: column,
+                        value: value
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alertify.success('Updated successfully!');
+                        }
+                    },
+                    error: function() {
+                        alertify.error('Update failed!');
+                    }
+                });
+            });
+        });
+    </script>
 
 @endsection
+
+@push('js')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.6.0/pagination.min.js"></script>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const items = Array.from(document.querySelectorAll(".layer-item"));
+            const container = document.getElementById("layerContainer");
+
+            $('#layerPagination').pagination({
+
+                dataSource: items,
+                pageSize: 8,
+                pageRange: 2,
+                className: "paginationjs-theme-blue paginationjs-big",
+
+                callback: function (data, pagination) {
+
+                    container.innerHTML = "";
+
+                    data.forEach(function (item) {
+                        container.appendChild(item);
+                    });
+
+                    const start = (pagination.pageNumber - 1) * pagination.pageSize + 1;
+                    const end = Math.min(
+                        pagination.pageNumber * pagination.pageSize,
+                        pagination.totalNumber
+                    );
+
+                    const total = pagination.totalNumber;
+
+                    document.getElementById('layerStats').innerHTML =
+                        `Showing ${start}-${end} of ${total} records`;
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            let calendar;
+
+            $('.viewCalendar').click(function (e) {
+
+                e.stopPropagation();
+
+                let start = $(this).data('start');
+                let end = $(this).data('end');
+
+                let endDate = new Date(end);
+                endDate.setDate(endDate.getDate() + 1);
+
+// convert back to YYYY-MM-DD
+                end = endDate.toISOString().split('T')[0];
+                let title = $(this).data('title');
+
+                $('#calendarModal').modal('show');
+
+                setTimeout(function () {
+
+                    let calendarEl = document.getElementById('calendar');
+
+                    if (calendar) {
+                        calendar.destroy();
+                    }
+
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+
+                        initialView: 'dayGridMonth',
+                        height: 480,
+
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,dayGridWeek'
+                        },
+
+                        buttonText: {
+                            today: 'Today',
+                            month: 'Month',
+                            week: 'Week'
+                        },
+
+                        events: [
+                            {
+                                title: title,
+                                start: start,
+                                end: end,
+                                allDay: true,
+                                backgroundColor: '#e7f1ff',
+                                borderColor: '#cfe2ff',
+                                textColor: '#2c3e50'
+                            }
+                        ]
+
+                    });
+
+                    calendar.render();
+
+                }, 200);
+
+            });
+
+        });
+    </script>
+@endpush
 

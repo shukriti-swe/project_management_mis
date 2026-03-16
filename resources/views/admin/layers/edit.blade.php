@@ -29,13 +29,13 @@
                                 @csrf
                                 @method('PUT')
 
-                                <input type="hidden"
-                                       name="project_id"
-                                       value="{{ old('project_id', $layer->project_id) }}">
+{{--                                <input type="hidden"--}}
+{{--                                       name="project_id"--}}
+{{--                                       value="{{ old('project_id', $layer->project_id) }}">--}}
 
-                                <input type="hidden"
-                                       name="parent_id"
-                                       value="{{ old('parent_id', $layer->parent_id) }}">
+{{--                                <input type="hidden"--}}
+{{--                                       name="parent_id"--}}
+{{--                                       value="{{ old('parent_id', $layer->parent_id) }}">--}}
 
                                 {{-- Layer Name --}}
                                 <div class="col-md-6">
@@ -59,39 +59,62 @@
                                 <div class="col-md-3">
                                     <label class="form-label">Layer Type</label>
 
-                                    <select class="form-select" name="type" id="layer-type">
+                                    <select class="form-select" name="layer_type_id">
+                                        @foreach($layerTypes as $type)
+                                            <option value="{{ $type->id }}"
+                                                    {{ old('type', $layer->layer_type_id) == $type->id ? 'selected' : '' }}>
+                                                {{ ucfirst($type->title) }}
+                                            </option>
 
-                                        <option value="container"
-                                                {{ old('type', $layer->type) == 'container' ? 'selected' : '' }}>
-                                            Container
-                                        </option>
-
-                                        <option value="task"
-                                                {{ old('type', $layer->type) == 'task' ? 'selected' : '' }}>
-                                            Task
-                                        </option>
+                                        @endforeach
 
                                     </select>
                                 </div>
 
                                 {{-- Status --}}
                                 <div class="col-md-3">
-                                    <div id="status-wrapper" style="{{ old('type', $layer->type ?? 'container') === 'task' ? '' : 'display:none;' }}">
+                                    <div>
                                         <label class="form-label">Status</label>
 
                                         <select class="form-select" name="status_id">
 
                                             @foreach($statuses as $status)
-
                                                 <option value="{{ $status->id }}"
                                                         {{ old('status_id', $layer->status_id) == $status->id ? 'selected' : '' }}>
                                                     {{ $status->label }}
                                                 </option>
-
                                             @endforeach
 
                                         </select>
                                     </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <label class="form-label">Project</label>
+
+                                    <select name="project_id" class="form-select user-select">
+                                        @foreach($projects as $project)
+                                            <option value="">-- Select Project --</option>
+                                            <option value="{{ $project->id }}"
+                                                    {{ $layer->project_id == $project->id ? 'selected' : '' }}>
+                                                {{ $project->title }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-6">
+                                    <label class="form-label">Parent</label>
+
+                                    <select name="parent_id" class="form-select parent_select">
+                                        <option value="">Select Parent</option>
+                                        @foreach($layers as $parent)
+                                            <option value="{{ $parent->id }}"
+                                                    {{ $layer->parent_id == $parent->id ? 'selected' : '' }}>
+                                                {{ $parent->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 {{-- Start Time --}}
@@ -182,8 +205,15 @@
 
         $(document).ready(function () {
             $('.user-select').select2({
-                placeholder: "Search users",
+                placeholder: "Select an option",
                 width: '100%'
+            });
+            $(document).ready(function () {
+                $('.parent_select').select2({
+                    placeholder: "Select Parent",
+                    allowClear: true,
+                    width: '100%'
+                });
             });
         });
     </script>

@@ -20,6 +20,7 @@ class Layer extends Model
         'total_tasks',
         'completed_tasks',
         'type',
+        'layer_type_id',
         'start_time',
         'end_time'
     ];
@@ -45,6 +46,11 @@ class Layer extends Model
     public function isTask(): bool
     {
         return $this->type === 'task';
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(LayerType::class);
     }
 
     public function users(): BelongsToMany

@@ -1,10 +1,79 @@
 @extends('layouts.backend.app')
+@push('css')
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet">
 
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+    <style>
+        /* overall font */
+        .fc {
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #444;
+        }
+
+        /* header title */
+        .fc-toolbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* day numbers */
+        .fc-daygrid-day-number {
+            color: #555;
+            font-weight: 500;
+        }
+
+        /* calendar cell hover */
+        .fc-daygrid-day:hover {
+            background: #f8f9fa;
+        }
+
+        /* event highlight */
+        .fc-bg-event {
+            background: #0d6efd20 !important;
+        }
+
+        /* toolbar buttons */
+        .fc .fc-button {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            color: #444;
+        }
+
+        .fc .fc-button:hover {
+            background: #f1f3f5;
+            color: #444;
+        }
+
+        /* remove heavy borders */
+        .fc-theme-standard td,
+        .fc-theme-standard th {
+            border-color: #f1f3f5;
+        }
+
+        .fc-event-title {
+            text-align: center;
+            width: 100%;
+        }
+
+        .fc-daygrid-event {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+    </style>
+@endpush
 @section('admin_content')
 
     <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
+
             <h6 class="mb-0 text-uppercase">Project</h6>
             <hr/>
             <div class="card">
@@ -42,6 +111,7 @@
                                 <th>Name</th>
                                 <th>Start date</th>
                                 <th>End date</th>
+                                <th>Duration</th>
                                 {{--                                <th>FIle/image</th>--}}
                                 <th>Status</th>
                                 <th>Action</th>
@@ -55,6 +125,15 @@
                                     <td>{{ $project->title }}</td>
                                     <td>{{ $project->start_date }}</td>
                                     <td>{{ $project->end_date }}</td>
+                                    <td>
+                                        <button
+                                                class="btn btn-info viewCalendar"
+                                                data-start="{{ $project->start_date }}"
+                                                data-end="{{ $project->end_date }}"
+                                                data-title="{{ $project->title }}">
+                                            Calendar
+                                        </button>
+                                    </td>
                                     {{--                                <td style="text-align: center;">--}}
                                     {{--                                    <img style="height:70px;width:120px;" src="{{ asset('project/'.$project->image) }}">--}}
                                     {{--                                </td>--}}
@@ -78,6 +157,22 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="calendarModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Project Date Range</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="calendar"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -105,20 +200,82 @@
     </footer>
 
 
-<script>
-    $(document).ready(function() {
-        var table = $('#example').DataTable({
-            lengthChange: true,
-            ordering: true,
-            info: true
-        });
+    <script>
+        $(document).ready(function () {
+            var table = $('#example').DataTable({
+                lengthChange: true,
+                ordering: true,
+                info: true
+            });
 
-        $('#statusFilter').on('change', function() {
-            var filterValue = $(this).val();
-            table.column(5).search(filterValue ? '^' + filterValue + '$' : '', true, false).draw();
+            $('#statusFilter').on('change', function () {
+                var filterValue = $(this).val();
+                table.column(5).search(filterValue ? '^' + filterValue + '$' : '', true, false).draw();
+            });
         });
-    });
-</script>
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            let calendar;
+
+            $('.viewCalendar').click(function (e) {
+
+                e.stopPropagation();
+
+                let start = $(this).data('start');
+                let end = $(this).data('end');
+                let title = $(this).data('title');
+
+                $('#calendarModal').modal('show');
+
+                setTimeout(function () {
+
+                    let calendarEl = document.getElementById('calendar');
+
+                    if (calendar) {
+                        calendar.destroy();
+                    }
+
+                    calendar = new FullCalendar.Calendar(calendarEl, {
+
+                        initialView: 'dayGridMonth',
+                        height: 480,
+
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,dayGridWeek'
+                        },
+
+                        buttonText: {
+                            today: 'Today',
+                            month: 'Month',
+                            week: 'Week'
+                        },
+
+                        events: [
+                            {
+                                title: title,
+                                start: start,
+                                end: end,
+                                allDay: true,
+                                backgroundColor: '#e7f1ff',
+                                borderColor: '#cfe2ff',
+                                textColor: '#2c3e50'
+                            }
+                        ]
+
+                    });
+
+                    calendar.render();
+
+                }, 200);
+
+            });
+
+        });
+    </script>
 
 @endsection
 
