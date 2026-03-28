@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::any('/update-layer-status', [LayerController::class, 'updateLayerStatus'])->name('updateLayerStatus');
     Route::any('/layer-types-store', [LayerController::class, 'updateLayerType'])->name('layer-types.store');
     Route::post('/layers/inline-update', [LayerController::class, 'inlineUpdate'])->name('layers.inlineUpdate');
+    Route::patch('/layers/update-schedule/{layer}', [LayerController::class, 'updateLayerSchedule'])->name('layers.updateSchedule');
 
     Route::resource('statuses', StatusController::class)->names('status')->except('show');
 

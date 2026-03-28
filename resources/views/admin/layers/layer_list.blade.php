@@ -296,7 +296,7 @@
                                     <td>{{ $layer->start_time }}</td>
                                     <td>{{ $layer->end_time }}</td>
                                     <td>
-                                        <button class="btn btn-info viewCalendar" data-start="{{ $layer->start_time }}" data-end="{{ $layer->end_time }}" data-title="{{ $layer->title }}">Calendar</button>
+                                        <button class="btn btn-info viewCalendar" data-start="{{ $layer->start_time }}" data-end="{{ $layer->end_time }}" data-id="{{$layer->id}}" data-title="{{ $layer->title }}">Calendar</button>
                                     </td>
                                     <td data-search="{{ $layer->status ? $layer->status->label : 'No Status' }}">
                                         <select class="form-select form-select-sm status-select" data-id="{{ $layer->id }}" style="width: 130px;">
@@ -846,6 +846,27 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
     <script>
+        function updateLayer(event) {
+
+            fetch(`/layers/update-schedule/${event.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    start_time: event.startStr,
+                    end_time: event.endStr,
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('Updated successfully');
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        }
         document.addEventListener('DOMContentLoaded', function () {
 
             let calendar;
@@ -856,6 +877,7 @@
 
                 let start = $(this).data('start');
                 let end = $(this).data('end');
+                let id = $(this).data('id');
 
                 let endDate = new Date(end);
                 endDate.setDate(endDate.getDate() + 1);
@@ -880,9 +902,18 @@
                         height: 480,
 
                         headerToolbar: {
-                            left: 'prev,next today',
+                            left: 'prev,next today reloadBtn',
                             center: 'title',
                             right: 'dayGridMonth,dayGridWeek'
+                        },
+
+                        customButtons: {
+                            reloadBtn: {
+                                text: 'Refresh',
+                                click: function () {
+                                    window.location.reload();
+                                }
+                            }
                         },
 
                         buttonText: {
@@ -891,8 +922,21 @@
                             week: 'Week'
                         },
 
+                        editable: true,
+                        eventStartEditable: true,
+                        eventDurationEditable: true,
+
+                        eventDrop: function(info) {
+                            updateLayer(info.event);
+                        },
+
+                        eventResize: function(info) {
+                            updateLayer(info.event);
+                        },
+
                         events: [
                             {
+                                id: id,
                                 title: title,
                                 start: start,
                                 end: end,
