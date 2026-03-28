@@ -9,6 +9,27 @@
                     <h6 class="mb-0 text-uppercase">Hierarchy Management</h6>
                     <hr/>
 
+                    <div class="flash-message">
+                   
+                        @foreach (['danger', 'warning', 'success', 'info'] as $msg)
+                            @if(Session::has($msg))
+                                <p class="alert alert-{{ $msg }}" role="alert">
+                                    @if($msg == 'success')
+                                        <strong><i class="icon fa fa-check"></i></strong>
+                                    @elseif($msg == 'warning')
+                                        <strong><i class="icon fa fa-warning"></i></strong>
+                                    @elseif($msg == 'info')
+                                        <strong><i class="icon fa fa-info"></i></strong>
+                                    @elseif($msg == 'danger')
+                                        <strong><i class="icon fa fa-ban"></i></strong>
+                                    @endif
+                                    {{ Session::get($msg) }}
+                                </p>
+                            @endif
+                        @endforeach
+
+                    </div>
+
                     <div class="card border-top border-0 border-4 border-primary">
                         <div class="card-body p-5">
 

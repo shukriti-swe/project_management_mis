@@ -24,6 +24,26 @@
                                 {{ $errors->first() }}
                             </div>
                         @endif
+
+                        <div class="flash-message">
+                            @foreach (['danger', 'warning', 'success', 'info'] as $msg)
+                                @if(Session::has($msg))
+                                    <p class="alert alert-{{ $msg }}" role="alert">
+                                        @if($msg == 'success')
+                                            <strong><i class="icon fa fa-check"></i></strong>
+                                        @elseif($msg == 'warning')
+                                            <strong><i class="icon fa fa-warning"></i></strong>
+                                        @elseif($msg == 'info')
+                                            <strong><i class="icon fa fa-info"></i></strong>
+                                        @elseif($msg == 'danger')
+                                            <strong><i class="icon fa fa-ban"></i></strong>
+                                        @endif
+                                        {{ Session::get($msg) }}
+                                    </p>
+                                @endif
+                            @endforeach
+
+                        </div>
                         
                         <form class="row g-3" method="POST" action="{{ route('updateProject') }}" enctype="multipart/form-data">
                             @csrf
