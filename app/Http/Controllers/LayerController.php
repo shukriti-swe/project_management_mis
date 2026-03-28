@@ -177,7 +177,7 @@ class LayerController extends Controller
             $this->layerService->updateLayer($layer, $validated);
 
             return redirect()
-                ->route('layer.show', $layer->id)
+                ->back()
                 ->with('success', 'Layer has been updated.');
 
         } catch (Throwable $e) {

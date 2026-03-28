@@ -544,8 +544,10 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Status <span class="text-danger">*</span></label>
                                 <select name="status_id" class="form-select single-select" required>
-                                    <option value="1" selected>Active</option>
-                                    <option value="0">Inactive</option>
+                                    <option value="">Select Status</option>
+                                    @foreach($statuses as $status)
+                                        <option value="{{ $status->id }}">{{ $status->label }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
