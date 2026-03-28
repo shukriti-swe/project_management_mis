@@ -92,17 +92,6 @@
 
 		<li class="menu-label">More Pages</li>
 
-		<li>
-			<a href="javascript:;" class="has-arrow">
-				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
-				<div class="menu-title">Project</div>
-			</a>
-			<ul>
-				<li><a href="{{ route('projectList') }}"><i class="bx bx-right-arrow-alt"></i>Project List</a></li>
-				<li><a href="{{ route('addProject') }}"><i class="bx bx-right-arrow-alt"></i>Add Project</a></li>
-			</ul>
-		</li>
-
         <li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class="bx bx-user-circle"></i></div>
@@ -124,6 +113,17 @@
                 <li><a href="{{ route('layerType.create') }}"><i class="bx bx-right-arrow-alt"></i>Add Type</a></li>
             </ul>
         </li>
+
+		<li>
+			<a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
+				<div class="menu-title">Project</div>
+			</a>
+			<ul>
+				<li><a href="{{ route('projectList') }}"><i class="bx bx-right-arrow-alt"></i>Project List</a></li>
+				<li><a href="{{ route('addProject') }}"><i class="bx bx-right-arrow-alt"></i>Add Project</a></li>
+			</ul>
+		</li>
 
 		<li>
 			<a href="javascript:;" class="has-arrow">
