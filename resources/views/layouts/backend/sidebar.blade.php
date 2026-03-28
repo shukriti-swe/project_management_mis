@@ -102,6 +102,18 @@
 				<li><a href="{{ route('addProject') }}"><i class="bx bx-right-arrow-alt"></i>Add Project</a></li>
 			</ul>
 		</li>
+
+        <li>
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class="bx bx-user-circle"></i></div>
+                <div class="menu-title">Statuses</div>
+            </a>
+            <ul>
+                <li><a href="{{ route('status.index') }}"><i class="bx bx-right-arrow-alt"></i>Status List</a></li>
+                <li><a href="{{ route('status.create') }}"><i class="bx bx-right-arrow-alt"></i>Add Status</a></li>
+            </ul>
+        </li>
+
 		<li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class="bx bx-user-circle"></i></div>

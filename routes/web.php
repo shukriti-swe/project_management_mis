@@ -5,6 +5,7 @@ use App\Http\Controllers\LayerTypeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StatusController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,8 @@ Route::middleware('auth')->group(function () {
     Route::any('/update-layer-status', [LayerController::class, 'updateLayerStatus'])->name('updateLayerStatus');
     Route::any('/layer-types-store', [LayerController::class, 'updateLayerType'])->name('layer-types.store');
     Route::post('/layers/inline-update', [LayerController::class, 'inlineUpdate'])->name('layers.inlineUpdate');
+
+    Route::resource('statuses', StatusController::class)->names('status')->except('show');
 
 });
 

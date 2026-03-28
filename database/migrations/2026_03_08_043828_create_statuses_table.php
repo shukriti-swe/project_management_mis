@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
+            $table->foreignId('project_id')->nullable()->constrained()->nullOnDelete();
             $table->string('label');
             $table->enum('category', ['backlog','todo', 'in_progress', 'done', 'canceled'])->default('backlog');
             $table->string('color')->nullable(); // UI Hex code
