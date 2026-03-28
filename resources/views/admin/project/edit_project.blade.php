@@ -18,6 +18,12 @@
                             <h5 class="mb-0 text-danger">Update Project</h5>
                         </div>
                         <hr>
+
+                        @if($errors->any())
+                            <div class="alert alert-danger">
+                                {{ $errors->first() }}
+                            </div>
+                        @endif
                         
                         <form class="row g-3" method="POST" action="{{ route('updateProject') }}" enctype="multipart/form-data">
                             @csrf
@@ -39,14 +45,14 @@
                             <div class="col-12">
                                 <label for="inputDate" class="form-label">Start Date</label>
                                 <div class="input-group"><span class="input-group-text bg-transparent"><i class='bx bxs-user' ></i></span>
-                                    <input type="date" name="start_date" class="form-control border-start-0" id="inputDate" placeholder="date" value="{{$project->start_date}}"/>
+                                    <input type="date" name="start_date" class="form-control border-start-0" id="inputDates" value="{{ $project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('Y-m-d') : '' }}"/>
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <label for="inputDate" class="form-label">End Date</label>
                                 <div class="input-group"><span class="input-group-text bg-transparent"><i class='bx bxs-user' ></i></span>
-                                    <input type="date" name="end_date" class="form-control border-start-0" id="inputDate" placeholder="date" value="{{$project->end_date}}"/>
+                                    <input type="date" name="end_date" class="form-control border-start-0" id="inputDate" placeholder="date" value="{{ $project->end_date ? \Carbon\Carbon::parse($project->end_date)->format('Y-m-d') : '' }}"/>
                                 </div>
                             </div>
 
@@ -83,7 +89,7 @@
                             </div>
                             
                             <div class="col-12">
-                                <button type="submit" class="btn btn-danger px-5">Submit</button>
+                                <button type="submit" class="btn btn-danger px-5">Update</button>
                             </div>
                         </form>
 
