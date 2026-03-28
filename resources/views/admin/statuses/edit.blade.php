@@ -60,7 +60,7 @@
                                 </div>
 
                                 {{-- Project --}}
-                                <div class="col-md-6">
+                                <!-- <div class="col-md-6">
                                     <label class="form-label">Project</label>
 
                                     <select class="form-select project-select" name="project_id">
@@ -73,7 +73,7 @@
                                         @endforeach
 
                                     </select>
-                                </div>
+                                </div> -->
 
                                 {{-- Buttons --}}
                                 <div class="col-12 mt-3">
