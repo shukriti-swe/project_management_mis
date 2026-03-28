@@ -56,8 +56,7 @@ Route::middleware('auth')->group(function () {
 
     // Sampad Singha
     Route::resource('/layers', LayerController::class)->names('layer');
-    Route::patch('/layers/{layer}/status/{status}', [LayerController::class, 'updateStatus'])
-        ->name('layer.updateStatus');
+    Route::patch('/layers/{layer}/status/{status}', [LayerController::class, 'updateStatus'])->name('layer.updateStatus');
 
     Route::resource('layer-types', LayerTypeController::class)->names('layerType')->except('show');
 

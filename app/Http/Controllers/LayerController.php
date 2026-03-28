@@ -138,19 +138,18 @@ class LayerController extends Controller
      */
     public function edit(Request $request, Layer $layer)
     {
-//        dd($layer);
+        // dd($layer->project_id);
         $users = User::all();
-        $project = Project::findOrFail($layer->project_id);
-        $statuses = $project->statuses()->get();
+        // $project = Project::findOrFail($layer->project_id);
+        // $statuses = $project->statuses()->get();
         $layerTypes = LayerType::all();
 
         $parent = Layer::find($layer->parent_id);
-        $layers = Layer::whereNotIn('id',
-            $layer->descendants()->pluck('id')->push($layer->id)
-        )->orderBy('created_at', 'desc')->get();
+        $layers = Layer::whereNotIn('id',$layer->descendants()->pluck('id')->push($layer->id))->orderBy('created_at', 'desc')->get();
         $projects = Project::all();
+        $statuses = Status::get();
 
-        return view('admin.layers.edit', compact('project', 'statuses', 'parent', 'layer', 'users', 'layers', 'projects', 'layerTypes'));
+        return view('admin.layers.edit', compact( 'statuses', 'parent', 'layer', 'users', 'layers', 'projects', 'layerTypes'));
     }
 
     /**
@@ -227,18 +226,16 @@ class LayerController extends Controller
         $layerTypes = LayerType::all();
         $projects = Project::all();
         $users     = User::select('id', 'name', 'email')->get();
+        $statuses = Status::get();
 
-        return view('admin.layers.layer_list', compact('layers','layerTypes','projects','users'));
+        return view('admin.layers.layer_list', compact('layers','layerTypes','projects','users','statuses'));
     }
 
     public function updateLayerStatus(Request $request) {
-        $status = Status::create([
-            'label' => $request->title,
-            'project_id' => $request->project_id,
-        ]);
-    
-        Layer::where('id', $request->layer_id)->update([
-            'status_id' => $status->id
+        $layer = Layer::findOrFail($request->layer_id);
+        
+        $layer->update([
+            'status_id' => $request->status_id
         ]);
     
         return response()->json(['success' => true]);

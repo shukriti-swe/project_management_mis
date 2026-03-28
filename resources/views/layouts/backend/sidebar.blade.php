@@ -124,6 +124,25 @@
 			</ul>
 		</li>
 
+		<li>
+			<a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
+				<div class="menu-title">Reports</div>
+			</a>
+			<ul>
+				<li><a href="#"><i class="bx bx-right-arrow-alt"></i>Project Details</a></li>
+				<li><a href="#"><i class="bx bx-right-arrow-alt"></i>User List</a></li>
+			</ul>
+		</li>
+
+		<li>
+			<a href="{{ route('logout') }}">
+				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
+				<div class="menu-title">Logout</div>
+			</a>
+			
+		</li>
+
 	</ul>
 
 </div>

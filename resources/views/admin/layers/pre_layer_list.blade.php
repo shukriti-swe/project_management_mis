@@ -202,37 +202,16 @@
 
 
                     <div class="row mb-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Filter with Status:</label>
+                        <div class="col-md-6">
+                            <label class="form-label">Filter:</label>
                             <select id="statusFilter" class="form-select" style="width: 200px; display: inline-block;">
                                 <option value="">All</option>
-                                @foreach($statuses as $status)
-                                <option value="{{ $status->label }}">{{ $status->label }}</option>
-                                @endforeach
+                                <option value="1">Active</option>
+                                <option value="0">In-Active</option>
                             </select>
                         </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label">By Project:</label>
-                            <select id="projectFilter" class="form-select d-inline-block" style="width: 180px;">
-                                <option value="">All Projects</option>
-                                @foreach($projects as $project)
-                                    <option value="{{ $project->title }}">{{ $project->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">By Layer:</label>
-                            <select id="layerFilter" class="form-select d-inline-block" style="width: 180px;">
-                                <option value="">All Layers</option>
-                                @foreach($layers as $l)
-                                    <option value="{{ $l->name }}">{{ $l->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-3" style="text-align:right;">
+                        <div class="col-md-6" style="text-align:right;">
                             <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addLayerModal">Add
                                 Layer</a>
                         </div>
@@ -259,7 +238,7 @@
                                 <tr>
                                     <td>{{ $layer->id }}</td>
                                     <td>{{ $layer->name }}</td>
-                                    <td data-search="{{ $layer->project ? $layer->project->title : 'No Project' }}">
+                                    <td style="width: 200px;">
                                         <select class="form-select inline-select" data-id="{{ $layer->id }}" data-column="project_id">
                                             <option value="">No Project</option>
                                             @foreach($projects as $project)
@@ -280,33 +259,36 @@
                                         </select>
                                     </td>
 
-                                    <td data-search="{{ $layer->parent ? $layer->parent->name : 'No Parent' }}">
+                                    <td style="width: 200px;">
                                         <select class="form-select inline-select" data-id="{{ $layer->id }}" data-column="parent_id">
                                             <option value="">No Parent</option>
                                             @foreach($layers as $l)
-                                                @if($l->id != $layer->id) 
-                                                    <option value="{{ $l->id }}" {{ $layer->parent_id == $l->id ? 'selected' : '' }}>
-                                                        {{ $l->name }}
-                                                    </option>
+                                                @if($l->id != $layer->id) <option value="{{ $l->id }}" {{ $layer->parent_id == $l->id ? 'selected' : '' }}>
+                                                    {{ $l->name }}
+                                                </option>
                                                 @endif
                                             @endforeach
                                         </select>
                                     </td>
-                                    
                                     <td>{{ $layer->start_time }}</td>
                                     <td>{{ $layer->end_time }}</td>
                                     <td>
-                                        <button class="btn btn-info viewCalendar" data-start="{{ $layer->start_time }}" data-end="{{ $layer->end_time }}" data-title="{{ $layer->title }}">Calendar</button>
+                                        <button
+                                                class="btn btn-info viewCalendar"
+                                                data-start="{{ $layer->start_time }}"
+                                                data-end="{{ $layer->end_time }}"
+                                                data-title="{{ $layer->title }}">
+                                            Calendar
+                                        </button>
                                     </td>
-                                    <td data-search="{{ $layer->status ? $layer->status->label : 'No Status' }}">
-                                        <select class="form-select form-select-sm status-select" data-id="{{ $layer->id }}" style="width: 130px;">
-                                            <option value="">Select Status</option>
-                                            @foreach($statuses as $status)
-                                                <option value="{{ $status->id }}" {{ $layer->status_id == $status->id ? 'selected' : '' }}>
-                                                    {{ $status->label }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                    <td data-filter="{{ $layer->status_id == 1 ? 'Active' : 'In-Active' }}">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary update-status-btn"
+                                                data-id="{{ $layer->id }}" 
+                                                data-index="{{ $layer->project_id }}"
+                                                data-current-status="{{ $layer->status_id == 1 ? 'Active' : 'In-Active' }}">
+                                            {{ $layer->status_id == 1 ? 'Active' : 'In-Active' }} <i class="bx bx-edit-alt"></i>
+                                        </button>
                                     </td>
                                     <td>
                                         <div>
@@ -327,275 +309,9 @@
             <h6 class="mb-0 text-uppercase">Card View</h6>
             <hr/>
 
-            <div class="card">
-                <div class="card-body">
-                    <div class="row g-4" id="layerContainer">
-
-                        @foreach($layers as $child)
-
-                            <div class="col-xl-3 col-lg-4 col-md-6 layer-item">
-
-                                <div class="child-card">
-
-                                    <div class="child-card-body">
-
-                                        <div class="d-flex align-items-center gap-2 mb-2">
-
-                                            {{--                                    <span class="layer-type-icon"--}}
-                                            {{--                                          data-type="{{ $child->type }}">--}}
-                                            {{--                                        {{ $child->type === 'task' ? 'T' : 'C' }}--}}
-                                            {{--                                    </span>--}}
-
-                                            <h6 class="child-title m-0">
-                                                {{ $child->name }}
-                                            </h6>
-
-                                        </div>
-
-                                        <div>
-                                            <div class="child-status mb-2">
-                                                @if($child->status)
-
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="status-dot" style="background:{{ $child->status->color }}"></span>
-                                                        <span style="color:{{ $child->status->color }}">{{ $child->status->label }}</span>
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted">No Status</span>
-                                                @endif
-                                            </div>
-                                            <div>
-                                                @if($child->parent)
-                                                    <small class="text-muted">Parent: {{ $child->parent?->name }}</small>
-                                                @else
-                                                    <small class="text-muted">No Parent (Top Layer)</small>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <div class="child-description">
-                                            {{ \Illuminate\Support\Str::limit(strip_tags($child->description),120) }}
-                                        </div>
-
-                                        <div class="child-dates">
-
-                                            <div>
-                                                <small class="text-muted">Start</small>
-                                                <div>{{ $child->start_time?->format('d M Y') ?? '—' }}</div>
-                                            </div>
-
-                                            <div>
-                                                <small class="text-muted">End</small>
-                                                <div>{{ $child->end_time?->format('d M Y') ?? '—' }}</div>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="child-card-footer child-actions">
-
-                                        <a href="{{ route('layer.show',$child->id) }}"
-                                           class="btn btn-sm btn-light">
-                                            View
-                                        </a>
-
-                                        <a href="{{ route('layer.edit',$child->id) }}"
-                                           class="btn btn-sm btn-primary">
-                                            Edit
-                                        </a>
-
-                                        <form method="POST"
-                                              action="{{ route('layer.destroy',$child->id) }}"
-                                              onsubmit="return confirm('Delete this layer?')"
-                                              class="d-inline">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-danger">
-                                                Delete
-                                            </button>
-
-                                        </form>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        @endforeach
-
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center justify-content-between my-4">
-
-                    <div class="ms-4" id="layerStats"></div>
-
-                    <div id="layerPagination"></div>
-
-                    <div style="width:120px"></div>
-
-                </div>
-            </div>
         </div>
     </div>
 
-    <div class="modal fade" id="addLayerModal" tabindex="-1" aria-labelledby="addLayerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addLayerModalLabel">Add New Layer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <form id="addLayerForm" method="POST" action="{{ route('storeLayer') }}">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Layer Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control" placeholder="e.g. Authentication Layer"
-                                   required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Project <span class="text-danger">*</span></label>
-                            <select name="project_id" class="form-select single-select-no-parent" required>
-                                <option value="">-- Select Project --</option>
-                                @foreach($projects as $project)
-                                    <option value="{{ $project->id }}">{{ $project->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Parent Layer</label>
-                                <select name="parent_id" class="form-select single-select">
-                                    <option value="">-- No Parent (This is a top layer) --</option>
-                                    @foreach($layers as $l)
-                                        <option value="{{ $l->id }}">{{ $l->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label fw-bold">Description</label>
-                                <textarea name="description" class="form-control" rows="2"
-                                          placeholder="Write layer details here..."></textarea>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Layer Type <span class="text-danger">*</span></label>
-                                <select name="layer_type_id" id="layerTypeSelect" class="form-select" required>
-                                    <option value="">-- Select or type new --</option>
-                                    @foreach($layerTypes as $type)
-                                        <option value="{{ $type->id }}">{{ $type->title }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Assigned Users</label>
-                                <select name="assigned_user_ids[]" id="assignedUsers"
-                                        class="form-select multiple-select" multiple>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Start Date <span class="text-danger">*</span></label>
-                                <input type="date" name="start_time" class="form-control" required>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">End Date <span class="text-danger">*</span></label>
-                                <input type="date" name="end_time" class="form-control" required>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Duration (days)</label>
-                                <input type="number" name="duration" class="form-control" min="1"
-                                       placeholder="Auto-calculate if empty">
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Status <span class="text-danger">*</span></label>
-                                <select name="status_id" class="form-select single-select" required>
-                                    <option value="1" selected>Active</option>
-                                    <option value="0">Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="saveLayerBtn">
-                            <i class="bx bx-save me-1"></i> Save Layer
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="calendarModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Project Date Range</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <div id="calendar"></div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Layer Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="statusUpdateForm">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="layer_id" name="layer_id">
-                        <input type="hidden" id="project_id" name="project_id">
-                        <div class="mb-3">
-                            <label class="form-label">Status Title</label>
-                            <input type="text" class="form-control" id="status_title" name="title"
-                                   placeholder="e.g. Completed, Pending, On Hold" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Update Status</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
     <footer class="page-footer">
         <p class="mb-0">Copyright © 2021. All right reserved.</p>
@@ -607,27 +323,26 @@
     <script>
 
         $(document).ready(function () {
-         
             var table = $('#example').DataTable({
-                lengthChange: true,
-                ordering: true,
-                info: true
-            });
+        lengthChange: true,
+        ordering: true,
+        info: true
+    });
 
-            $('#statusFilter').on('change', function() {
-                var searchText = $(this).val(); 
-                table.column(8).search(searchText ? '^' + searchText + '$' : '', true, false).draw();
-            });
+    $('#statusFilter').on('change', function() {
+        var val = $(this).val(); // ১ অথবা ০
+        var searchText = '';
 
-            $('#projectFilter').on('change', function() {
-                var val = $(this).val();
-                table.column(2).search(val ? '^' + val + '$' : '', true, false).draw();
-            });
+        if (val === "1") {
+            searchText = 'Active';
+        } else if (val === "0") {
+            searchText = 'In-Active';
+        }
 
-            $('#layerFilter').on('change', function() {
-                var val = $(this).val();
-                table.column(4).search(val ? '^' + val + '$' : '', true, false).draw();
-            });
+        // কলাম ৮ (Status) ফিল্টার করবে। 
+        // true, false এর মানে হলো smart search বন্ধ করে exact match করা।
+        table.column(8).search(searchText ? '^' + searchText + '$' : '', true, false).draw();
+    });
 
             function initSelect2() {
                 $('.single-select, .single-select-no-parent').select2({
@@ -728,41 +443,48 @@
                     }
                 });
             });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('.inline-select').select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
 
-            $(document).on('change', '.status-select', function() {
-                let layerId = $(this).data('id');
-                let statusId = $(this).val();
-                let selectElement = $(this);
-                let statusText = $(this).find('option:selected').text();
+            $('.inline-select-multiple').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: "Select Users"
+            });
+
+            $(document).on('change', '.inline-select, .inline-select-multiple', function() {
+                let $this = $(this);
+                let id = $this.data('id');
+                let column = $this.data('column');
+                let value = $this.val();
 
                 $.ajax({
-                    url: "{{ route('updateLayerStatus') }}",
+                    url: "{{ route('layers.inlineUpdate') }}",
                     method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     data: {
-                        layer_id: layerId,
-                        status_id: statusId
+                        _token: "{{ csrf_token() }}",
+                        id: id,
+                        column: column,
+                        value: value
                     },
                     success: function(response) {
-                        if(response.success) {
-                            selectElement.closest('td').attr('data-search', statusText.trim());
-                            
-                            if(typeof alertify !== 'undefined'){
-                                alertify.success('Status updated to ' + statusText);
-                            }
+                        if (response.success) {
+                            alertify.success('Updated successfully!');
                         }
                     },
                     error: function() {
-                        alert("Something went wrong!");
+                        alertify.error('Update failed!');
                     }
                 });
             });
         });
     </script>
-
-
     <script>
         $(document).ready(function() {
             $('.inline-select').select2({
@@ -844,7 +566,9 @@
             });
         });
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
