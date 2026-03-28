@@ -5,6 +5,9 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
     <style>
+        .table-responsive{
+            overflow: visible!important;
+        }
         /* overall font */
         .fc {
             font-family: system-ui, -apple-system, sans-serif;
@@ -104,7 +107,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table id="example" class="table table-striped table-bordered table-hover" style="width:100%">
+                        <table id="example" class="table table-striped table-bordered table-hover project-table" style="width:100%">
                             <thead>
                             <tr>
                                 <th>ID</th>
@@ -112,14 +115,13 @@
                                 <th>Start date</th>
                                 <th>End date</th>
                                 <th>Duration</th>
-                                {{--                                <th>FIle/image</th>--}}
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($projects as $project)
-                                <tr onclick="window.location='{{ route('projectDetails',$project->id) }}'"
+                                <tr data-href="{{ route('projectDetails',$project->id) }}"
                                     style="cursor:pointer;">
                                     <td>{{ $project->id }}</td>
                                     <td>{{ $project->title }}</td>
@@ -134,15 +136,32 @@
                                             Calendar
                                         </button>
                                     </td>
-                                    {{--                                <td style="text-align: center;">--}}
-                                    {{--                                    <img style="height:70px;width:120px;" src="{{ asset('project/'.$project->image) }}">--}}
-                                    {{--                                </td>--}}
                                     <td>
-                                        @if($project->status==1)
-                                            {{ 'Active' }}
-                                        @else
-                                            {{ 'In-Active' }}
-                                        @endif
+                                        <div class="btn-group">
+
+                                            <button type="button" class="btn btn-warning">
+                                                {{ match($project->status) {
+                                                    1 => 'Not Start',
+                                                    2 => 'Running',
+                                                    3 => 'Pause',
+                                                    4 => 'End',
+                                                    default => 'Unknown'
+                                                } }}
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-warning dropdown-toggle dropdown-toggle-split"
+                                                    data-bs-toggle="dropdown">
+                                            </button>
+
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="1">Not Start</a></li>
+                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="2">Running</a></li>
+                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="3">Pause</a></li>
+                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="4">End</a></li>
+                                            </ul>
+
+                                        </div>
                                     </td>
                                     <td>
                                         <div>
@@ -274,6 +293,41 @@
 
             });
 
+        });
+    </script>
+
+    <script>
+        $(document).on('click', '#example tbody tr', function (e) {
+
+            // if clicked inside button/dropdown → ignore row click
+            if ($(e.target).closest('.btn-group').length) return;
+
+            let url = $(this).data('href');
+            if (url) window.location = url;
+        });
+        $(document).on('click', '.change-status', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log('clicked'); // will now fire
+
+            let projectId = $(this).data('project');
+            let status = $(this).data('status');
+
+            fetch(`/projects/${projectId}/status`, {
+                method: 'POST', // safer for Apache
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    _method: 'PATCH',
+                    status: status
+                })
+            })
+                .then(res => res.json())
+                .then(() => location.reload())
+                .catch(err => console.error(err));
         });
     </script>
 
