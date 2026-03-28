@@ -337,7 +337,6 @@ class LayerController extends Controller
 
     public function updateLayerSchedule(Request $request, Layer $layer)
     {
-        Log::info('Updating layer schedule', ['layer_id' => $layer->id, 'request' => $request->all()]);
         $validated = $request->validate([
             'start_time' => 'required|date',
             'end_time' => 'required|date|after_or_equal:start_time',
@@ -346,6 +345,6 @@ class LayerController extends Controller
         $layer->update($validated);
 
         return response()->json(['success' => true]);
-    }
+        }
 }
    
