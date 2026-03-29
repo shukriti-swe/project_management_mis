@@ -21,53 +21,6 @@
 			</a>
 		</li>
 
-		<!-- <li>
-			<a href="#" class="has-arrow">
-				<div class="parent-icon"><i class='bx bx-home-circle'></i></div>
-				<div class="menu-title">Settings</div>
-			</a>        
-		</li> -->
-
-		
-
-		<!-- <li>
-			<a href="#" class="has-arrow">
-				<div class="parent-icon"><i class='bx bx-home-circle'></i>
-				</div>
-				<div class="menu-title">About Us</div> 
-			</a>
-		</li>
-
-		<li>
-			<a href="#" class="has-arrow">
-				<div class="parent-icon"><i class='bx bx-home-circle'></i>
-				</div>
-				<div class="menu-title">Contact Us</div>
-			</a>
-		</li>
-
-		<li>
-			<a href="#" class="has-arrow">
-				<div class="parent-icon"><i class='bx bx-home-circle'></i>
-				</div>
-				<div class="menu-title">Event List</div>
-			</a>
-		</li>
-
-		<li>
-			<a href="#" class="has-arrow">
-				<div class="parent-icon"><i class='bx bx-home-circle'></i></div>
-				<div class="menu-title">Album List</div>
-			</a>
-		</li>
-
-		<li>
-			<a href="#" class="has-arrow">
-				<div class="parent-icon"><i class='bx bx-home-circle'></i></div>
-				<div class="menu-title">Photos</div>
-			</a>
-		</li> -->
-
 		<li>
 			<a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
@@ -152,11 +105,9 @@
 				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
 				<div class="menu-title">Logout</div>
 			</a>
-			
 		</li>
 
 	</ul>
-
 </div>
 
 <!--end sidebar wrapper -->
