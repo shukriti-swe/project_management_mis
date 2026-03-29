@@ -142,7 +142,7 @@
 				<div class="menu-title">Reports</div>
 			</a>
 			<ul>
-				<li><a href="#"><i class="bx bx-right-arrow-alt"></i>Project Details</a></li>
+				<li><a href="{{ route('projectSammary') }}"><i class="bx bx-right-arrow-alt"></i>Project Sammary</a></li>
 				<li><a href="#"><i class="bx bx-right-arrow-alt"></i>User List</a></li>
 			</ul>
 		</li>
