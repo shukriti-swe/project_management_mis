@@ -196,7 +196,7 @@
                                         <span class="me-3"><i class="bx bx-calendar-check"></i>
                                             {{ $project->end_date?->format('d M Y') ?? 'N/A' }}
                                         </span>
-                                        <span class="badge bg-secondary">{{ $project->status ?? 'N/A' }}</span>
+                                        <span class="badge bg-secondary">{{ $project->label ?? 'N/A' }}</span>
                                     </div>
 
                                 </div>
@@ -294,15 +294,7 @@
                                             <td class="fw-semibold">
                                                 <div class="d-flex align-items-center">
 
-                                                    <span
-                                                            class="me-2 rounded-circle text-white d-flex justify-content-center align-items-center flex-shrink-0"
-                                                            style="
-                                                            width:22px;
-                                                            height:22px;
-                                                            font-size:16px;
-                                                            padding-top: 2px;
-                                                            background-color: {{ $layer->type === 'task' ? '#0d6efd' : '#e69406' }};
-                                                        ">
+                                                    <span class="me-2 rounded-circle text-white d-flex justify-content-center align-items-center flex-shrink-0" style="width:22px;height:22px;font-size:16px;padding-top: 2px;background-color: {{ $layer->type === 'task' ? '#0d6efd' : '#e69406' }};">
                                                         {{ $layer->type === 'task' ? 'T' : 'C' }}
                                                     </span>
 
