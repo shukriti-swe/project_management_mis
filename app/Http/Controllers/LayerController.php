@@ -62,17 +62,21 @@ class LayerController extends Controller
     public function create(Request $request)
     {
         $users = User::all();
-        $project = Project::findOrFail($request->input('project'));
-        $statuses = $project->statuses()->get();
+        $project = Project::find($request->input('project'));
+        $projects = Project::all();
+        $statuses = Status::all();
         $parentLayers = Layer::orderBy('created_at', 'desc')->get();
-        $parent = Layer::find($request->input('parent'));
+        $parent = isset($request->parent) ? Layer::find($request->input('parent')) : null;
+        $layerTypes = LayerType::all();
         return view('admin.layers.create',
             compact(
                 'project',
+                'projects',
                 'parentLayers',
                 'statuses',
                 'parent',
-                'users'
+                'users',
+                'layerTypes'
             ));
     }
 
@@ -88,7 +92,7 @@ class LayerController extends Controller
                 'description' => 'nullable|string',
                 'status_id' => 'nullable|exists:statuses,id',
                 'project_id' => 'required|exists:projects,id',
-                'type' => 'required|in:task,container',
+                'layer_type_id' => 'required|exists:layer_types,id',
                 'parent_id' => 'nullable|exists:layers,id',
                 'start_time' => 'nullable|date',
                 'end_time' => 'nullable|date|after_or_equal:start_time',

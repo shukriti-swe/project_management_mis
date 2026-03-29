@@ -20,7 +20,8 @@ class ReportController extends Controller
     public function projectSammary(){
         $projects = Project::withCount('layers')->orderBy('id', 'desc')->get();
         $users = User::all();
-        return view('admin.reports.project_sammary', compact('projects','users'));
+        $statuses = Status::all();
+        return view('admin.reports.project_sammary', compact('projects','users','statuses'));
     }
 
     public function projectReport($id) {

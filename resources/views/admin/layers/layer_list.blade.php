@@ -455,10 +455,10 @@
                         <div class="card-footer bg-transparent border-0 px-4 pb-4">
                             <div class="d-flex justify-content-between mb-1 small">
                                 <span class="fw-bold">Completion</span>
-                                <span class="text-primary">85%</span>
+                                <span class="text-primary">{{$child->progress_percent}}%</span>
                             </div>
                             <div class="progress rounded-pill" style="height: 8px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 85%;"></div>
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: {{$child->progress_percent}}%;"></div>
                             </div>
                         </div>
                     </div>

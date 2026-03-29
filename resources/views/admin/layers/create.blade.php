@@ -7,7 +7,7 @@
             <div class="row">
                 <div class="col-xl-10 mx-auto">
 
-                    <h6 class="mb-0 text-uppercase">Hierarchy Management</h6>
+                    <h6 class="mb-0 text-uppercase">Create Layer</h6>
                     <hr/>
 
                     <div class="card border-top border-0 border-4 border-danger">
@@ -15,8 +15,8 @@
 
                             <div class="card-title d-flex align-items-center">
                                 <div><i class="bx bx-layer me-1 font-22"></i></div>
-                                <h5 class="mb-0">{{$parent? 'Add Sub Layer to: ' : 'Add Layer to Project: '}}
-                                    <span class="text-danger">{{$parent ? $parent->name : $project->title}}</span></h5>
+{{--                                <h5 class="mb-0">{{$parent? 'Add Sub Layer to: ' : 'Add Layer to Project: '}}--}}
+{{--                                    <span class="text-danger">{{$parent ? $parent->name : $project->title}}</span></h5>--}}
                             </div>
 
                             <hr>
@@ -24,12 +24,12 @@
                             <form class="row g-4" method="POST" action="{{ route('layer.store') }}" enctype="multipart/form-data">
                                 @csrf
 
-                                <input type="hidden" name="project_id" value="{{ $project->id }}">
-                                <input type="hidden" name="parent_id" value="{{ $parent? $parent->id : null }}">
+{{--                                <input type="hidden" name="project_id" value="{{ $project ? $project->id : null }}">--}}
+{{--                                <input type="hidden" name="parent_id" value="{{ $parent? $parent->id : null }}">--}}
 
                                 {{-- Layer Name --}}
                                 <div class="col-md-6">
-                                    <label class="form-label">Layer Name</label>
+                                    <label class="form-label">Layer Name <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-transparent"><i class='bx bx-tag'></i></span>
                                         <input
@@ -44,10 +44,12 @@
 
                                 {{-- Layer Type --}}
                                 <div class="col-md-3">
-                                    <label class="form-label">Layer Type</label>
-                                    <select class="form-select" name="type" id="layer-type">
-                                        <option value="container" {{ old('type') == 'container' ? 'selected' : '' }}>Container</option>
-                                        <option value="task" {{ old('type') == 'task' ? 'selected' : '' }}>Task</option>
+                                    <label class="form-label">Layer Type <span class="text-danger">*</span></label>
+                                    <select name="layer_type_id" id="layerTypeSelect" class="form-select" required>
+                                        <option value="">-- Select or type new --</option>
+                                        @foreach($layerTypes as $type)
+                                            <option value="{{ $type->id }}">{{ $type->title }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
 
@@ -64,6 +66,34 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                @if($project == null)
+                                    <div class="col-md-6">
+                                        <label class="form-label ">Project <span class="text-danger">*</span></label>
+                                        <select name="project_id" class="form-select single-select-no-parent" required>
+                                            <option value="">-- Select Project --</option>
+                                            @foreach($projects as $project)
+                                                <option value="{{ $project->id }}">{{ $project->title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @else
+                                    <input type="hidden" name="project_id" value="{{ $project ? $project->id : null }}">
+                                @endif
+
+                                @if($parent == null)
+                                    <div class="col-md-6">
+                                        <label class="form-label">Parent Layer</label>
+                                        <select name="parent_id" class="form-select single-select">
+                                            <option value="">-- No Parent (This is a top layer) --</option>
+                                            @foreach($parentLayers as $l)
+                                                <option value="{{ $l->id }}">{{ $l->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @else
+                                    <input type="hidden" name="parent_id" value="{{ $parent? $parent->id : null }}">
+                                @endif
 
                                 {{-- Start Time --}}
                                 <div class="col-md-3">

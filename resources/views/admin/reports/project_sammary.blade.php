@@ -22,9 +22,9 @@
                         <label class="form-label fw-bold">Filter by Status:</label>
                         <select id="projectStatusFilter" class="form-select">
                             <option value="">All Status</option>
-                            <option value="Active">Active</option>
-                            <option value="In-Active">In-Active</option>
-                            <option value="Completed">Completed</option>
+                            @foreach($statuses as $status)
+                                <option value="{{ $status->id }}">{{ $status->label }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -63,7 +63,7 @@
                                         <i class="bx bx-layer"></i> {{ $project->layers_count }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-status="{{ $project->status->id }}">
                                     <span class="badge bg-{{ $project->status == 'Active' ? 'success' : 'secondary' }}">
                                         {{ $project->status->label ?? 'Active' }}
                                     </span>
@@ -94,14 +94,27 @@
             ]
         });
 
-        $('#projectStatusFilter').on('change', function() {
-            var val = $(this).val();
-            table.column(5).search(val ? '^' + val + '$' : '', true, false).draw();
+        // $('#projectStatusFilter').on('change', function() {
+        //     var val = $(this).val();
+        //     table.column(5).search(val ? '^' + val + '$' : '', true, false).draw();
+        // });
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            var selected = $('#projectStatusFilter').val();
+            if (!selected) return true;
+
+            var row = table.row(dataIndex).node();
+            var status = $(row).find('td').eq(5).data('status');
+
+            return status == selected;
         });
 
         $('#projectUserFilter').on('change', function() {
             var val = $(this).val();
             table.column(2).search(val ? '^' + val + '$' : '', true, false).draw();
+        });
+
+        $('#projectStatusFilter').on('change', function() {
+            table.draw();
         });
     });
 </script>

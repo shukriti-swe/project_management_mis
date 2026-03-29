@@ -40,7 +40,12 @@
                     </div>
                     <div class="col">
                         <div class="p-2 border rounded text-center bg-light">
-                            <h5 class="mb-0 text-success">{{ $project->layers->where('status_id', 1)->count() }}</h5>
+                            <h5 class="mb-0 text-success">
+                                {{ $project->layers->filter(function ($layer) {
+                                    return $layer->status
+                                        && !in_array($layer->status->category, ['done', 'canceled']);
+                                })->count() }}
+                            </h5>
                             <small class="text-muted">Active Layers</small>
                         </div>
                     </div>
@@ -100,7 +105,7 @@
                                 </td>
                                 <td>
                                     <div class="progress" style="height: 5px;">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 100%"></div>
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{$layer->progress_percent}}%"></div>
                                     </div>
                                     <small class="text-muted mt-1 d-block">Updated: {{ $layer->updated_at->format('d-m-Y') }}</small>
                                 </td>
