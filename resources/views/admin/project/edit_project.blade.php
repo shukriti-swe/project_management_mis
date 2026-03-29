@@ -80,12 +80,15 @@
                             <div class="col-12">
                                 <label for="inputStatus" class="form-label">Status</label>
                                 <div class="input-group"><span class="input-group-text bg-transparent"><i class='bx bxs-user' ></i></span>
-                                    <select id="inputStatus" class="form-select" name="status">
+                                    <select id="inputStatus" class="form-select" name="status_id">
                                         <option selected>-- Select one --</option>
-                                        <option value="1" @if($project->status==1) {{'selected'}}  @endif >Not start</option>
-                                        <option value="2" @if($project->status==2) {{'selected'}}  @endif >Running</option>
-                                        <option value="1" @if($project->status==3) {{'selected'}}  @endif >Pause</option>
-                                        <option value="2" @if($project->status==4) {{'selected'}}  @endif >End</option>
+                                        @foreach($statuses as $status)
+                                            <option value="{{ $status->id }}" {{$project->status_id == $status->id ? 'selected' : ''}}>{{ $status->label }}</option>
+                                        @endforeach
+{{--                                        <option value="1" @if($project->status==1) {{'selected'}}  @endif >Not start</option>--}}
+{{--                                        <option value="2" @if($project->status==2) {{'selected'}}  @endif >Running</option>--}}
+{{--                                        <option value="1" @if($project->status==3) {{'selected'}}  @endif >Pause</option>--}}
+{{--                                        <option value="2" @if($project->status==4) {{'selected'}}  @endif >End</option>--}}
                                     </select>
                                 </div>
                             </div>

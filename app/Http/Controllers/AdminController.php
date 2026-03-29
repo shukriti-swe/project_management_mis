@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Status;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,13 +17,17 @@ use DB;
 class AdminController extends Controller
 {
     public function projectList(){
-        $projects = Project::get()->all();
-        return view('admin.project.project_list', compact('projects'));
+        $projects = Project::with('status')->get();
+        $statuses = Status::all();
+        return view('admin.project.project_list', compact('projects', 'statuses'));
     }
 
     public function addProject(){
+
+        $statuses = Status::all();
+//        dd($statuses);
         
-        return view('admin.project.add_project');
+        return view('admin.project.add_project', compact('statuses'));
     }
 
     /**
@@ -33,7 +38,7 @@ class AdminController extends Controller
             'title' => 'required',
             'description' => 'nullable',
             'start_date' => 'required',
-            'status' => 'required',
+            'status_id' => 'required',
             // 'image' => 'required | file | mimes:jpg,png,jpeg| dimensions:max_height=38,max_width=168',
         ]);
 
@@ -45,7 +50,7 @@ class AdminController extends Controller
             $project->description = $request->description;
             $project->start_date  = $request->start_date;
             $project->end_date    = $request->end_date;
-            $project->status      = $request->status; 
+            $project->status_id     = $request->status_id;
         
             if($request->hasFile('image')){
                 $image = $request->file('image');
@@ -60,14 +65,16 @@ class AdminController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
+            Log::error($e->getMessage());
             return redirect()->route('projectList')->with('alert-danger','Something went wrong!');
         }
     }
 
-    public function editProject($id){
-
+    public function editProject($id)
+    {
+        $statuses = Status::all();
         $project = Project::where('id',$id)->first();
-        return view('admin.project.edit_project',compact('project'));
+        return view('admin.project.edit_project',compact('project', 'statuses'));
 
     }
 
@@ -81,7 +88,7 @@ class AdminController extends Controller
             'title' => 'required',
             'description' => 'nullable',
             'start_date' => 'required',
-            'status' => 'required',
+            'status_id' => 'required',
             // 'image' => 'required | file | mimes:jpg,png,jpeg| dimensions:max_height=38,max_width=168',
         ]);
 
@@ -93,7 +100,7 @@ class AdminController extends Controller
             $project->description = $request->description;
             $project->start_date  = $request->start_date;
             $project->end_date    = $request->end_date;
-            $project->status      = $request->status;
+            $project->status_id      = $request->status_id;
             if($request->hasFile('image')){
                 $image = $request->file('image');
                 $imageName = time() . '.' . $image->getClientOriginalExtension();
@@ -154,10 +161,10 @@ class AdminController extends Controller
     public function changeStatus(Request $request, Project $project)
     {
         $request->validate([
-            'status' => 'required|in:1,2,3,4'
+            'status_id' => 'required|exists:statuses,id',
         ]);
 
-        $project->status = $request->status;
+        $project->status_id = $request->status_id;
         $project->save();
 
         return response()->json(['success' => true]);

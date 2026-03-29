@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->integer('status')->nullable();
+            $table->foreignId('status_id')->nullable()->constrained('statuses')->onDelete('set null');
             $table->string('image')->nullable();
             $table->timestamps();
         });

@@ -52,12 +52,11 @@
                             <div class="col-12">
                                 <label for="inputStatus" class="form-label">Status</label>
                                 <div class="input-group"><span class="input-group-text bg-transparent"><i class='bx bxs-user' ></i></span>
-                                    <select id="inputStatus" class="form-select" name="status">
+                                    <select id="inputStatus" class="form-select" name="status_id">
                                         <option selected>-- Select one --</option>
-                                        <option value="1">Not start</option>
-                                        <option value="2">Running</option>
-                                        <option value="3">Pause</option>
-                                        <option value="4">End</option>
+                                        @foreach($statuses as $status)
+                                            <option value="{{ $status->id }}">{{ $status->label }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

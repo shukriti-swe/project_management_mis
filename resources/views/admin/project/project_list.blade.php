@@ -69,6 +69,20 @@
         .modal-body {
             padding: 25px;
         }
+
+        .status-label {
+            pointer-events: none; /* disable only label */
+            cursor: default;
+        }
+
+        .status-btn-active {
+            background: var(--status-color);
+            color: #fff !important;
+        }
+
+        .status-btn-active.dropdown-toggle-split {
+            filter: brightness(0.9);
+        }
     </style>
 @endpush
 @section('admin_content')
@@ -139,26 +153,23 @@
                                     <td>
                                         <div class="btn-group">
 
-                                            <button type="button" class="btn btn-warning">
-                                                {{ match($project->status) {
-                                                    1 => 'Not Start',
-                                                    2 => 'Running',
-                                                    3 => 'Pause',
-                                                    4 => 'End',
-                                                    default => 'Unknown'
-                                                } }}
+                                            <button type="button" class="btn status-btn-active status-label" style="--status-color: {{ $project->status->color }}">
+                                                {{ $project->status->label }}
                                             </button>
 
-                                            <button type="button"
-                                                    class="btn btn-warning dropdown-toggle dropdown-toggle-split"
+                                            <button type="button" style="--status-color: {{ $project->status->color }}"
+                                                    class="btn dropdown-toggle dropdown-toggle-split status-btn-active"
                                                     data-bs-toggle="dropdown">
                                             </button>
 
                                             <ul class="dropdown-menu">
-                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="1">Not Start</a></li>
-                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="2">Running</a></li>
-                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="3">Pause</a></li>
-                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="4">End</a></li>
+                                                @foreach($statuses as $status)
+                                                    <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="{{ $status->id }}">{{ $status->label }}</a></li>
+                                                @endforeach
+{{--                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="1">Not Start</a></li>--}}
+{{--                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="2">Running</a></li>--}}
+{{--                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="3">Pause</a></li>--}}
+{{--                                                <li><a class="dropdown-item change-status" href="#" data-project="{{ $project->id }}" data-status="4">End</a></li>--}}
                                             </ul>
 
                                         </div>
@@ -320,7 +331,7 @@
                 },
                 body: JSON.stringify({
                     _method: 'PATCH',
-                    status: status
+                    status_id: status
                 })
             })
                 .then(res => res.json())
