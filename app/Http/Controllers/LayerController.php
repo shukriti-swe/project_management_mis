@@ -9,6 +9,7 @@ use App\Models\Status;
 use App\Models\LayerType;
 use App\Models\LayerUser;
 use App\Services\LayerService;
+use App\Services\LayerStatusUpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -20,6 +21,7 @@ class LayerController extends Controller
 
     public function __construct(
         protected LayerService $layerService,
+        protected LayerStatusUpdateService $statusService
     )
     {
     }
@@ -165,7 +167,6 @@ class LayerController extends Controller
                 'status_id' => 'nullable|exists:statuses,id',
                 'layer_type_id' => 'required|exists:layer_types,id',
                 'project_id' => 'required|exists:projects,id',
-//                'type' => 'required|in:task,container',
                 'parent_id' => 'nullable|exists:layers,id',
                 'start_time' => 'nullable|date',
                 'end_time' => 'nullable|date|after_or_equal:start_time',
@@ -181,7 +182,6 @@ class LayerController extends Controller
                 ->with('success', 'Layer has been updated.');
 
         } catch (Throwable $e) {
-            dd($e->getMessage());
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
     }
@@ -286,6 +286,10 @@ class LayerController extends Controller
             }
 
             $layer->users()->sync($syncData);
+        }
+
+        if ($layer->parent) {
+            $this->statusService->calculate($layer->parent);
         }
 
         return response()->json(['success' => true]);

@@ -309,8 +309,6 @@
             e.preventDefault();
             e.stopPropagation();
 
-            console.log('clicked'); // will now fire
-
             let projectId = $(this).data('project');
             let status = $(this).data('status');
 
