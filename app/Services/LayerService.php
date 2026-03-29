@@ -86,22 +86,106 @@ class LayerService
      * Update layer
      * @throws Throwable
      */
+//    public function updateLayer(Layer $layer, array $data): Layer
+//    {
+//        return DB::transaction(function () use ($layer, $data) {
+//            $users = $data['users'] ?? [];
+//            unset($data['users']);
+//
+//            $oldParent = $layer->parent;
+//
+////            $statusChanged = isset($data['status_id']) && $data['status_id'] != $layer->status_id;
+//            $parentChanged = isset($data['parent_id']) && $data['parent_id'] != $layer->parent_id;
+//
+//            $statusId = $data['status_id'] ?? null;
+//            $statusChanged = isset($data['status_id']) && $data['status_id'] != $layer->status_id;
+//
+//            unset($data['status_id']);
+//
+//            if ($parentChanged) {
+//
+//                $newParent = !empty($data['parent_id'])
+//                    ? Layer::findOrFail($data['parent_id'])
+//                    : null;
+//
+//                if ($newParent && $newParent->isDescendantOf($layer)) {
+//                    throw new Exception('Cannot move node inside its own subtree.');
+//                }
+//
+//                unset($data['parent_id']);
+//
+//                $layer->fill($data);
+//
+//                if ($newParent) {
+//                    $layer->appendToNode($newParent);
+//                } else {
+//                    $layer->makeRoot();
+//                }
+//
+//                $layer->save();
+//
+//            } else {
+//
+//                $layer->update($data);
+//
+//            }
+//
+//            if ($parentChanged) {
+//
+//                if ($layer->parent) {
+//                    $this->statusService->calculate($layer->parent);
+//                }
+//
+//                if ($parentChanged && $oldParent) {
+//                    $this->statusService->calculate($oldParent);
+//                }
+//            }
+//
+//            if ($statusChanged) {
+//                $this->statusService->updateTaskStatus($layer, $statusId);
+//            }
+//
+//            $assigner = auth()->id();
+//            $now = now();
+//
+//            $syncData = [];
+//
+//            $existingAssignments = $layer->users->keyBy('id');
+//
+//            foreach ($users as $userId) {
+//
+//                $existing = $existingAssignments->get($userId);
+//
+//                $syncData[$userId] = [
+//                    'assigned_by' => $assigner,
+//                    'assigned_at' => $existing?->pivot->assigned_at ?? $now
+//                ];
+//            }
+//
+//            $layer->users()->sync($syncData);
+//
+//            return $layer;
+//        });
+//    }
     public function updateLayer(Layer $layer, array $data): Layer
     {
         return DB::transaction(function () use ($layer, $data) {
+
             $users = $data['users'] ?? [];
             unset($data['users']);
 
             $oldParent = $layer->parent;
 
-            $statusChanged = isset($data['status_id']) && $data['status_id'] != $layer->status_id;
             $parentChanged = isset($data['parent_id']) && $data['parent_id'] != $layer->parent_id;
 
-            if ($layer->type === 'task' && $statusChanged) {
-                $this->statusService->updateTaskStatus($layer, $data['status_id']);
-                unset($data['status_id']);
-            }
+            $statusId = $data['status_id'] ?? null;
+            $statusChanged = isset($data['status_id']) && $data['status_id'] != $layer->status_id;
 
+            unset($data['status_id']);
+
+            // -------------------------
+            // 1. Handle parent change
+            // -------------------------
             if ($parentChanged) {
 
                 $newParent = !empty($data['parent_id'])
@@ -125,31 +209,33 @@ class LayerService
                 $layer->save();
 
             } else {
-
                 $layer->update($data);
-
             }
 
-            if ($parentChanged) {
-
-                if ($layer->parent) {
-                    $this->statusService->calculate($layer->parent);
-                }
-
-                if ($parentChanged && $oldParent) {
-                    $this->statusService->calculate($oldParent);
-                }
+            // -------------------------
+            // 2. Handle status change
+            // -------------------------
+            if ($statusChanged) {
+                $this->statusService->updateTaskStatus($layer, $statusId);
             }
 
+            // -------------------------
+            // 3. Fix old parent (if moved)
+            // -------------------------
+            if ($parentChanged && $oldParent) {
+                $this->statusService->calculate($oldParent);
+            }
+
+            // -------------------------
+            // 4. Sync users
+            // -------------------------
             $assigner = auth()->id();
             $now = now();
 
             $syncData = [];
-
             $existingAssignments = $layer->users->keyBy('id');
 
             foreach ($users as $userId) {
-
                 $existing = $existingAssignments->get($userId);
 
                 $syncData[$userId] = [
@@ -168,69 +254,84 @@ class LayerService
      * Convert between task/container
      * @throws Throwable
      */
-    public function convertLayerType(Layer $layer, string $newType, ?int $statusId = null): Layer
-    {
-        return DB::transaction(function () use ($layer, $newType, $statusId) {
-
-            if ($layer->type === $newType) {
-                return $layer;
-            }
-
-            if ($newType === 'task') {
-
-                if ($layer->children()->exists()) {
-                    throw new Exception(
-                        "Cannot convert a folder to a task while it contains children."
-                    );
-                }
-
-                $progress = $this->resolveTaskProgress($statusId);
-
-                $layer->status_id = $statusId;
-                $layer->progress_percent = $progress;
-                $layer->total_tasks = 1;
-                $layer->completed_tasks = $progress === 100 ? 1 : 0;
-
-            } else {
-
-                $layer->status_id = null;
-                $layer->progress_percent = 0;
-                $layer->total_tasks = 0;
-                $layer->completed_tasks = 0;
-
-            }
-
-            $layer->type = $newType;
-            $layer->save();
-
-            $this->statusService->calculate($layer->parent);
-
-            return $layer;
-        });
-    }
+//    public function convertLayerType(Layer $layer, string $newType, ?int $statusId = null): Layer
+//    {
+//        return DB::transaction(function () use ($layer, $newType, $statusId) {
+//
+//            if ($layer->type === $newType) {
+//                return $layer;
+//            }
+//
+//            if ($newType === 'task') {
+//
+//                if ($layer->children()->exists()) {
+//                    throw new Exception(
+//                        "Cannot convert a folder to a task while it contains children."
+//                    );
+//                }
+//
+//                $progress = $this->resolveTaskProgress($statusId);
+//
+//                $layer->status_id = $statusId;
+//                $layer->progress_percent = $progress;
+//                $layer->total_tasks = 1;
+//                $layer->completed_tasks = $progress === 100 ? 1 : 0;
+//
+//            } else {
+//
+//                $layer->status_id = null;
+//                $layer->progress_percent = 0;
+//                $layer->total_tasks = 0;
+//                $layer->completed_tasks = 0;
+//
+//            }
+//
+//            $layer->type = $newType;
+//            $layer->save();
+//
+//            $this->statusService->calculate($layer->parent);
+//
+//            return $layer;
+//        });
+//    }
 
     /**
      * Initialize progress values
      */
+//    protected function initializeProgress(array &$data): void
+//    {
+//        $type = $data['type'] ?? 'container';
+//
+//        if ($type === 'task') {
+//
+//            $progress = $this->resolveTaskProgress($data['status_id'] ?? null);
+//
+//            $data['progress_percent'] = $progress;
+//            $data['total_tasks'] = 1;
+//            $data['completed_tasks'] = $progress === 100 ? 1 : 0;
+//
+//        } else {
+//
+//            $data['progress_percent'] = 0;
+//            $data['status_id'] = null;
+//            $data['total_tasks'] = 0;
+//            $data['completed_tasks'] = 0;
+//        }
+//    }
     protected function initializeProgress(array &$data): void
     {
-        $type = $data['type'] ?? 'container';
+        $statusId = $data['status_id'] ?? null;
 
-        if ($type === 'task') {
+        $status = $statusId
+            ? Status::select('category')->find($statusId)
+            : null;
 
-            $progress = $this->resolveTaskProgress($data['status_id'] ?? null);
+        $isDone = $status?->category === 'done';
+        $isCanceled = $status?->category === 'canceled';
 
-            $data['progress_percent'] = $progress;
-            $data['total_tasks'] = 1;
-            $data['completed_tasks'] = $progress === 100 ? 1 : 0;
-
-        } else {
-
-            $data['progress_percent'] = 0;
-            $data['status_id'] = null;
-            $data['total_tasks'] = 0;
-            $data['completed_tasks'] = 0;
-        }
+        $data['progress_percent'] = $isDone ? 100 : 0;
+        $data['total_tasks'] = $isCanceled ? 0 : 1;
+        $data['completed_tasks'] = $isDone ? 1 : 0;
     }
 
     /**
@@ -253,14 +354,14 @@ class LayerService
     /**
      * Resolve task progress from status
      */
-    protected function resolveTaskProgress(?int $statusId): int
-    {
-        if (!$statusId) {
-            return 0;
-        }
-
-        $status = Status::select('id','category')->find($statusId);
-
-        return ($status?->category === 'done') ? 100 : 0;
-    }
+//    protected function resolveTaskProgress(?int $statusId): int
+//    {
+//        if (!$statusId) {
+//            return 0;
+//        }
+//
+//        $status = Status::select('id','category')->find($statusId);
+//
+//        return ($status?->category === 'done') ? 100 : 0;
+//    }
 }
