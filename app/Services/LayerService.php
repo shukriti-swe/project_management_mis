@@ -75,6 +75,14 @@ class LayerService
             }
 
             if ($layer->parent) {
+                if ($layer->parent->total_tasks > 0) {
+                    $layer->parent->update([
+                        'total_tasks' => 0,
+                        'completed_tasks' => 0,
+                        'progress_percent' => 0,
+                    ]);
+                }
+
                 $this->statusService->calculate($layer->parent);
             }
 
@@ -181,10 +189,11 @@ class LayerService
             $statusId = $data['status_id'] ?? null;
             $statusChanged = isset($data['status_id']) && $data['status_id'] != $layer->status_id;
 
+            // remove status from mass update (handled separately)
             unset($data['status_id']);
 
             // -------------------------
-            // 1. Handle parent change
+            // 1. Handle parent change (STRUCTURE ONLY)
             // -------------------------
             if ($parentChanged) {
 
@@ -206,24 +215,40 @@ class LayerService
                     $layer->makeRoot();
                 }
 
+                // save new structure
                 $layer->save();
+
+                if ($layer->parent && $layer->parent->total_tasks > 0) {
+                    $layer->parent->update([
+                        'total_tasks' => 0,
+                        'completed_tasks' => 0,
+                        'progress_percent' => 0,
+                    ]);
+                }
 
             } else {
                 $layer->update($data);
             }
 
             // -------------------------
-            // 2. Handle status change
+            // 2. Handle status change (LEAF FIRST)
             // -------------------------
             if ($statusChanged) {
                 $this->statusService->updateTaskStatus($layer, $statusId);
             }
 
             // -------------------------
-            // 3. Fix old parent (if moved)
+            // 3. Handle parent recalculation (ONLY if no status change)
             // -------------------------
-            if ($parentChanged && $oldParent) {
-                $this->statusService->calculate($oldParent);
+            if ($parentChanged && !$statusChanged) {
+
+                if ($layer->parent) {
+                    $this->statusService->calculate($layer->parent); // new parent
+                }
+
+                if ($oldParent) {
+                    $this->statusService->calculate($oldParent); // old parent
+                }
             }
 
             // -------------------------

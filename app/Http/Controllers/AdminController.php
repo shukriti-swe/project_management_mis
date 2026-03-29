@@ -129,16 +129,17 @@ class AdminController extends Controller
 
         $total_tasks = 0;
         $completed_tasks = 0;
-        foreach($layers as $layer){
+
+        foreach ($layers as $layer) {
             $total_tasks += $layer->total_tasks;
             $completed_tasks += $layer->completed_tasks;
         }
 
-        $progress_percent = $project->layers()
-            ->where('type', 'task')
-            ->avg('progress_percent');
+        $progress_percent = $total_tasks === 0
+            ? 0
+            : round(($completed_tasks / $total_tasks) * 100);
 
-        $project->progress_percent = round($progress_percent);
+        $project->progress_percent = $progress_percent;
 
         return view('admin.project.view_project', compact(
             'project',

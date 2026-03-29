@@ -55,9 +55,18 @@
             padding: 6px 10px;
         }
 
-        .status-btn.active {
+        .status-label {
+            pointer-events: none; /* disable only label */
+            cursor: default;
+        }
+
+        .status-btn-active {
             background: var(--status-color);
-            color: #fff;
+            color: #fff !important;
+        }
+
+        .status-btn-active.dropdown-toggle-split {
+            filter: brightness(0.9);
         }
 
         /* HEADER PROGRESS */
@@ -360,11 +369,11 @@
 
                                     <div class="layer-badges mb-2">
 
-                                        <span class="badge {{ $layer->type==='task'?'bg-primary':'bg-warning text-dark' }}">
-                                            {{ ucfirst($layer->type) }}
+                                        <span class="badge {{ !$layer->children->count() ?'bg-primary':'bg-warning text-dark' }}">
+                                            {{ ucfirst($layer->layerType->title) }}
                                         </span>
 
-                                        @if($layer->type==='task' && $layer->status)
+                                        @if($layer->status)
                                             <span class="badge" style="background:{{ $layer->status->color }}">
                                                 {{ $layer->status->label }}
                                             </span>
@@ -386,22 +395,41 @@
 
                             <div class="align-items-start action-bar">
                                 <div class="status-group">
-                                    @if($layer->type==='task')
-                                        <div class="btn-group">
+                                    <div class="btn-group">
+                                        <button type="button" style="--status-color: {{ $layer->status->color }}"
+                                                class="btn status-label status-btn-active">{{$layer->status->label}}</button>
+                                        <button type="button" style="--status-color: {{ $layer->status->color }}"
+                                                class="btn status-btn-active dropdown-toggle dropdown-toggle-split"
+                                                data-bs-toggle="dropdown" aria-expanded="false"><span
+                                                    class="visually-hidden">Toggle Dropdown</span>
+                                        </button>
+                                        <ul class="dropdown-menu" style="margin: 0px;">
                                             @foreach($statuses as $status)
-                                                <a href="#"
-                                                   class="btn status-btn change-status {{ $layer->status_id == $status->id ? 'active' : '' }}"
-                                                   data-url="{{ route('layer.updateStatus',['layer'=>$layer->id,'status'=>$status->id]) }}"
-                                                   style="--status-color: {{ $status->color }}">
-                                                    {{ $status->label }}
-                                                </a>
+                                                <li>
+                                                    <a class="dropdown-item change-status"
+                                                       href="#"
+                                                       data-url="{{ route('layer.updateStatus',['layer'=>$layer->id,'status'=>$status->id]) }}">
+                                                        {{$status->label}}
+
+                                                    </a>
+                                                </li>
                                             @endforeach
-                                        </div>
-                                    @endif
+                                        </ul>
+                                    </div>
+                                    {{--                                    <div class="btn-group">--}}
+                                    {{--                                        @foreach($statuses as $status)--}}
+                                    {{--                                            <a href="#"--}}
+                                    {{--                                               class="btn status-btn change-status {{ $layer->status_id == $status->id ? 'active' : '' }}"--}}
+                                    {{--                                               data-url="{{ route('layer.updateStatus',['layer'=>$layer->id,'status'=>$status->id]) }}"--}}
+                                    {{--                                               style="--status-color: {{ $status->color }}">--}}
+                                    {{--                                                {{ $status->label }}--}}
+                                    {{--                                            </a>--}}
+                                    {{--                                        @endforeach--}}
+                                    {{--                                    </div>--}}
                                 </div>
                                 <div class="action-group">
                                     <a href="{{ route('layer.edit',$layer->id) }}" class="btn btn-primary btn-sm">
-                                        Edit {{ $layer->type==='task'?'Task':'Layer' }}
+                                        Edit Layer
                                     </a>
                                     <form action="{{route('layer.destroy',$layer->id)}}" method="POST">
                                         @csrf
@@ -409,7 +437,7 @@
                                         <input type="hidden" name="id" value="{{ $layer->id }}">
                                         <button type="submit" class="btn btn-danger btn-sm"
                                                 onclick="return confirm('Are you sure you want to delete this {{ $layer->type }}?')">
-                                            {{'Delete' . ($layer->type==='task'?' Task':' Layer') }}
+                                            Delete Layer
                                         </button>
                                     </form>
                                 </div>
@@ -438,10 +466,10 @@
                             <div class="section-title">ASSIGNED USERS</div>
 
                             <div class="assigned-users">
-
                                 @foreach($layer->users as $user)
                                     <div class="assigned-user">
-                                        <img src="https://i.pravatar.cc/60?img=12" alt="User Avatar">
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background={{ substr(md5($user->name), 0, 6) }}&color=fff"
+                                             class="rounded-circle">
                                         <div class="user-name">{{$user->name}}<br>[{{$user->email}}]</div>
                                         <div class="assigned-meta">
                                             <p class="m-0">Assigned by {{$user->pivot->assignedBy->name}}</p>
@@ -539,30 +567,30 @@
 
 
             {{-- CHILDREN TABLE --}}
-            @if($layer->type==='container')
+            <div class="row mt-4">
+                <div class="col-xl-10 mx-auto">
 
-                <div class="row mt-4">
-                    <div class="col-xl-10 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
 
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="section-title">CHILDREN</div>
 
-                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <div class="section-title">CHILDREN</div>
+                                <a href="{{ route('layer.create',['project'=>$layer->project_id, 'parent' => $layer->id]) }}"
+                                   class="btn btn-info btn-sm">
+                                    Add Child </a>
+                            </div>
 
-                                    <a href="{{ route('layer.create',['project'=>$layer->project_id, 'parent' => $layer->id]) }}"
-                                       class="btn btn-info btn-sm">
-                                        Add Child </a>
-                                </div>
+                            <div class="table-responsive">
 
-                                <div class="table-responsive">
-
+                                @if($layer->children->count())
                                     <table class="table table-modern align-middle">
 
                                         <thead>
                                         <tr>
                                             <th>Name</th>
                                             <th>Progress</th>
+                                            <th>Status</th>
                                             <th>Assigned To</th>
                                             <th>Start</th>
                                             <th>End</th>
@@ -579,49 +607,36 @@
                                                 <td class="fw-semibold">
 
                                                     <div class="d-flex align-items-center">
-
-<span class="me-2 layer-type-icon" data-type="{{ $child->type }}">
-{{ $child->type==='task'?'T':'C' }}
-</span>
-
                                                         {{ $child->name }}
-
                                                     </div>
 
                                                 </td>
 
                                                 <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div id="progress-{{ $child->id }}"
+                                                             style="width:32px;height:32px;"></div>
+                                                        <small class="text-muted">{{ $child->progress_percent ?? 0 }}
+                                                            %</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @if($child->status)
 
-                                                    @if($child->type==='task')
-
-                                                        @if($child->status)
-
-                                                            <div class="d-flex align-items-center gap-2">
+                                                        <div class="d-flex align-items-center gap-2">
 
                                                                 <span class="status-dot"
                                                                       style="background:{{ $child->status->color }}"></span>
 
-                                                                <span style="color:{{ $child->status->color }}">
+                                                            <span style="color:{{ $child->status->color }}">
 {{ $child->status->label }}
 </span>
 
-                                                            </div>
-
-                                                        @else
-                                                            <span class="text-muted">No Status</span>
-                                                        @endif
-
-                                                    @else
-
-                                                        <div class="d-flex align-items-center gap-2">
-                                                            <div id="progress-{{ $child->id }}"
-                                                                 style="width:32px;height:32px;"></div>
-                                                            <small class="text-muted">{{ $child->progress_percent ?? 0 }}
-                                                                %</small>
                                                         </div>
 
+                                                    @else
+                                                        <span class="text-muted">No Status</span>
                                                     @endif
-
                                                 </td>
 
                                                 <td class="text-muted">—</td>
@@ -685,16 +700,21 @@
                                         </tbody>
 
                                     </table>
-
-                                </div>
+                                @else
+                                    <div class="text-center py-5 text-muted">
+                                        <div style="font-size: 14px; letter-spacing: .05em;">
+                                            No sub-layers available for this layer.
+                                        </div>
+                                    </div>
+                                @endif
 
                             </div>
+
                         </div>
-
                     </div>
-                </div>
 
-            @endif
+                </div>
+            </div>
 
         </div>
     </div>
@@ -749,9 +769,6 @@
             }).animate({{ ($layer->progress_percent ?? 0)/100 }});
 
             @foreach($layer->children as $child)
-
-            @if($child->type==='container')
-
             new ProgressBar.Circle('#progress-{{ $child->id }}', {
                 strokeWidth: 16,
                 color: '{{ ($layer->progress_percent ?? 0) == 100 ? "#1e965f" : "#0d6efd" }}',
@@ -759,9 +776,6 @@
                 trailWidth: 16,
                 duration: 600
             }).animate({{ ($child->progress_percent ?? 0)/100 }});
-
-            @endif
-
             @endforeach
 
             document.querySelectorAll('.change-status').forEach(btn => {

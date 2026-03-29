@@ -29,25 +29,31 @@ class LayerController extends Controller
      */
     public function index()
     {
-        echo "<pre>";
-
-        function printTree($nodes, $prefix = '')
-        {
-            foreach ($nodes as $node) {
-
-                echo $prefix . "├── " . $node->name . "\n";
-
-                if ($node->children->isNotEmpty()) {
-                    printTree($node->children, $prefix . "│   ");
-                }
+//        echo "<pre>";
+//
+//        function printTree($nodes, $prefix = '')
+//        {
+//            foreach ($nodes as $node) {
+//
+//                echo $prefix . "├── " . $node->name . "\n";
+//
+//                if ($node->children->isNotEmpty()) {
+//                    printTree($node->children, $prefix . "│   ");
+//                }
+//            }
+//        }
+//
+//        $tree = Layer::get()->toTree();
+//
+//        printTree($tree);
+//
+//        echo "</pre>";
+        Layer::all()->each(function ($layer) {
+            if (!$layer->children()->exists()) {
+                app(\App\Services\LayerStatusUpdateService::class)
+                    ->updateTaskStatus($layer, $layer->status_id);
             }
-        }
-
-        $tree = Layer::get()->toTree();
-
-        printTree($tree);
-
-        echo "</pre>";
+        });
     }
 
     /**
@@ -117,12 +123,13 @@ class LayerController extends Controller
             'status',
             'project',
             'ancestors',
-            'users'
+            'users',
+            'layerType'
         ]);
 
 //        dd($layer->users->first()->pivot);
 
-        $statuses = $layer->project->statuses;
+        $statuses = Status::all();
 
         $ancestors = $layer->ancestors;
 
@@ -138,10 +145,7 @@ class LayerController extends Controller
      */
     public function edit(Request $request, Layer $layer)
     {
-        // dd($layer->project_id);
         $users = User::all();
-        // $project = Project::findOrFail($layer->project_id);
-        // $statuses = $project->statuses()->get();
         $layerTypes = LayerType::all();
 
         $parent = Layer::find($layer->parent_id);
@@ -243,8 +247,6 @@ class LayerController extends Controller
 //    }
     public function updateLayerStatus(Request $request)
     {
-        Log::info('updateLayerStatus', $request->all());
-
         $request->validate([
             'layer_id' => 'required|exists:layers,id',
             'status_id' => 'required|exists:statuses,id',
@@ -353,7 +355,6 @@ class LayerController extends Controller
 
     public function updateLayerType(Request $request)
     {
-        Log::info('updateLayerType', $request->all());
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:layer_types,title'
         ]);
@@ -372,7 +373,6 @@ class LayerController extends Controller
      */
     public function inlineUpdate(Request $request)
     {
-        Log::info('Inline update request', $request->all());
         $request->validate([
             'id' => 'required|exists:layers,id',
             'column' => 'required|string',
