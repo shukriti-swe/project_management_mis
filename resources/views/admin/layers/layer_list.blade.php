@@ -173,6 +173,72 @@
         }
     </style>
 
+    <style>
+        .premium-card {
+            border: none !important;
+            border-radius: 25px !important;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .card-header-gradient {
+            padding: 15px 20px;
+            border-bottom: 0;
+        }
+
+        .status-label {
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .description-text {
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        .timeline-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .date-info label {
+            display: block;
+            font-size: 9px;
+            font-weight: 800;
+            color: #adb5bd;
+            margin-bottom: 2px;
+        }
+
+        .date-info p {
+            margin-bottom: 0;
+            font-weight: 700;
+            font-size: 14px;
+            color: #343a40;
+        }
+
+        .timeline-arrow {
+            font-size: 24px;
+            color: #dee2e6;
+        }
+
+        .progress {
+            background-color: #f0f0f0;
+        }
+    </style>
+
     <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
@@ -337,121 +403,73 @@
             <h6 class="mb-0 text-uppercase">Card View</h6>
             <hr/>
 
-            <div class="card">
-                <div class="card-body">
-                    <div class="row g-4" id="layerContainer">
-
-                        @foreach($layers as $child)
-
-                            <div class="col-xl-3 col-lg-4 col-md-6 layer-item">
-
-                                <div class="child-card">
-
-                                    <div class="child-card-body">
-
-                                        <div class="d-flex align-items-center gap-2 mb-2">
-
-                                            {{--                                    <span class="layer-type-icon"--}}
-                                            {{--                                          data-type="{{ $child->type }}">--}}
-                                            {{--                                        {{ $child->type === 'task' ? 'T' : 'C' }}--}}
-                                            {{--                                    </span>--}}
-
-                                            <h6 class="child-title m-0">
-                                                {{ $child->name }}
-                                            </h6>
-
-                                        </div>
-
-                                        <div>
-                                            <div class="child-status mb-2">
-                                                @if($child->status)
-
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="status-dot" style="background:{{ $child->status->color }}"></span>
-                                                        <span style="color:{{ $child->status->color }}">{{ $child->status->label }}</span>
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted">No Status</span>
-                                                @endif
-                                            </div>
-                                            <div>
-                                                @if($child->parent)
-                                                    <small class="text-muted">Parent: {{ $child->parent?->name }}</small>
-                                                @else
-                                                    <small class="text-muted">No Parent (Top Layer)</small>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <div class="child-description">
-                                            {{ \Illuminate\Support\Str::limit(strip_tags($child->description),120) }}
-                                        </div>
-
-                                        <div class="child-dates">
-
-                                            <div>
-                                                <small class="text-muted">Start</small>
-                                                <div>{{ $child->start_time?->format('d M Y') ?? '—' }}</div>
-                                            </div>
-
-                                            <div>
-                                                <small class="text-muted">End</small>
-                                                <div>{{ $child->end_time?->format('d M Y') ?? '—' }}</div>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="child-card-footer child-actions">
-
-                                        <a href="{{ route('layer.show',$child->id) }}"
-                                           class="btn btn-sm btn-light">
-                                            View
-                                        </a>
-
-                                        <a href="{{ route('layer.edit',$child->id) }}"
-                                           class="btn btn-sm btn-primary">
-                                            Edit
-                                        </a>
-
-                                        <form method="POST"
-                                              action="{{ route('layer.destroy',$child->id) }}"
-                                              onsubmit="return confirm('Delete this layer?')"
-                                              class="d-inline">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-danger">
-                                                Delete
-                                            </button>
-
-                                        </form>
-
-                                    </div>
-
+            <div class="row g-4" id="layerContainer">
+                @foreach($layers as $child)
+                <div class="col-xl-3 col-lg-4 col-md-6 layer-item">
+                    <div class="card premium-card h-100">
+                        <div class="card-header-gradient" style="background: linear-gradient(45deg, {{ $child->status->color ?? '#6c757d' }}20, {{ $child->status->color ?? '#6c757d' }}40);">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="status-label" style="background: {{ $child->status->color ?? '#6c757d' }}; color: #fff;">
+                                    <i class='bx bxs-zap me-1'></i> {{ $child->status->label ?? 'No Status' }}
+                                </span>
+                                <div class="dropdown">
+                                    <a class="text-dark font-20" href="javascript:;" data-bs-toggle="dropdown"><i class='bx bx-dots-vertical-rounded'></i></a>
+                                    <ul class="dropdown-menu shadow">
+                                        <li><a class="dropdown-item" href="{{ route('layer.show',$child->id) }}"><i class='bx bx-show me-2'></i>View</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('layer.edit',$child->id) }}"><i class='bx bx-edit me-2'></i>Edit</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="POST" action="{{ route('layer.destroy',$child->id) }}" onsubmit="return confirm('Delete?')">
+                                                @csrf @method('DELETE')
+                                                <button class="dropdown-item text-danger"><i class='bx bx-trash me-2'></i>Delete</button>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </div>
+                            </div>
+                        </div>
 
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold text-dark mb-1">{{ $child->name }}</h5>
+                            <p class="text-muted small mb-3"><i class='bx bx-folder-open text-warning me-1'></i> {{ $child->parent?->name ?? 'Main Project' }}</p>
+                            
+                            <div class="description-text mb-4">
+                                {{ \Illuminate\Support\Str::limit(strip_tags($child->description), 90) }}
                             </div>
 
-                        @endforeach
+                            <div class="d-flex align-items-center justify-content-between timeline-box p-3">
+                                <div class="date-info">
+                                    <label>START</label>
+                                    <p>{{ $child->start_time?->format('d M') ?? 'N/A' }}</p>
+                                </div>
+                                <div class="timeline-arrow">
+                                    <i class='bx bx-right-arrow-alt'></i>
+                                </div>
+                                <div class="date-info text-end">
+                                    <label>DEADLINE</label>
+                                    <p class="text-danger">{{ $child->end_time?->format('d M') ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="card-footer bg-transparent border-0 px-4 pb-4">
+                            <div class="d-flex justify-content-between mb-1 small">
+                                <span class="fw-bold">Completion</span>
+                                <span class="text-primary">85%</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 8px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 85%;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="d-flex align-items-center justify-content-between my-4">
-
-                    <div class="ms-4" id="layerStats"></div>
-
-                    <div id="layerPagination"></div>
-
-                    <div style="width:120px"></div>
-
-                </div>
+                @endforeach
             </div>
+
+
+
+
+
         </div>
     </div>
 

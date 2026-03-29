@@ -65,7 +65,7 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-{{ $project->status == 'Active' ? 'success' : 'secondary' }}">
-                                        {{ $project->status ?? 'Active' }}
+                                        {{ $project->status->label ?? 'Active' }}
                                     </span>
                                 </td>
                                 <td class="text-center">
