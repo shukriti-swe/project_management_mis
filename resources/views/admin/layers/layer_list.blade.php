@@ -311,7 +311,17 @@
                                     <td>
                                         <div>
                                             <a href="{{ route('layer.edit',$layer->id) }}" class="btn btn-warning">Edit</a>
-                                            <a href="{{ route('layer.destroy',$layer->id) }}" class="btn btn-danger">Delete</a>
+                                            <a href="#" class="btn btn-danger"
+                                               onclick="event.preventDefault(); if(confirm('Delete this layer?')) document.getElementById('delete-layer-{{ $layer->id }}').submit();">
+                                                Delete
+                                            </a>
+
+                                            <form id="delete-layer-{{ $layer->id }}"
+                                                  action="{{ route('layer.destroy', $layer->id) }}"
+                                                  method="POST" style="display:none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

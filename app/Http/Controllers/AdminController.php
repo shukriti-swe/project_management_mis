@@ -150,7 +150,17 @@ class AdminController extends Controller
         
     }
 
-    
+    public function changeStatus(Request $request, Project $project)
+    {
+        $request->validate([
+            'status' => 'required|in:1,2,3,4'
+        ]);
+
+        $project->status = $request->status;
+        $project->save();
+
+        return response()->json(['success' => true]);
+    }
 
 
 }
