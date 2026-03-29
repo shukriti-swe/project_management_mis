@@ -7,19 +7,19 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\Status;
 use App\Models\LayerType;
-use App\Models\LayerUser;
 use App\Services\LayerService;
+use App\Services\LayerStatusUpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
-use DB;
 use Carbon\Carbon;
 
 class LayerController extends Controller
 {
 
     public function __construct(
-        protected LayerService $layerService,
+        protected LayerService             $layerService,
+        protected LayerStatusUpdateService $statusService
     )
     {
     }
@@ -29,25 +29,31 @@ class LayerController extends Controller
      */
     public function index()
     {
-        echo "<pre>";
-
-        function printTree($nodes, $prefix = '')
-        {
-            foreach ($nodes as $node) {
-
-                echo $prefix . "├── " . $node->name . "\n";
-
-                if ($node->children->isNotEmpty()) {
-                    printTree($node->children, $prefix . "│   ");
-                }
+//        echo "<pre>";
+//
+//        function printTree($nodes, $prefix = '')
+//        {
+//            foreach ($nodes as $node) {
+//
+//                echo $prefix . "├── " . $node->name . "\n";
+//
+//                if ($node->children->isNotEmpty()) {
+//                    printTree($node->children, $prefix . "│   ");
+//                }
+//            }
+//        }
+//
+//        $tree = Layer::get()->toTree();
+//
+//        printTree($tree);
+//
+//        echo "</pre>";
+        Layer::all()->each(function ($layer) {
+            if (!$layer->children()->exists()) {
+                app(\App\Services\LayerStatusUpdateService::class)
+                    ->updateTaskStatus($layer, $layer->status_id);
             }
-        }
-
-        $tree = Layer::get()->toTree();
-
-        printTree($tree);
-
-        echo "</pre>";
+        });
     }
 
     /**
@@ -117,12 +123,13 @@ class LayerController extends Controller
             'status',
             'project',
             'ancestors',
-            'users'
+            'users',
+            'layerType'
         ]);
 
 //        dd($layer->users->first()->pivot);
 
-        $statuses = $layer->project->statuses;
+        $statuses = Status::all();
 
         $ancestors = $layer->ancestors;
 
@@ -138,18 +145,15 @@ class LayerController extends Controller
      */
     public function edit(Request $request, Layer $layer)
     {
-        // dd($layer->project_id);
         $users = User::all();
-        // $project = Project::findOrFail($layer->project_id);
-        // $statuses = $project->statuses()->get();
         $layerTypes = LayerType::all();
 
         $parent = Layer::find($layer->parent_id);
-        $layers = Layer::whereNotIn('id',$layer->descendants()->pluck('id')->push($layer->id))->orderBy('created_at', 'desc')->get();
+        $layers = Layer::whereNotIn('id', $layer->descendants()->pluck('id')->push($layer->id))->orderBy('created_at', 'desc')->get();
         $projects = Project::all();
         $statuses = Status::get();
 
-        return view('admin.layers.edit', compact( 'statuses', 'parent', 'layer', 'users', 'layers', 'projects', 'layerTypes'));
+        return view('admin.layers.edit', compact('statuses', 'parent', 'layer', 'users', 'layers', 'projects', 'layerTypes'));
     }
 
     /**
@@ -165,7 +169,6 @@ class LayerController extends Controller
                 'status_id' => 'nullable|exists:statuses,id',
                 'layer_type_id' => 'required|exists:layer_types,id',
                 'project_id' => 'required|exists:projects,id',
-//                'type' => 'required|in:task,container',
                 'parent_id' => 'nullable|exists:layers,id',
                 'start_time' => 'nullable|date',
                 'end_time' => 'nullable|date|after_or_equal:start_time',
@@ -181,7 +184,6 @@ class LayerController extends Controller
                 ->with('success', 'Layer has been updated.');
 
         } catch (Throwable $e) {
-            dd($e->getMessage());
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
     }
@@ -221,72 +223,132 @@ class LayerController extends Controller
         }
     }
 
-    public function layerList(){
+    public function layerList()
+    {
         $layers = Layer::all();
         $layerTypes = LayerType::all();
         $projects = Project::all();
-        $users     = User::select('id', 'name', 'email')->get();
+        $users = User::select('id', 'name', 'email')->get();
         $statuses = Status::get();
 
-        return view('admin.layers.layer_list', compact('layers','layerTypes','projects','users','statuses'));
+        return view('admin.layers.layer_list', compact('layers', 'layerTypes', 'projects', 'users', 'statuses'));
     }
 
-    public function updateLayerStatus(Request $request) {
-        $layer = Layer::findOrFail($request->layer_id);
-        
-        $layer->update([
-            'status_id' => $request->status_id
+//    public function updateLayerStatus(Request $request)
+//    {
+//        Log::info('updateLayerType', $request->all());
+//        $layer = Layer::findOrFail($request->layer_id);
+//
+//        $layer->update([
+//            'status_id' => $request->status_id
+//        ]);
+//
+//        return response()->json(['success' => true]);
+//    }
+    public function updateLayerStatus(Request $request)
+    {
+        $request->validate([
+            'layer_id' => 'required|exists:layers,id',
+            'status_id' => 'required|exists:statuses,id',
         ]);
-    
+
+        $layer = Layer::findOrFail($request->layer_id);
+
+        $this->layerService->changeStatus($layer, $request->status_id);
+
         return response()->json(['success' => true]);
     }
 
+//    public function storeLayer(Request $request)
+//    {
+//
+//        $validated = $request->validate([
+//            'name'          => 'required|string|max:255',
+//            'project_id'    => 'required',
+//            'layer_type_id' => 'required',
+//            'start_time'    => 'required|date',
+//            'end_time'      => 'required|date|after_or_equal:start_time',
+//            'status_id'     => 'required|in:0,1',
+//            'parent_id'     => 'nullable|exists:layers,id',
+//        ]);
+//
+//        $duration = $request->duration;
+//        if (empty($duration)) {
+//            $start = Carbon::parse($request->start_time);
+//            $end   = Carbon::parse($request->end_time);
+//            $duration = $start->diffInDays($end) + 1;
+//        }
+//
+//        $layer = new Layer();
+//        $layer->name            = $request->name;
+//        $layer->project_id      = $request->project_id;
+//        $layer->layer_type_id   = $request->layer_type_id;
+//        $layer->start_time      = $request->start_time;
+//        $layer->end_time        = $request->end_time;
+//        $layer->status_id       = $request->status_id;
+//        $layer->duration        = $duration;
+//
+//
+//        $layer->parent_id = $request->parent_id ?: null;
+//        $layer->description     = $request->description ?: null;
+//
+//        $layer->save();
+//
+//        if ($request->has('assigned_user_ids')) {
+//            $syncData = [];
+//            foreach ($request->assigned_user_ids as $userId) {
+//                $syncData[$userId] = [
+//                    'assigned_by' => auth()->id(),
+//                    'assigned_at' => now(),
+//                ];
+//            }
+//
+//            $layer->users()->sync($syncData);
+//        }
+//
+//        if ($layer->parent) {
+//            $this->statusService->calculate($layer->parent);
+//        }
+//
+//        return response()->json(['success' => true]);
+//    }
     public function storeLayer(Request $request)
     {
-
         $validated = $request->validate([
-            'name'          => 'required|string|max:255',
-            'project_id'    => 'required',
-            'layer_type_id' => 'required',
-            'start_time'    => 'required|date',
-            'end_time'      => 'required|date|after_or_equal:start_time',
-            'status_id'     => 'required|in:0,1',
-            'parent_id'     => 'nullable|exists:layers,id',
+            'name' => 'required|string|max:255',
+            'project_id' => 'required|exists:projects,id',
+            'layer_type_id' => 'required|exists:layer_types,id',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after_or_equal:start_time',
+            'status_id' => 'nullable|exists:statuses,id',
+            'parent_id' => 'nullable|exists:layers,id',
+            'description' => 'nullable|string',
+            'assigned_user_ids' => 'nullable|array',
+            'assigned_user_ids.*' => 'exists:users,id',
         ]);
 
+        // -------------------------
+        // 1. KEEP your duration logic
+        // -------------------------
         $duration = $request->duration;
+
         if (empty($duration)) {
             $start = Carbon::parse($request->start_time);
-            $end   = Carbon::parse($request->end_time);
+            $end = Carbon::parse($request->end_time);
             $duration = $start->diffInDays($end) + 1;
         }
 
-        $layer = new Layer();
-        $layer->name            = $request->name;
-        $layer->project_id      = $request->project_id;
-        $layer->layer_type_id   = $request->layer_type_id;
-        $layer->start_time      = $request->start_time;
-        $layer->end_time        = $request->end_time;
-        $layer->status_id       = $request->status_id;
-        $layer->duration        = $duration;
-        
+        $validated['duration'] = $duration;
 
-        $layer->parent_id = $request->parent_id ?: null;
-        $layer->description     = $request->description ?: null;
-        
-        $layer->save();
+        // -------------------------
+        // 2. Map users for service
+        // -------------------------
+        $validated['users'] = $request->assigned_user_ids ?? [];
 
-        if ($request->has('assigned_user_ids')) {
-            $syncData = [];
-            foreach ($request->assigned_user_ids as $userId) {
-                $syncData[$userId] = [
-                    'assigned_by' => auth()->id(),
-                    'assigned_at' => now(),
-                ];
-            }
-
-            $layer->users()->sync($syncData);
-        }
+        // -------------------------
+        // 3. Delegate to service
+        // -------------------------
+        $this->layerService->createLayer($validated);
 
         return response()->json(['success' => true]);
     }
@@ -301,23 +363,43 @@ class LayerController extends Controller
 
         return response()->json([
             'success' => true,
-            'id'      => $type->id,
-            'name'    => $type->title
+            'id' => $type->id,
+            'name' => $type->title
         ]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function inlineUpdate(Request $request)
     {
         $request->validate([
-            'id'     => 'required|exists:layers,id',
+            'id' => 'required|exists:layers,id',
             'column' => 'required|string',
-            'value'  => 'nullable'
+            'value' => 'nullable'
         ]);
 
         $layer = Layer::findOrFail($request->id);
 
+//        if ($request->column === 'assigned_user_ids') {
+//            $syncData = [];
+//            if (!empty($request->value)) {
+//                foreach ($request->value as $userId) {
+//                    $syncData[$userId] = [
+//                        'assigned_by' => auth()->id(),
+//                        'assigned_at' => now(),
+//                    ];
+//                }
+//            }
+//            $layer->users()->sync($syncData);
+//        } else {
+//            $layer->{$request->column} = $request->value ?: null;
+//            $layer->save();
+//        }
         if ($request->column === 'assigned_user_ids') {
+
             $syncData = [];
+
             if (!empty($request->value)) {
                 foreach ($request->value as $userId) {
                     $syncData[$userId] = [
@@ -326,8 +408,21 @@ class LayerController extends Controller
                     ];
                 }
             }
+
             $layer->users()->sync($syncData);
+
+        } elseif ($request->column === 'status_id') {
+
+            $this->layerService->changeStatus($layer, $request->value);
+
+        } elseif ($request->column === 'parent_id') {
+
+            $this->layerService->updateLayer($layer, [
+                'parent_id' => $request->value
+            ]);
+
         } else {
+
             $layer->{$request->column} = $request->value ?: null;
             $layer->save();
         }
@@ -345,6 +440,6 @@ class LayerController extends Controller
         $layer->update($validated);
 
         return response()->json(['success' => true]);
-        }
+    }
 }
    

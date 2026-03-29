@@ -35,6 +35,7 @@
 <script src="{{asset('admin_assets/plugins/fancy-file-uploader/jquery.fancy-fileupload.js')}}"></script>
 <script src="{{asset('admin_assets/plugins/Drag-And-Drop/dist/imageuploadify.min.js')}}"></script>
 <script src="{{asset('admin_assets/plugins/select2/js/select2.min.js')}}"></script>
+<script src="https://cdn.jsdelivr.net/npm/progressbar.js@1.1.0/dist/progressbar.min.js"></script>
 <script>
     $('.single-select').select2({
         theme: 'bootstrap4',
