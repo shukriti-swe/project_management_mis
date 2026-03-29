@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\UserRoleController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -54,6 +55,11 @@ Route::middleware('auth')->group(function () {
     Route::any('/update-project', [AdminController::class, 'updateProject'])->name('updateProject');
     Route::any('/delete-project/{id}', [AdminController::class, 'deleteProject'])->name('deleteProject');
     Route::get('/project-details/{project}', [AdminController::class, 'show'])->name('projectDetails');
+
+    //Reports
+    Route::get('/project-sammary', [ReportController::class, 'projectSammary'])->name('projectSammary');
+    Route::get('/project/report/{id}', [ReportController::class, 'projectReport'])->name('project.report');
+
 
     // Sampad Singha
     Route::resource('/layers', LayerController::class)->names('layer');

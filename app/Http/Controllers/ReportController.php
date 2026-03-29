@@ -17,5 +17,16 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
+    public function projectSammary(){
+        $projects = Project::withCount('layers')->orderBy('id', 'desc')->get();
+        $users = User::all();
+        return view('admin.reports.project_sammary', compact('projects','users'));
+    }
+
+    public function projectReport($id) {
+        $project = Project::with(['layers.users', 'layers.status'])->findOrFail($id);
+    
+        return view('admin.reports.project_report', compact('project'));
+    }
 
 }

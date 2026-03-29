@@ -48,7 +48,6 @@
                                 </div>
                             </div>
 
-
                             <div class="col-12">
                                 <label for="inputStatus" class="form-label">Status</label>
                                 <div class="input-group"><span class="input-group-text bg-transparent"><i class='bx bxs-user' ></i></span>
