@@ -57,6 +57,16 @@
         </li>
 
 		<li>
+			<a href="javascript:;" class="has-arrow">
+				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
+				<div class="menu-title">Project & Layers</div>
+			</a>
+			<ul>
+				<li><a href="{{ route('projectWithLayers') }}"><i class="bx bx-right-arrow-alt"></i>Project with layers</a></li>
+			</ul>
+		</li>
+
+		<li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class="bx bx-user-circle"></i></div>
                 <div class="menu-title">Layer Types</div>
@@ -70,7 +80,7 @@
 		<li>
 			<a href="javascript:;" class="has-arrow">
 				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
-				<div class="menu-title">Project</div>
+				<div class="menu-title">Project Individual</div>
 			</a>
 			<ul>
 				<li><a href="{{ route('projectList') }}"><i class="bx bx-right-arrow-alt"></i>Project List</a></li>

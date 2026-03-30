@@ -60,6 +60,20 @@ Route::middleware('auth')->group(function () {
     //Reports
     Route::get('/project-sammary', [ReportController::class, 'projectSammary'])->name('projectSammary');
     Route::get('/project/report/{id}', [ReportController::class, 'projectReport'])->name('project.report');
+    
+
+    // Project layer table show
+    Route::get('/project-with-layers', [ReportController::class, 'projectWithLayers'])->name('projectWithLayers');
+    Route::post('/projects/store', [ReportController::class, 'storeProject'])->name('project.store');
+    Route::get('/projects/{id}/edit', [AdminController::class, 'editProject'])->name('project.edit');
+    Route::post('/projects/update', [AdminController::class, 'updateProject'])->name('project.update');
+    Route::delete('/projects/{id}', [AdminController::class, 'destroyProject'])->name('project.delete');
+    Route::post('/layers/reorder', [ReportController::class, 'reorderLayers'])->name('layers.reorder');
+    Route::post('/project/child/store', [ReportController::class, 'storeProjectChild'])->name('project.child.store');
+    Route::get('/project/child/edit/{id}', [ReportController::class, 'editProjectChild'])->name('project.child.edit');
+    Route::post('/project/child/update', [ReportController::class, 'updateProjectChild'])->name('project.child.update');
+    Route::delete('/project/child/delete/{id}', [ReportController::class, 'deleteProjectChild'])->name('project.child.delete');
+    Route::post('/project/child/update-dates', [ReportController::class, 'updateDatesAjax'])->name('project.child.updateDates');
 
 
     // Sampad Singha
