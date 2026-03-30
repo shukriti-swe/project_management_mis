@@ -170,6 +170,34 @@ class ReportController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Layer updated successfully!']);
     }
+
+    public function deleteProjectChild($id)
+    {
+        try {
+            $layer = Layer::findOrFail($id);
+            if ($layer->children()->count() > 0) {
+                $this->recursiveDelete($layer);
+            } else {
+                $layer->delete();
+            }
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Layer and its sub-layers deleted successfully!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    private function recursiveDelete($layer)
+    {
+        foreach ($layer->children as $child) {
+            $this->recursiveDelete($child);
+        }
+        $layer->delete();
+    }
     
     //drag and drop
     public function reorderLayers(Request $request)

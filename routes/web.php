@@ -65,9 +65,9 @@ Route::middleware('auth')->group(function () {
     // Project layer table show
     Route::get('/project-with-layers', [ReportController::class, 'projectWithLayers'])->name('projectWithLayers');
     Route::post('/projects/store', [ReportController::class, 'storeProject'])->name('project.store');
-    Route::get('/projects/{id}/edit', [AdminController::class, 'editProject'])->name('project.edit');
-    Route::post('/projects/update', [AdminController::class, 'updateProject'])->name('project.update');
-    Route::delete('/projects/{id}', [AdminController::class, 'destroyProject'])->name('project.delete');
+    Route::get('/projects/{id}/edit', [ReportController::class, 'editProject'])->name('project.edit');
+    Route::post('/projects/update', [ReportController::class, 'updateProject'])->name('project.update');
+    Route::delete('/projects/{id}', [ReportController::class, 'destroyProject'])->name('project.delete');
     Route::post('/layers/reorder', [ReportController::class, 'reorderLayers'])->name('layers.reorder');
     Route::post('/project/child/store', [ReportController::class, 'storeProjectChild'])->name('project.child.store');
     Route::get('/project/child/edit/{id}', [ReportController::class, 'editProjectChild'])->name('project.child.edit');

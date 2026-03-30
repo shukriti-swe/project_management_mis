@@ -11,6 +11,16 @@ class Project extends Model
 {
     protected $table = 'projects';
 
+    protected $fillable = [
+        'title',
+        'description',
+        'start_date',
+        'end_date',
+        'status_id',
+        'user_id',
+        'image',
+    ];
+
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',

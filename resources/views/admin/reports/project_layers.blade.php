@@ -105,8 +105,11 @@
                                             $u_tags = $layer->users->map(fn($u) => "<span class='user-tag'>$u->name</span>")->implode('');
                                             $hasChildAttr = ($layer->children->count() > 0) ? 'yes' : 'no';
 
+                                            $style = ($layer->end_time < now() && $layer->status->category != "done")
+                                            ? 'background:#f8d7da !important; border-left: 4px solid #dc3545 !important;': '';
+
                                             echo '<li class="dd-item" data-id="'.$layer->id.'">
-                                                <div class="dd-handle">
+                                                <div class="dd-handle" style="'.$style.'">
                                                     <div class="t-col c-name"><i class="bx bx-hash text-muted"></i> '.$layer->name.'</div>
                                                     <div class="t-col c-cal">
                                                         <i class="bx bx-calendar date-picker-btn" data-id="'.$layer->id.'"></i>
