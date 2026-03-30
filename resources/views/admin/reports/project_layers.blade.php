@@ -62,6 +62,19 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-3">
                     <input type="text" id="treeSearch" class="form-control form-control-sm w-25" placeholder="Search project or layer...">
+                    <select id="filterUser" class="form-control form-control-sm w-25">
+                        <option value="">All Users</option>
+                        @foreach($users as $u)
+                            <option value="{{ $u->id }}">{{ $u->name }}</option>
+                        @endforeach
+                    </select>
+
+                    <select id="filterStatus" class="form-control form-control-sm w-25">
+                        <option value="">All Status</option>
+                        @foreach($statuses as $s)
+                            <option value="{{ $s->id }}">{{ $s->label }}</option>
+                        @endforeach
+                    </select>
                     <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#projectModal" onclick="$('#projectForm')[0].reset(); $('#edit_p_id').val('');">+ New Project</button>
                 </div>
 
@@ -108,7 +121,7 @@
                                             $style = ($layer->end_time < now() && $layer->status->category != "done")
                                             ? 'background:#f8d7da !important; border-left: 4px solid #dc3545 !important;': '';
 
-                                            echo '<li class="dd-item" data-id="'.$layer->id.'">
+                                            echo '<li class="dd-item" data-id="'.$layer->id.'" data-users="'.implode(',', $layer->users->pluck('id')->toArray()).'" data-status="'.$layer->status_id.'">
                                                 <div class="dd-handle" style="'.$style.'">
                                                     <div class="t-col c-name"><i class="bx bx-hash text-muted"></i> '.$layer->name.'</div>
                                                     <div class="t-col c-cal">
@@ -198,6 +211,47 @@ $(document).ready(function() {
             $.post("{{ route('layers.reorder') }}", { _token: "{{ csrf_token() }}", hierarchy: $('#nestable').nestable('serialize') });
         }
     });
+
+    $('#filterUser, #filterStatus').on('change', function() {
+        applyFilters();
+    });
+
+    function applyFilters() {
+        let userId = $('#filterUser').val();
+        let statusId = $('#filterStatus').val();
+
+        // Step 1: hide all layers first
+        $('#nestable .dd-item').hide();
+
+        // Step 2: show matched layers
+        $('#nestable .dd-item').each(function() {
+            let item = $(this);
+
+            if (item.hasClass('dd-nodrag')) return; // skip project
+
+            let users = item.data('users') ? item.data('users').toString().split(',') : [];
+            let status = item.data('status') ? item.data('status').toString() : '';
+
+            let userMatch = !userId || users.includes(userId);
+            let statusMatch = !statusId || status === statusId;
+
+            if (userMatch && statusMatch) {
+                item.show();
+
+                // ✅ show all parents
+                item.parents('.dd-item').show();
+            }
+        });
+
+        // Step 3: show projects if they have visible children
+        $('#nestable > .dd-list > .dd-item').each(function() {
+            let project = $(this);
+
+            if (project.find('.dd-item:visible').length > 0) {
+                project.show();
+            }
+        });
+    }
 
     // ২. Select2 Init
     $('.select2-multiple').select2({ width: '100%', dropdownParent: $('#layerModal') });
