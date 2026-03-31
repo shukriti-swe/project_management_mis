@@ -118,8 +118,21 @@
         .dd-item > button {
             position: absolute !important;
             left: 45px !important;
-            top: 15px !important;
+            top: 10px !important;
             z-index: 11;
+            height: 25px !important;
+
+            font-size: 24px !important;
+            font-family: Arial, sans-serif !important;
+            margin-top: auto;
+            margin-bottom: auto;
+            font-weight: 300!important;
+        }
+        .dd-item > button:focus {
+            outline: none!important;
+        }
+        .dd-item > button:hover{
+            color: #2ea8e5;
         }
 
         .user-tag {
@@ -175,6 +188,9 @@
         .daterangepicker .btn-primary {
             background-color: #007bff !important;
             border-color: #007bff !important;
+        }
+        #nestable {
+            visibility: hidden;
         }
     </style>
 
@@ -412,27 +428,25 @@
                     let item = e.length ? $(e[0]) : null;
                     if (!item) return;
 
-                    // 🔹 original project
                     let originalProject = item.closest('.dd-item.dd-nodrag').data('id');
 
-                    // 🔹 new parent project after drop
                     let newProject = item.parent().closest('.dd-item.dd-nodrag').data('id');
 
                     if (originalProject !== newProject) {
-                        // ❌ block move
                         Swal.fire('Not allowed', 'Cannot move layer to another project', 'warning');
 
                         location.reload(); // safest revert
                         return;
                     }
 
-                    // ✅ valid → save
                     $.post("{{ route('layers.reorder') }}", {
                         _token: "{{ csrf_token() }}",
                         hierarchy: $('#nestable').nestable('serialize')
                     });
                 }
             });
+            $('#nestable').nestable('collapseAll');
+            $('#nestable').css('visibility', 'visible');
 
             $('#filterUser, #filterStatus').on('change', function () {
                 applyFilters();
@@ -441,6 +455,13 @@
             function applyFilters() {
                 let userId = $('#filterUser').val();
                 let statusId = $('#filterStatus').val();
+                if (!userId && !statusId) {
+                    $('#nestable .dd-item').show();
+                    $('#nestable').nestable('collapseAll');
+                    return; // 🔥 stop here
+                }
+
+                $('#nestable').nestable('collapseAll');
 
                 // Step 1: hide all layers first
                 $('#nestable .dd-item').hide();
@@ -461,7 +482,12 @@
                         item.show();
 
                         // ✅ show all parents
-                        item.parents('.dd-item').show();
+                        item.parents('.dd-item').each(function () {
+                            $(this).show();
+
+                            let btn = $(this).children('button[data-action="expand"]');
+                            if (btn.length) btn.click();
+                        });
                     }
                 });
 
