@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
+
         .dd {
             max-width: 100% !important;
             width: 100% !important;
@@ -216,10 +217,10 @@
                         <div class="t-col c-action">Action</div>
                     </div>
 
-                    <div class="dd" id="nestable">
-                        <ol class="dd-list">
+                    <div id="treeRoot">
+                        <ul class="sortable-root">
                             @foreach($projects as $project)
-                                <li class="dd-item dd-nodrag" data-id="p{{ $project->id }}">
+                                <li class="project-item" data-id="p{{ $project->id }}">
                                     <div class="dd-handle"
                                          style="background: #f4f6f9 !important; border-left: 4px solid #007bff !important;">
                                         <div class="t-col c-drag">
@@ -258,7 +259,7 @@
 
                                     @php
                                         $renderLayers = function($layers, $projectId) use (&$renderLayers) {
-                                            echo '<ol class="dd-list">';
+                                            echo '<ul class="sortable">';
                                             foreach ($layers->sortBy('position') as $layer) {
                                                 $s_color = $layer->status->color ?? '#6c757d';
                                                 $u_tags = $layer->users->map(fn($u) => "<span class='user-tag'>$u->name</span>")->implode('');
@@ -267,7 +268,7 @@
                                                 $style = ($layer->end_time < now() && $layer->status->category != "done")
                                                 ? 'background:#f8d7da !important; border-left: 4px solid #dc3545 !important;': '';
 
-                                                echo '<li class="dd-item" data-id="'.$layer->id.'" data-users="'.implode(',', $layer->users->pluck('id')->toArray()).'" data-status="'.$layer->status_id.'">
+                                                echo '<li class="layer-item" data-id="'.$layer->id.'" data-users="'.implode(',', $layer->users->pluck('id')->toArray()).'" data-status="'.$layer->status_id.'">
                                                     <div class="dd-handle" style="'.$style.'">
                                                     <div class="t-col c-drag">
                                                             <span class="drag-handle"><i class="bx bx-grid-vertical"></i></span>
@@ -291,13 +292,13 @@
                                                 if ($layer->children->count() > 0) { $renderLayers($layer->children, $projectId); }
                                                 echo '</li>';
                                             }
-                                            echo '</ol>';
+                                            echo '</ul>';
                                         };
                                     @endphp
                                     {!! $renderLayers($project->layers, $project->id) !!}
                                 </li>
                             @endforeach
-                        </ol>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -391,47 +392,67 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function () {
-            // ১. Nestable Init
-            {{--$('#nestable').nestable({ --}}
-            {{--    maxDepth: 10,--}}
-            {{--    callback: function(l, e) {--}}
-            {{--        $.post("{{ route('layers.reorder') }}", { _token: "{{ csrf_token() }}", hierarchy: $('#nestable').nestable('serialize') });--}}
-            {{--    }--}}
-            {{--});--}}
-            $('#nestable').nestable({
-                maxDepth: 10,
-                handleClass: 'drag-handle',
+            function initSortable(el) {
+                new Sortable(el, {
+                    group: {
+                        name: 'nested',
+                        pull: true,
+                        put: true
+                    },
+                    handle: '.drag-handle',
+                    animation: 150,
+                    fallbackOnBody: true,
+                    swapThreshold: 0.65,
 
-                callback: function (l, e) {
+                    onMove: function (evt) {
 
-                    let item = e.length ? $(e[0]) : null;
-                    if (!item) return;
+                        let dragged = evt.dragged;
+                        let related = evt.related;
 
-                    // 🔹 original project
-                    let originalProject = item.closest('.dd-item.dd-nodrag').data('id');
+                        // 🔥 detect drop ON item (not just between)
+                        if (related && related.classList.contains('layer-item')) {
 
-                    // 🔹 new parent project after drop
-                    let newProject = item.parent().closest('.dd-item.dd-nodrag').data('id');
+                            let rect = related.getBoundingClientRect();
+                            let offset = evt.originalEvent.clientY - rect.top;
 
-                    if (originalProject !== newProject) {
-                        // ❌ block move
-                        Swal.fire('Not allowed', 'Cannot move layer to another project', 'warning');
+                            // 👉 if cursor is inside middle zone → treat as "make child"
+                            if (offset > rect.height * 0.25 && offset < rect.height * 0.75) {
 
-                        location.reload(); // safest revert
-                        return;
+                                let childUl = related.querySelector(':scope > ul');
+
+                                if (!childUl) {
+                                    childUl = document.createElement('ul');
+                                    childUl.classList.add('sortable');
+                                    related.appendChild(childUl);
+                                    initSortable(childUl); // 🔥 IMPORTANT
+                                }
+
+                                childUl.appendChild(dragged);
+
+                                return false; // stop default behavior
+                            }
+                        }
+                    },
+
+                    onEnd: function () {
+                        let hierarchy = buildHierarchy();
+
+                        $.post("{{ route('layers.reorder') }}", {
+                            _token: "{{ csrf_token() }}",
+                            hierarchy: hierarchy
+                        });
                     }
+                });
+            }
 
-                    // ✅ valid → save
-                    $.post("{{ route('layers.reorder') }}", {
-                        _token: "{{ csrf_token() }}",
-                        hierarchy: $('#nestable').nestable('serialize')
-                    });
-                }
+// init root
+            document.querySelectorAll('.sortable-root, .sortable').forEach(el => {
+                initSortable(el);
             });
 
             $('#filterUser, #filterStatus').on('change', function () {
@@ -629,5 +650,29 @@
                 });
             });
         });
+        function buildHierarchy() {
+
+            function parseList(ul) {
+                let result = [];
+
+                ul.querySelectorAll(':scope > li').forEach(li => {
+                    let item = {
+                        id: li.dataset.id,
+                        children: []
+                    };
+
+                    let childUl = li.querySelector(':scope > ul');
+                    if (childUl) {
+                        item.children = parseList(childUl);
+                    }
+
+                    result.push(item);
+                });
+
+                return result;
+            }
+
+            return parseList(document.querySelector('.sortable-root'));
+        }
     </script>
 @endpush
