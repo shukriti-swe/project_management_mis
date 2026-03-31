@@ -6,6 +6,7 @@ use App\Models\Layer;
 use App\Models\Status;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class LayerService
@@ -94,87 +95,6 @@ class LayerService
      * Update layer
      * @throws Throwable
      */
-//    public function updateLayer(Layer $layer, array $data): Layer
-//    {
-//        return DB::transaction(function () use ($layer, $data) {
-//            $users = $data['users'] ?? [];
-//            unset($data['users']);
-//
-//            $oldParent = $layer->parent;
-//
-////            $statusChanged = isset($data['status_id']) && $data['status_id'] != $layer->status_id;
-//            $parentChanged = isset($data['parent_id']) && $data['parent_id'] != $layer->parent_id;
-//
-//            $statusId = $data['status_id'] ?? null;
-//            $statusChanged = isset($data['status_id']) && $data['status_id'] != $layer->status_id;
-//
-//            unset($data['status_id']);
-//
-//            if ($parentChanged) {
-//
-//                $newParent = !empty($data['parent_id'])
-//                    ? Layer::findOrFail($data['parent_id'])
-//                    : null;
-//
-//                if ($newParent && $newParent->isDescendantOf($layer)) {
-//                    throw new Exception('Cannot move node inside its own subtree.');
-//                }
-//
-//                unset($data['parent_id']);
-//
-//                $layer->fill($data);
-//
-//                if ($newParent) {
-//                    $layer->appendToNode($newParent);
-//                } else {
-//                    $layer->makeRoot();
-//                }
-//
-//                $layer->save();
-//
-//            } else {
-//
-//                $layer->update($data);
-//
-//            }
-//
-//            if ($parentChanged) {
-//
-//                if ($layer->parent) {
-//                    $this->statusService->calculate($layer->parent);
-//                }
-//
-//                if ($parentChanged && $oldParent) {
-//                    $this->statusService->calculate($oldParent);
-//                }
-//            }
-//
-//            if ($statusChanged) {
-//                $this->statusService->updateTaskStatus($layer, $statusId);
-//            }
-//
-//            $assigner = auth()->id();
-//            $now = now();
-//
-//            $syncData = [];
-//
-//            $existingAssignments = $layer->users->keyBy('id');
-//
-//            foreach ($users as $userId) {
-//
-//                $existing = $existingAssignments->get($userId);
-//
-//                $syncData[$userId] = [
-//                    'assigned_by' => $assigner,
-//                    'assigned_at' => $existing?->pivot->assigned_at ?? $now
-//                ];
-//            }
-//
-//            $layer->users()->sync($syncData);
-//
-//            return $layer;
-//        });
-//    }
     public function updateLayer(Layer $layer, array $data): Layer
     {
         return DB::transaction(function () use ($layer, $data) {
@@ -276,73 +196,8 @@ class LayerService
     }
 
     /**
-     * Convert between task/container
-     * @throws Throwable
-     */
-//    public function convertLayerType(Layer $layer, string $newType, ?int $statusId = null): Layer
-//    {
-//        return DB::transaction(function () use ($layer, $newType, $statusId) {
-//
-//            if ($layer->type === $newType) {
-//                return $layer;
-//            }
-//
-//            if ($newType === 'task') {
-//
-//                if ($layer->children()->exists()) {
-//                    throw new Exception(
-//                        "Cannot convert a folder to a task while it contains children."
-//                    );
-//                }
-//
-//                $progress = $this->resolveTaskProgress($statusId);
-//
-//                $layer->status_id = $statusId;
-//                $layer->progress_percent = $progress;
-//                $layer->total_tasks = 1;
-//                $layer->completed_tasks = $progress === 100 ? 1 : 0;
-//
-//            } else {
-//
-//                $layer->status_id = null;
-//                $layer->progress_percent = 0;
-//                $layer->total_tasks = 0;
-//                $layer->completed_tasks = 0;
-//
-//            }
-//
-//            $layer->type = $newType;
-//            $layer->save();
-//
-//            $this->statusService->calculate($layer->parent);
-//
-//            return $layer;
-//        });
-//    }
-
-    /**
      * Initialize progress values
      */
-//    protected function initializeProgress(array &$data): void
-//    {
-//        $type = $data['type'] ?? 'container';
-//
-//        if ($type === 'task') {
-//
-//            $progress = $this->resolveTaskProgress($data['status_id'] ?? null);
-//
-//            $data['progress_percent'] = $progress;
-//            $data['total_tasks'] = 1;
-//            $data['completed_tasks'] = $progress === 100 ? 1 : 0;
-//
-//        } else {
-//
-//            $data['progress_percent'] = 0;
-//            $data['status_id'] = null;
-//            $data['total_tasks'] = 0;
-//            $data['completed_tasks'] = 0;
-//        }
-//    }
     protected function initializeProgress(array &$data): void
     {
         $statusId = $data['status_id'] ?? null;
@@ -364,6 +219,7 @@ class LayerService
      */
     protected function createNode(array $data): Layer
     {
+        Log::info('parent id: ' . ($data['parent_id'] ?? 'null'));
         if (!empty($data['parent_id'])) {
 
             $parent = Layer::findOrFail($data['parent_id']);

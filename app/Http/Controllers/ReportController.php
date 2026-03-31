@@ -9,6 +9,7 @@ use App\Models\Status;
 use App\Models\LayerType;
 use App\Models\LayerUser;
 use App\Services\LayerService;
+use App\Services\LayerStatusUpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -17,6 +18,13 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
+    public function __construct(
+        protected LayerService $layerService,
+        protected LayerStatusUpdateService $statusUpdate
+    ){}
+
+    protected array $affectedParents = [];
+
     public function projectSammary(){
         $projects = Project::withCount('layers')->orderBy('id', 'desc')->get();
         $users = User::all();
@@ -56,6 +64,7 @@ class ReportController extends Controller
             'title' => 'required|string|max:255',
             'status_id' => 'required',
             'user_id' => 'required',
+            'parent_id' => 'nullable|exists:projects,id',
         ]);
 
         $project = new Project();
@@ -97,41 +106,70 @@ class ReportController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+//    public function storeProjectChild(Request $request)
+//    {
+//        $request->validate([
+//            'name' => 'required|string|max:255',
+//            'project_id' => 'required',
+//            'status_id' => 'required',
+//        ]);
+//
+//        $lastPosition = Layer::where('project_id', $request->project_id)
+//                        ->where('parent_id', $request->parent_id)
+//                        ->max('position') ?? 0;
+//
+//        $layer = new Layer();
+//        $layer->name = $request->name;
+//        $layer->project_id = $request->project_id;
+//        $layer->parent_id = $request->parent_id;
+//        $layer->start_time = $request->start_time;
+//        $layer->end_time = $request->end_time;
+//        $layer->status_id = $request->status_id;
+//        $layer->position = $lastPosition + 1;
+//        $layer->save();
+//
+//        // Multiple Users Sync with Pivot Data
+//        if ($request->has('user_ids')) {
+//            $syncData = [];
+//            foreach ($request->user_ids as $userId) {
+//                $syncData[$userId] = [
+//                    'assigned_by' => auth()->id(),
+//                    'assigned_at' => now(),
+//                ];
+//            }
+//            $layer->users()->sync($syncData);
+//        }
+//
+//        return response()->json(['status' => 'success', 'message' => 'Layer added successfully!']);
+//    }
     public function storeProjectChild(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'project_id' => 'required',
-            'status_id' => 'required',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'project_id' => 'required',
+                'status_id' => 'required',
+                'parent_id' => 'nullable|exists:layers,id',
+            ]);
 
-        $lastPosition = Layer::where('project_id', $request->project_id)
-                        ->where('parent_id', $request->parent_id)
-                        ->max('position') ?? 0;
+            $validated['users'] = $request->has('user_ids') ? $request->user_ids : [];
+            $validated['start_time'] = Carbon::parse($request->start_time)->startOfDay();
+            $validated['end_time']   = Carbon::parse($request->end_time)->endOfDay();
 
-        $layer = new Layer();
-        $layer->name = $request->name;
-        $layer->project_id = $request->project_id;
-        $layer->parent_id = $request->parent_id; 
-        $layer->start_time = $request->start_time;
-        $layer->end_time = $request->end_time;
-        $layer->status_id = $request->status_id;
-        $layer->position = $lastPosition + 1;
-        $layer->save();
+            $lastPosition = Layer::where('project_id', $request->project_id)
+                ->where('parent_id', $request->parent_id)
+                ->max('position') ?? 0;
 
-        // Multiple Users Sync with Pivot Data
-        if ($request->has('user_ids')) {
-            $syncData = [];
-            foreach ($request->user_ids as $userId) {
-                $syncData[$userId] = [
-                    'assigned_by' => auth()->id(),
-                    'assigned_at' => now(),
-                ];
-            }
-            $layer->users()->sync($syncData);
+            $layer = $this->layerService->createLayer($validated);
+            $layer->position = $lastPosition + 1;
+            $layer->save();
+
+            return response()->json(['status' => 'success', 'message' => 'Layer added successfully!']);
+        } catch (Throwable $e) {
+            Log::error('Error adding layer: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Something went wrong while adding the layer.'], 500);
         }
 
-        return response()->json(['status' => 'success', 'message' => 'Layer added successfully!']);
     }
 
     public function editProjectChild($id)
@@ -140,35 +178,57 @@ class ReportController extends Controller
         return response()->json($layer);
     }
 
+//    public function updateProjectChild(Request $request)
+//    {
+//        $request->validate([
+//            'name' => 'required|string|max:255',
+//            'status_id' => 'required',
+//        ]);
+//
+//        $layer = Layer::findOrFail($request->layer_id);
+//        $layer->name = $request->name;
+//        $layer->start_time = $request->start_time;
+//        $layer->end_time = $request->end_time;
+//        $layer->status_id = $request->status_id;
+//        $layer->save();
+//
+//        // Update Users
+//        if ($request->has('user_ids')) {
+//            $syncData = [];
+//            foreach ($request->user_ids as $userId) {
+//                $syncData[$userId] = [
+//                    'assigned_by' => auth()->id(),
+//                    'assigned_at' => now(),
+//                ];
+//            }
+//            $layer->users()->sync($syncData);
+//        } else {
+//            $layer->users()->detach(); // যদি সব ইউজার রিমুভ করে দেওয়া হয়
+//        }
+//
+//        return response()->json(['status' => 'success', 'message' => 'Layer updated successfully!']);
+//    }
     public function updateProjectChild(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'status_id' => 'required',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'status_id' => 'required',
+            ]);
 
-        $layer = Layer::findOrFail($request->layer_id);
-        $layer->name = $request->name;
-        $layer->start_time = $request->start_time;
-        $layer->end_time = $request->end_time;
-        $layer->status_id = $request->status_id;
-        $layer->save();
+            $validated['users'] = $request->has('user_ids') ? $request->user_ids : [];
+            $validated['start_time'] = Carbon::parse($request->start_time)->startOfDay();
+            $validated['end_time']   = Carbon::parse($request->end_time)->endOfDay();
 
-        // Update Users
-        if ($request->has('user_ids')) {
-            $syncData = [];
-            foreach ($request->user_ids as $userId) {
-                $syncData[$userId] = [
-                    'assigned_by' => auth()->id(),
-                    'assigned_at' => now(),
-                ];
-            }
-            $layer->users()->sync($syncData);
-        } else {
-            $layer->users()->detach(); // যদি সব ইউজার রিমুভ করে দেওয়া হয়
+            $layer = Layer::findOrFail($request->layer_id);
+
+            $this->layerService->updateLayer($layer, $validated);
+
+            return response()->json(['status' => 'success', 'message' => 'Layer updated successfully!']);
+        } catch (Throwable $e) {
+            Log::error('Error updating layer: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Something went wrong while updating the layer.'], 500);
         }
-
-        return response()->json(['status' => 'success', 'message' => 'Layer updated successfully!']);
     }
 
     public function deleteProjectChild($id)
@@ -178,7 +238,7 @@ class ReportController extends Controller
             if ($layer->children()->count() > 0) {
                 $this->recursiveDelete($layer);
             } else {
-                $layer->delete();
+                $this->layerService->deleteLayer($layer);
             }
             return response()->json([
                 'status' => 'success',
@@ -191,22 +251,38 @@ class ReportController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * @throws \Exception
+     */
     private function recursiveDelete($layer)
     {
         foreach ($layer->children as $child) {
             $this->recursiveDelete($child);
         }
-        $layer->delete();
+//        $layer->delete();
+        $this->layerService->deleteLayer($layer);
     }
     
     //drag and drop
     public function reorderLayers(Request $request)
     {
+        $this->affectedParents = [];
         $hierarchy = $request->hierarchy;
         
         foreach ($hierarchy as $index => $item) {
             $this->processLayerOrdering($item, null, $index + 1);
         }
+
+        collect($this->affectedParents)
+            ->filter()
+            ->unique()
+            ->each(function ($parentId) {
+                $parent = Layer::find($parentId);
+                if ($parent) {
+                    $this->statusUpdate->calculate($parent);
+                }
+            });
 
         return response()->json(['status' => 'success']);
     }
@@ -218,6 +294,19 @@ class ReportController extends Controller
         if ($layerId) {
             $layer = Layer::find($layerId);
             if ($layer) {
+                $oldParentId = $layer->parent_id;
+
+                // ✅ Track affected parents ONLY (no calculation here)
+                if ($oldParentId != $parentId) {
+                    if ($oldParentId) {
+                        $this->affectedParents[] = $oldParentId;
+                    }
+
+                    if ($parentId) {
+                        $this->affectedParents[] = $parentId;
+                    }
+                }
+
                 $layer->parent_id = $parentId;
                 $layer->position = $position;
                 $layer->save();
@@ -230,8 +319,6 @@ class ReportController extends Controller
             }
         }
     }
-
-    
 
     public function updateDatesAjax(Request $request)
     {
