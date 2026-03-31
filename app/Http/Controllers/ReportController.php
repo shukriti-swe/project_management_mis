@@ -9,6 +9,7 @@ use App\Models\Status;
 use App\Models\LayerType;
 use App\Models\LayerUser;
 use App\Services\LayerService;
+use App\Services\LayerStatusUpdateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -18,8 +19,12 @@ use Carbon\Carbon;
 class ReportController extends Controller
 {
     public function __construct(
-        protected LayerService $layerService
+        protected LayerService $layerService,
+        protected LayerStatusUpdateService $statusUpdate
     ){}
+
+    protected array $affectedParents = [];
+
     public function projectSammary(){
         $projects = Project::withCount('layers')->orderBy('id', 'desc')->get();
         $users = User::all();
@@ -59,6 +64,7 @@ class ReportController extends Controller
             'title' => 'required|string|max:255',
             'status_id' => 'required',
             'user_id' => 'required',
+            'parent_id' => 'nullable|exists:projects,id',
         ]);
 
         $project = new Project();
@@ -143,6 +149,7 @@ class ReportController extends Controller
                 'name' => 'required|string|max:255',
                 'project_id' => 'required',
                 'status_id' => 'required',
+                'parent_id' => 'nullable|exists:layers,id',
             ]);
 
             $validated['users'] = $request->has('user_ids') ? $request->user_ids : [];
@@ -260,11 +267,22 @@ class ReportController extends Controller
     //drag and drop
     public function reorderLayers(Request $request)
     {
+        $this->affectedParents = [];
         $hierarchy = $request->hierarchy;
         
         foreach ($hierarchy as $index => $item) {
             $this->processLayerOrdering($item, null, $index + 1);
         }
+
+        collect($this->affectedParents)
+            ->filter()
+            ->unique()
+            ->each(function ($parentId) {
+                $parent = Layer::find($parentId);
+                if ($parent) {
+                    $this->statusUpdate->calculate($parent);
+                }
+            });
 
         return response()->json(['status' => 'success']);
     }
@@ -276,6 +294,19 @@ class ReportController extends Controller
         if ($layerId) {
             $layer = Layer::find($layerId);
             if ($layer) {
+                $oldParentId = $layer->parent_id;
+
+                // ✅ Track affected parents ONLY (no calculation here)
+                if ($oldParentId != $parentId) {
+                    if ($oldParentId) {
+                        $this->affectedParents[] = $oldParentId;
+                    }
+
+                    if ($parentId) {
+                        $this->affectedParents[] = $parentId;
+                    }
+                }
+
                 $layer->parent_id = $parentId;
                 $layer->position = $position;
                 $layer->save();
@@ -288,8 +319,6 @@ class ReportController extends Controller
             }
         }
     }
-
-    
 
     public function updateDatesAjax(Request $request)
     {

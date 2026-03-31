@@ -26,6 +26,7 @@ class LayerController extends Controller
 
     /**
      * Display a listing of the resource.
+     * @throws \Exception
      */
     public function index()
     {
@@ -50,7 +51,7 @@ class LayerController extends Controller
 //        echo "</pre>";
         Layer::all()->each(function ($layer) {
             if (!$layer->children()->exists()) {
-                app(\App\Services\LayerStatusUpdateService::class)
+                app(LayerStatusUpdateService::class)
                     ->updateTaskStatus($layer, $layer->status_id);
             }
         });

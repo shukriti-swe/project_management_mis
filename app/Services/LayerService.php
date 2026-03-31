@@ -6,6 +6,7 @@ use App\Models\Layer;
 use App\Models\Status;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class LayerService
@@ -195,73 +196,8 @@ class LayerService
     }
 
     /**
-     * Convert between task/container
-     * @throws Throwable
-     */
-//    public function convertLayerType(Layer $layer, string $newType, ?int $statusId = null): Layer
-//    {
-//        return DB::transaction(function () use ($layer, $newType, $statusId) {
-//
-//            if ($layer->type === $newType) {
-//                return $layer;
-//            }
-//
-//            if ($newType === 'task') {
-//
-//                if ($layer->children()->exists()) {
-//                    throw new Exception(
-//                        "Cannot convert a folder to a task while it contains children."
-//                    );
-//                }
-//
-//                $progress = $this->resolveTaskProgress($statusId);
-//
-//                $layer->status_id = $statusId;
-//                $layer->progress_percent = $progress;
-//                $layer->total_tasks = 1;
-//                $layer->completed_tasks = $progress === 100 ? 1 : 0;
-//
-//            } else {
-//
-//                $layer->status_id = null;
-//                $layer->progress_percent = 0;
-//                $layer->total_tasks = 0;
-//                $layer->completed_tasks = 0;
-//
-//            }
-//
-//            $layer->type = $newType;
-//            $layer->save();
-//
-//            $this->statusService->calculate($layer->parent);
-//
-//            return $layer;
-//        });
-//    }
-
-    /**
      * Initialize progress values
      */
-//    protected function initializeProgress(array &$data): void
-//    {
-//        $type = $data['type'] ?? 'container';
-//
-//        if ($type === 'task') {
-//
-//            $progress = $this->resolveTaskProgress($data['status_id'] ?? null);
-//
-//            $data['progress_percent'] = $progress;
-//            $data['total_tasks'] = 1;
-//            $data['completed_tasks'] = $progress === 100 ? 1 : 0;
-//
-//        } else {
-//
-//            $data['progress_percent'] = 0;
-//            $data['status_id'] = null;
-//            $data['total_tasks'] = 0;
-//            $data['completed_tasks'] = 0;
-//        }
-//    }
     protected function initializeProgress(array &$data): void
     {
         $statusId = $data['status_id'] ?? null;
@@ -283,6 +219,7 @@ class LayerService
      */
     protected function createNode(array $data): Layer
     {
+        Log::info('parent id: ' . ($data['parent_id'] ?? 'null'));
         if (!empty($data['parent_id'])) {
 
             $parent = Layer::findOrFail($data['parent_id']);

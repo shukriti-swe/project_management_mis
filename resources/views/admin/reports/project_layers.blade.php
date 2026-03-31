@@ -317,10 +317,10 @@ $(document).ready(function() {
     $(document).on('click', '.delete-layer', function() {
         let id = $(this).attr('data-id');
         let hasChild = $(this).attr('data-has-child');
-        if(hasChild === 'yes') {
-            Swal.fire('Access Denied!', 'Please delete child layers first.', 'error');
-            return;
-        }
+        // if(hasChild === 'yes') {
+        //     Swal.fire('Access Denied!', 'Please delete child layers first.', 'error');
+        //     return;
+        // }
         Swal.fire({
             title: 'Are you sure?',
             icon: 'warning',

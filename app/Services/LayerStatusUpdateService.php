@@ -21,10 +21,8 @@ class LayerStatusUpdateService
         $isDone = $status->category === 'done';
         $isCanceled = $status->category === 'canceled';
 
-        // 🔥 KEY FIX
         if ($layer->children()->exists()) {
 
-            // DO NOT TOUCH total_tasks / completed_tasks
             $layer->update([
                 'status_id' => $statusId,
                 'progress_percent' => 0, // or leave unchanged
