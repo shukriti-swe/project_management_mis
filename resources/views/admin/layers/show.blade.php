@@ -369,9 +369,11 @@
 
                                     <div class="layer-badges mb-2">
 
-                                        <span class="badge {{ !$layer->children->count() ?'bg-primary':'bg-warning text-dark' }}">
-                                            {{ ucfirst($layer->layerType->title) }}
+                                        @if($layer->layerType)
+                                            <span class="badge {{ !$layer->children->count() ?'bg-primary':'bg-warning text-dark' }}">
+                                            {{ ucfirst($layer->layerType?->title) }}
                                         </span>
+                                        @endif
 
                                         @if($layer->status)
                                             <span class="badge" style="background:{{ $layer->status->color }}">
