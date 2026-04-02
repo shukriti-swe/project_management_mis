@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Models\Status;
 use App\Models\LayerType;
 use App\Services\LayerService;
-use App\Services\LayerStatusUpdateService;
+use App\Services\LayerPropagationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -19,7 +19,7 @@ class LayerController extends Controller
 
     public function __construct(
         protected LayerService             $layerService,
-        protected LayerStatusUpdateService $statusService
+        protected LayerPropagationService $statusService
     )
     {
     }
@@ -51,7 +51,7 @@ class LayerController extends Controller
 //        echo "</pre>";
         Layer::all()->each(function ($layer) {
             if (!$layer->children()->exists()) {
-                app(LayerStatusUpdateService::class)
+                app(LayerPropagationService::class)
                     ->updateTaskStatus($layer, $layer->status_id);
             }
         });

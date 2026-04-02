@@ -12,7 +12,7 @@ use Throwable;
 class LayerService
 {
     public function __construct(
-        protected LayerStatusUpdateService $statusService
+        protected LayerPropagationService $statusService
     ) {}
 
     /**

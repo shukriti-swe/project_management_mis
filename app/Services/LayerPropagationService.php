@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class LayerStatusUpdateService
+class LayerPropagationService
 {
     /**
      * Update task status
@@ -21,16 +21,17 @@ class LayerStatusUpdateService
         $isDone = $status->category === 'done';
         $isCanceled = $status->category === 'canceled';
 
+        // -------------------------
+        // 1. Update current layer
+        // -------------------------
         if ($layer->children()->exists()) {
 
             $layer->update([
-                'status_id' => $statusId,
-                'progress_percent' => 0, // or leave unchanged
+                'status_id' => $statusId
             ]);
 
         } else {
 
-            // LEAF → behaves like task
             $layer->update([
                 'status_id' => $statusId,
                 'progress_percent' => $isDone ? 100 : 0,
@@ -39,6 +40,16 @@ class LayerStatusUpdateService
             ]);
         }
 
+        // -------------------------
+        // 2. Cascade DOWN (ONLY if DONE)
+        // -------------------------
+        if ($isDone) {
+            $this->cascadeDown($layer, $statusId);
+        }
+
+        // -------------------------
+        // 3. Bubble UP (for non-done or safety)
+        // -------------------------
         $this->bubbleUp($layer->parent);
     }
 
@@ -68,7 +79,7 @@ class LayerStatusUpdateService
 
             $newProgress = $totalTasks === 0
                 ? 0
-                : (int) round(($completedTasks / $totalTasks) * 100);
+                : (int)round(($completedTasks / $totalTasks) * 100);
 
             if (
                 $parent->progress_percent === $newProgress &&
@@ -86,5 +97,40 @@ class LayerStatusUpdateService
 
             $parent = $parent->parent;
         }
+    }
+
+    protected function cascadeDown(Layer $layer, int $statusId): void
+    {
+        $layer->descendants()
+            ->with('status')
+            ->get()
+            ->each(function ($node) use ($statusId) {
+
+                // skip canceled
+                if ($node->status && $node->status->category === 'canceled') {
+                    return;
+                }
+
+                $isLeaf = !$node->children()->exists();
+
+                if ($isLeaf) {
+                    // Leaf → full update
+                    $node->update([
+                        'status_id' => $statusId,
+                        'progress_percent' => 100,
+                        'total_tasks' => 1,
+                        'completed_tasks' => 1
+                    ]);
+
+                    // propagate from leaf
+                    $this->bubbleUp($node->parent);
+
+                } else {
+                    // Container → status only
+                    $node->update([
+                        'status_id' => $statusId
+                    ]);
+                }
+            });
     }
 }

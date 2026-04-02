@@ -9,7 +9,7 @@ use App\Models\Status;
 use App\Models\LayerType;
 use App\Models\LayerUser;
 use App\Services\LayerService;
-use App\Services\LayerStatusUpdateService;
+use App\Services\LayerPropagationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -20,7 +20,7 @@ class ReportController extends Controller
 {
     public function __construct(
         protected LayerService $layerService,
-        protected LayerStatusUpdateService $statusUpdate
+        protected LayerPropagationService $statusUpdate
     ){}
 
     protected array $affectedParents = [];
