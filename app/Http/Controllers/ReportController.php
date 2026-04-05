@@ -296,7 +296,7 @@ class ReportController extends Controller
             if ($layer) {
                 $oldParentId = $layer->parent_id;
 
-                // ✅ Track affected parents ONLY (no calculation here)
+                // Track affected parents ONLY
                 if ($oldParentId != $parentId) {
                     if ($oldParentId) {
                         $this->affectedParents[] = $oldParentId;
