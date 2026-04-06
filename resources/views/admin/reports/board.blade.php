@@ -838,6 +838,14 @@
             margin-bottom: 20px;
         }
 
+        .date-range-group{
+            max-width: 50%;
+        }
+
+        .assigned-users-group label{
+            margin-bottom: 20px!important;
+        }
+
         .detail-group label {
             font-size: 14px;
             color: var(--muted);
@@ -897,7 +905,15 @@
         .progress-inline {
             display: flex;
             align-items: center;
-            gap: 30px;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .progress-inline .inline-group{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
         }
 
         .subtasks-inline {
@@ -910,7 +926,10 @@
         }
 
         .user-row {
-            display: flex;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            margin-right: 20px;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
 
@@ -924,6 +943,26 @@
             width: 28px;
             height: 28px;
             border-radius: 50%;
+        }
+
+        /* DESCRIPTION */
+        .description-view {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* TREE */
+        .tree-node.active {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .status-btn{
+            cursor: default!important;
+        }
+
+        #currentStatusBtn:hover{
+            color: #FFF;
         }
     </style>
 @endpush
@@ -1054,41 +1093,38 @@
                     <!-- BODY -->
                     <div class="task-details-layout">
 
-                        <!-- ================= LEFT ================= -->
+                        <!-- LEFT -->
                         <div class="details-left">
 
+                            <!-- STATUS -->
                             <div class="detail-group">
                                 <label>Status</label>
-                                <div class="detail-group">
-{{--                                    <label>Status</label>--}}
 
-                                    <div class="status-dropdown btn-group">
-                                        <button id="currentStatusBtn" type="button" class="btn status-btn">
-                                            Status
-                                        </button>
-
-                                        <button type="button"
-                                                class="btn dropdown-toggle dropdown-toggle-split"
-                                                data-bs-toggle="dropdown">
-                                        </button>
-
-                                        <ul id="statusDropdownMenu" class="dropdown-menu"></ul>
-                                    </div>
+                                <div class="btn-group status-dropdown">
+                                    <button id="currentStatusBtn" class="btn status-btn"></button>
+                                    <button id="dropdown-toggle-split" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></button>
+                                    <ul id="statusDropdownMenu" class="dropdown-menu"></ul>
                                 </div>
                             </div>
 
+                            <!-- PROGRESS -->
                             <div class="detail-group">
-                                <label>Progress</label>
 
                                 <div class="progress-inline">
 
-                                    <div class="subtasks-inline">
-                                        <i id="detailsSubtaskIcon"></i> Subtasks Count:
-                                        <span id="detailsSubtasks"></span>
+                                    <div class="inline-group">
+                                        <label>Subtasks</label>
+                                        <div class="subtasks-inline">
+                                            <i id="detailsSubtaskIcon"></i>
+                                            <span id="detailsSubtasks"></span>
+                                        </div>
                                     </div>
 
-                                    <div class="progress">
-                                        <div id="detailsProgressBar" class="progress-bar"></div>
+                                    <div class="inline-group">
+                                        <label>Progress</label>
+                                        <div class="progress">
+                                            <div id="detailsProgressBar" class="progress-bar"></div>
+                                        </div>
                                     </div>
 
                                     <span id="detailsProgressText"></span>
@@ -1096,33 +1132,34 @@
                                 </div>
                             </div>
 
-                            <div class="detail-group">
+                            <!-- DATE -->
+                            <div class="detail-group date-range-group">
                                 <label>Date Range</label>
-                                <input id="detailsDateRange" class="editable-input">
+                                <input id="detailsDateRange">
                             </div>
 
-                            <div class="detail-group">
+                            <!-- USERS -->
+                            <div class="detail-group assigned-users-group">
                                 <label>Assigned Users</label>
-                                <div id="detailsUsers" class="users"></div>
+                                <div id="detailsUsers"></div>
                             </div>
 
+                            <!-- DESCRIPTION (FIXED) -->
                             <div class="detail-group">
                                 <label>Description</label>
-                                <textarea id="detailsDescription" rows="6"></textarea>
+                                <div id="detailsDescription" class="description-view"></div>
                             </div>
 
                         </div>
 
-                        <!-- ================= RIGHT ================= -->
+                        <!-- RIGHT -->
                         <div class="details-right">
 
-                            <!-- TREE -->
                             <div class="tree-section">
                                 <div class="section-title">Structure</div>
                                 <div id="detailsTree"></div>
                             </div>
 
-                            <!-- LOG -->
                             <div class="log-section">
                                 <div class="section-title">Activity</div>
                                 <div id="detailsLog"></div>
@@ -1131,7 +1168,6 @@
                         </div>
 
                     </div>
-
                 </div>
             </div>
         </div>
@@ -1505,13 +1541,16 @@
             // ======================
             const btn = document.getElementById('currentStatusBtn');
             const menu = document.getElementById('statusDropdownMenu');
+            const btn_dropdown = document.getElementById('dropdown-toggle-split')
 
             if (btn && menu && window.allStatuses) {
 
                 // set current
                 const current = window.allStatuses.find(s => s.id === layer.status_id);
                 btn.textContent = current?.label || 'Status';
-                btn.style.background = current?.color || '#ccc';
+                btn.style.background = current?.color || '#999';
+                btn_dropdown.style.background = current?.color || '#999';
+                btn_dropdown.style.filter = 'brightness(0.85)';
 
                 // build menu
                 menu.innerHTML = window.allStatuses.map(s => `
@@ -1589,7 +1628,9 @@
             // DESCRIPTION
             // ======================
             const descEl = document.getElementById('detailsDescription');
-            if (descEl) descEl.value = layer.description || '';
+            if (descEl) {
+                descEl.innerHTML = layer.description || '<i>No description</i>';
+            }
 
             // ======================
             // USERS
