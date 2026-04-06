@@ -93,6 +93,10 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('statuses', StatusController::class)->names('status')->except('show');
 
+    Route::get('/board', [LayerController::class, 'board'])->name('board');
+    Route::get('/board/data', [LayerController::class, 'boardData'])->name('board.data');
+    Route::get('/board/layers', [LayerController::class, 'parentLayers']);
+
 });
 
 require __DIR__ . '/auth.php';
