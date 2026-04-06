@@ -461,5 +461,41 @@ class LayerController extends Controller
             'tree' => $tree
         ]);
     }
+
+    public function updateLayerJson(Request $request, Layer $layer)
+    {
+        Log::info('Received request to update layer with data: ' . json_encode($request->all()));
+        try {
+
+            $data = $request->only([
+                'name',
+                'status_id',
+                'start_time',
+                'end_time',
+                'parent_id',
+                'users',
+                'description'
+            ]);
+
+            // CRITICAL FIX
+            if (!$request->has('users')) {
+                $data['users'] = $layer->users->pluck('id')->toArray();
+            }
+
+            $layer = $this->layerService->updateLayer($layer, $data);
+
+            return response()->json([
+                'success' => true,
+                'layer' => $layer->fresh(['status', 'users'])
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
    

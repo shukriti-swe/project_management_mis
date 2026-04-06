@@ -771,14 +771,31 @@
             color: var(--muted);
         }
 
+        .title-input-group{
+            display: flex;
+            align-items: center;
+            justify-content: start;
+            gap: 8px;
+        }
+
         /* Title input */
         .title-input {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             border: none;
             outline: none;
-            width: 100%;
             background: transparent;
+        }
+
+        .inline-update-btn{
+            padding: 12px 10px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            color: #FFFFFF;
+            background-color: var(--primary);
+        }
+        .inline-update-btn:focus{
+            outline: none;
         }
 
         /* =========================
@@ -1085,7 +1102,10 @@
 
                     <!-- HEADER -->
                     <div class="modal-header">
-                        <input id="detailsName" class="title-input"/>
+                        <div class="title-input-group">
+                            <input id="detailsName" class="title-input"/>
+                            <button id="updateLayerNameBtn" class="inline-update-btn"><i class="fa fa-check"></i></button>
+                        </div>
                         <span class="close" id="closeDetailsModal">&times;</span>
                     </div>
 
@@ -1553,7 +1573,47 @@
             // TITLE (input now)
             // ======================
             const titleEl = document.getElementById('detailsName');
-            if (titleEl) titleEl.value = layer.name;
+            const updateBtn = document.getElementById('updateLayerNameBtn');
+            if (titleEl) {
+                titleEl.value = layer.name;
+
+                // 🔥 store original
+                titleEl.dataset.original = layer.name;
+
+                // hide button initially
+                updateBtn.style.display = 'none';
+            }
+
+            titleEl.addEventListener('input', function () {
+
+                const current = this.value.trim();
+                const original = this.dataset.original;
+
+                if (current !== original && current !== '') {
+                    updateBtn.style.display = 'inline-flex';
+                } else {
+                    updateBtn.style.display = 'none';
+                }
+            });
+
+            updateBtn.onclick = async function () {
+
+                const name = titleEl.value.trim();
+                if (!name) return;
+
+                await updateLayer(window.currentLayerId, {
+                    name: name
+                }, {
+                    refreshDetails: false, // ⚠️ important (avoid rebind issues)
+                    refreshBoard: true
+                });
+
+                // 🔥 update original baseline
+                titleEl.dataset.original = name;
+
+                // 🔥 hide button again
+                updateBtn.style.display = 'none';
+            };
 
             // ======================
             // STATUS (dropdown)
@@ -1639,11 +1699,17 @@
                 locale: {
                     format: 'MMM D, YYYY HH:mm'
                 }
-            }).on('apply.daterangepicker', function (ev, picker) {
+            }).on('apply.daterangepicker', async function (ev, picker) {
 
-                updateLayerField('dates', {
-                    start: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
-                    end: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                const start = picker.startDate.format('YYYY-MM-DD HH:mm:ss');
+                const end = picker.endDate.format('YYYY-MM-DD HH:mm:ss');
+
+                await updateLayer(window.currentLayerId, {
+                    start_time: start,
+                    end_time: end
+                }, {
+                    refreshDetails: true,
+                    refreshBoard: true
                 });
             });
 
@@ -1685,6 +1751,45 @@
             <div>✔ Status changed</div>
             <div>✔ Assigned users</div>
         `;
+            }
+        }
+
+        async function updateLayer(layerId, payload, options = {}) {
+            const {
+                refreshDetails = true,
+                refreshBoard = false
+            } = options;
+
+            try {
+                const res = await fetch(`/board/layers/${layerId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Request failed: ${res.status}`);
+                }
+
+                // 🔁 optional refresh behaviors
+                if (refreshDetails) {
+                    await openTaskDetails(layerId);
+                }
+
+                if (refreshBoard) {
+                    await loadBoardData();
+                }
+
+                return await res.json(); // useful if backend returns updated layer
+
+            } catch (e) {
+                console.error('Layer update failed:', e);
+                throw e; // allow caller to handle if needed
             }
         }
 
