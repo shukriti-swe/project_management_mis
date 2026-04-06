@@ -1132,9 +1132,9 @@
                                 <div class="progress-inline">
 
                                     <div class="inline-group">
-                                        <label>Subtasks</label>
+                                        <i id="detailsSubtaskIcon"></i>
+                                        <label>Subtasks: </label>
                                         <div class="subtasks-inline">
-                                            <i id="detailsSubtaskIcon"></i>
                                             <span id="detailsSubtasks"></span>
                                         </div>
                                     </div>
@@ -1166,7 +1166,17 @@
                             <!-- DESCRIPTION (FIXED) -->
                             <div class="detail-group">
                                 <label>Description</label>
+
+                                <!-- VIEW -->
                                 <div id="detailsDescription" class="description-view"></div>
+
+                                <!-- EDIT (hidden initially) -->
+                                <textarea id="detailsDescriptionEditor" style="display:none;"></textarea>
+
+                                <!-- UPDATE BTN -->
+                                <button id="updateDescriptionBtn" class="inline-update-btn" style="display:none; margin-top: 10px; padding: 4px 10px;">
+                                    Update
+                                </button>
                             </div>
 
                         </div>
@@ -1566,7 +1576,7 @@
         function renderTaskDetails(data) {
             const layer = data.layer;
 
-            // 🔥 IMPORTANT: store current id globally
+            window.currentLayer = layer;
             window.currentLayerId = layer.id;
 
             // ======================
@@ -1708,7 +1718,7 @@
                     start_time: start,
                     end_time: end
                 }, {
-                    refreshDetails: true,
+                    refreshDetails: false,
                     refreshBoard: true
                 });
             });
@@ -1716,10 +1726,66 @@
             // ======================
             // DESCRIPTION
             // ======================
-            const descEl = document.getElementById('detailsDescription');
-            if (descEl) {
-                descEl.innerHTML = layer.description || '<i>No description</i>';
+            const viewEl = document.getElementById('detailsDescription');
+            const editorEl = document.getElementById('detailsDescriptionEditor');
+            const descUpdateBtn = document.getElementById('updateDescriptionBtn');
+
+            // set view
+            viewEl.innerHTML = layer.description || '<i>No description</i>';
+
+            // reset UI
+            viewEl.style.display = 'block';
+            descUpdateBtn.style.display = 'none';
+
+            // IMPORTANT: DO NOT rely on textarea visibility anymore
+            if (window.descriptionEditorInstance) {
+                window.descriptionEditorInstance.ui.view.element.style.display = 'none';
             }
+
+            viewEl.onclick = async function () {
+
+                viewEl.style.display = 'none';
+                descUpdateBtn.style.display = 'inline-flex';
+
+                // FIRST TIME
+                if (!window.descriptionEditorInstance) {
+
+                    const editor = await ClassicEditor.create(editorEl);
+                    window.descriptionEditorInstance = editor;
+
+                }
+
+                // ALWAYS SET FRESH DATA
+                window.descriptionEditorInstance.setData(window.currentLayer.description || '');
+
+                // SHOW editor
+                window.descriptionEditorInstance.ui.view.element.style.display = 'block';
+            };
+
+            descUpdateBtn.onclick = async function () {
+
+                const data = window.descriptionEditorInstance.getData();
+
+                await updateLayer(window.currentLayerId, {
+                    description: data
+                }, {
+                    refreshDetails: false,
+                    refreshBoard: true
+                });
+
+                // 🔥 update local state
+                window.currentLayer.description = data;
+
+                // 🔥 update editor state
+                window.descriptionEditorInstance.setData(data);
+
+                // 🔥 update UI
+                viewEl.innerHTML = data || '<i>No description</i>';
+
+                viewEl.style.display = 'block';
+                window.descriptionEditorInstance.ui.view.element.style.display = 'none';
+                descUpdateBtn.style.display = 'none';
+            };
 
             // ======================
             // USERS
