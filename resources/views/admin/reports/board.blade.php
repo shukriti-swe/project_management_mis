@@ -552,15 +552,6 @@
             margin-bottom: 12px;
         }
 
-        .close {
-            position: absolute;
-            right: 12px;
-            top: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            color: var(--muted);
-        }
-
         /* =========================
            FORM
         ========================= */
@@ -771,6 +762,13 @@
             border-bottom: 1px solid var(--border);
             padding-bottom: 10px;
             margin-bottom: 10px;
+            padding-top: 0;
+        }
+
+        .close {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--muted);
         }
 
         /* Title input */
@@ -1017,9 +1015,11 @@
             <!-- Task Modal -->
             <div class="modal" id="taskModal">
                 <div class="modal-content modal-lg">
-                    <span class="close">&times;</span>
 
-                    <h2 class="modal-title">Create Layer</h2>
+                    <div class="modal-header">
+                        <h2 class="modal-title">Create Layer</h2>
+                        <span class="close">&times;</span>
+                    </div>
 
                     <form id="taskForm">
 
@@ -1083,11 +1083,10 @@
             <div class="modal" id="taskDetailsModal">
                 <div class="modal-content modal-xl">
 
-                    <span class="close" id="closeDetailsModal">&times;</span>
-
                     <!-- HEADER -->
                     <div class="modal-header">
                         <input id="detailsName" class="title-input"/>
+                        <span class="close" id="closeDetailsModal">&times;</span>
                     </div>
 
                     <!-- BODY -->
@@ -1524,6 +1523,26 @@
             }
         });
 
+        async function updateStatus(layer_id, status_id) {
+            try {
+                await fetch(`/update-layer-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({layer_id, status_id })
+                });
+
+                // reload board
+                await loadBoardData();
+                await openTaskDetails(layer_id)
+
+            } catch (err) {
+                console.error('Failed to update status', err);
+            }
+        }
+
         function renderTaskDetails(data) {
             const layer = data.layer;
 
@@ -1566,7 +1585,11 @@
                 // click
                 menu.querySelectorAll('.status-item').forEach(el => {
                     el.addEventListener('click', () => {
-                        updateLayerField('status_id', el.dataset.id);
+
+                        const statusId = parseInt(el.dataset.id);
+
+                        updateStatus(window.currentLayerId, statusId);
+
                         btn.textContent = el.textContent;
                     });
                 });

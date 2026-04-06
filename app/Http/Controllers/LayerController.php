@@ -218,6 +218,9 @@ class LayerController extends Controller
         return view('admin.layers.layer_list', compact('layers', 'layerTypes', 'projects', 'users', 'statuses'));
     }
 
+    /**
+     * @throws \Exception
+     */
     public function updateLayerStatus(Request $request)
     {
         $request->validate([
