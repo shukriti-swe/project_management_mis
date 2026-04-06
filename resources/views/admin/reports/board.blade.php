@@ -975,7 +975,7 @@
 
                         <span id="currentProjectName" class="project-name">Modern Kanban Board</span>
 
-                        <i class="fa-solid fa-rotate"></i> Chnage Project
+                        <i class="fa-solid fa-rotate"></i> Change Project
                         <select id="projectSelect">
                             @foreach($projects as $project)
                                 <option value="{{$project->id}}">{{$project->title}}</option>
