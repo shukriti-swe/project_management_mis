@@ -30,25 +30,6 @@ class LayerController extends Controller
      */
     public function index()
     {
-//        echo "<pre>";
-//
-//        function printTree($nodes, $prefix = '')
-//        {
-//            foreach ($nodes as $node) {
-//
-//                echo $prefix . "├── " . $node->name . "\n";
-//
-//                if ($node->children->isNotEmpty()) {
-//                    printTree($node->children, $prefix . "│   ");
-//                }
-//            }
-//        }
-//
-//        $tree = Layer::get()->toTree();
-//
-//        printTree($tree);
-//
-//        echo "</pre>";
         Layer::all()->each(function ($layer) {
             if (!$layer->children()->exists()) {
                 app(LayerPropagationService::class)
@@ -131,8 +112,6 @@ class LayerController extends Controller
             'users',
             'layerType'
         ]);
-
-//        dd($layer->users->first()->pivot);
 
         $statuses = Status::all();
 
@@ -322,21 +301,6 @@ class LayerController extends Controller
 
         $layer = Layer::findOrFail($request->id);
 
-//        if ($request->column === 'assigned_user_ids') {
-//            $syncData = [];
-//            if (!empty($request->value)) {
-//                foreach ($request->value as $userId) {
-//                    $syncData[$userId] = [
-//                        'assigned_by' => auth()->id(),
-//                        'assigned_at' => now(),
-//                    ];
-//                }
-//            }
-//            $layer->users()->sync($syncData);
-//        } else {
-//            $layer->{$request->column} = $request->value ?: null;
-//            $layer->save();
-//        }
         if ($request->column === 'assigned_user_ids') {
 
             $syncData = [];
@@ -469,6 +433,29 @@ class LayerController extends Controller
 
         return response()->json([
             'layers' => $layers
+        ]);
+    }
+
+    public function layerDetailJson($id)
+    {
+        $layer = Layer::with([
+            'status',
+            'users',
+            'ancestors',
+        ])->findOrFail($id);
+
+        $root = $layer->ancestors()
+            ->defaultOrder()
+            ->first()
+            ?? $layer;
+
+        $tree = Layer::with(['status', 'users'])
+            ->descendantsAndSelf($layer->id)
+            ->toTree();
+
+        return response()->json([
+            'layer' => $layer,
+            'tree' => $tree
         ]);
     }
 }

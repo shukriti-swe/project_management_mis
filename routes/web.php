@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/board', [LayerController::class, 'board'])->name('board');
     Route::get('/board/data', [LayerController::class, 'boardData'])->name('board.data');
     Route::get('/board/layers', [LayerController::class, 'parentLayers']);
+    Route::get('/board/layers/{layer}', [LayerController::class, 'layerDetailJson'])->name('board.layerDetailJson');
 
 });
 

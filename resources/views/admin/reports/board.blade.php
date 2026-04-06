@@ -85,7 +85,7 @@
             margin-right: 30px;
         }
 
-         /*Make select2 compact */
+        /*Make select2 compact */
         #projectSelect + .select2-container {
             min-width: 200px;
         }
@@ -112,6 +112,11 @@
             gap: 6px;
         }
 
+        #addTaskBtn:hover, .submit-btn:hover {
+            color: #FFF;
+            background-color: #376dc6;
+        }
+
         /* =========================
            BOARD
         ========================= */
@@ -133,6 +138,7 @@
 
             background: var(--column-bg);
             border: 1px solid var(--border);
+            border-top: 4px solid var(--status-color, #939393);
             border-radius: var(--radius);
             padding: 8px;
 
@@ -165,10 +171,10 @@
 
         /* Count */
         .task-count {
-            background: #e5e7eb;
-            color: #374151;
-            font-size: 11px;
-            padding: 2px 6px;
+            background: var(--status-color, #e5e7eb);
+            color: #FFF;
+            font-size: 13px;
+            padding: 2px 10px;
             border-radius: 999px;
         }
 
@@ -250,6 +256,11 @@
         .task-title {
             font-size: 13px;
             font-weight: 500;
+            cursor: pointer;
+        }
+
+        .task-title:hover {
+            text-decoration: underline;
         }
 
         /* Assignee */
@@ -607,6 +618,7 @@
 
             overflow: hidden !important;
         }
+
         .container-fluid {
             height: 100% !important;
             display: flex;
@@ -619,8 +631,8 @@
 
         header {
             flex: 0 0 auto !important;
-            margin: 0 0 20px!important;
-            padding: 10px 0 20px!important;
+            margin: 0 0 20px !important;
+            padding: 10px 0 20px !important;
             border-bottom: 1px solid var(--border);
         }
 
@@ -701,7 +713,7 @@
 
         /* On hover: show thin scrollbar */
         .task-list:hover::-webkit-scrollbar {
-            width: 2px!important;
+            width: 2px !important;
         }
 
         /* Track */
@@ -736,7 +748,182 @@
         /* Firefox hover (approximation) */
         .task-list:hover {
             scrollbar-width: thin;
-            scrollbar-color: rgba(0,0,0,0.15) transparent;
+            scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+        }
+    </style>
+    <style>
+        /* =========================
+           LARGE MODAL
+        ========================= */
+        .modal-xl {
+            width: 70vw;
+            height: 70vh;
+
+            max-width: none;
+            margin: 20px auto;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .modal-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Title input */
+        .title-input {
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            outline: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        /* =========================
+           LAYOUT
+        ========================= */
+        .task-details-layout {
+            display: flex;
+            height: 100%;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        /* LEFT PANEL (3 parts) */
+        .details-left {
+            flex: 3;
+            overflow-y: auto;
+            padding: 40px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        /* RIGHT PANEL (2 parts) */
+        .details-right {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* =========================
+           SECTIONS
+        ========================= */
+        .tree-section,
+        .log-section {
+            flex: 1;
+            overflow-y: auto;
+
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           DETAIL FIELDS
+        ========================= */
+        .detail-group {
+            margin-bottom: 20px;
+        }
+
+        .detail-group label {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Inputs */
+        .editable-input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        /* =========================
+           USERS
+        ========================= */
+        .users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        /* =========================
+           TREE
+        ========================= */
+        .tree-node {
+            padding-left: 10px;
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .tree-node.active {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .tree-children {
+            margin-left: 12px;
+            border-left: 1px dashed #ddd;
+            padding-left: 8px;
+        }
+
+        /* =========================
+           LOG
+        ========================= */
+        #detailsLog div {
+            font-size: 12px;
+            padding: 4px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .progress-inline {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .subtasks-inline {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 60px;
+        }
+
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 6px;
+            border-radius: 6px;
+
+            background: #f8fafc;
+        }
+
+        .user-row img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
         }
     </style>
 @endpush
@@ -760,13 +947,13 @@
                     </div>
 
                     <button id="addTaskBtn" class="btn addTaskBtn">
-                        <i class="fas fa-plus"></i> Add Task
+                        <i class="fas fa-plus"></i> Add Layer
                     </button>
                 </header>
 
                 <div class="board">
                     @foreach($statuses as $status)
-                        <div class="column" id="{{$status->id}}">
+                        <div class="column" id="{{$status->id}}" style="--status-color: {{ $status->color }}">
                             <div class="column-header">
                                 <div class="left">
                                     <h2>{{ucfirst($status->label)}}</h2>
@@ -829,7 +1016,7 @@
                             <label>Parent Layer</label>
                             <select id="parentLayerSelect">
                                 <option value="">None</option>
-                                 <!-- Options will be loaded dynamically -->
+                                <!-- Options will be loaded dynamically -->
                             </select>
                         </div>
 
@@ -847,10 +1034,104 @@
                             <textarea id="taskDescription" rows="3"></textarea>
                         </div>
 
-                        <button type="submit" class="btn">
-                            <i class="fas fa-plus"></i> Create Layer
+                        <button type="submit" class="btn submit-btn">
+                            <i class="fas fa-check"></i> Create Layer
                         </button>
                     </form>
+                </div>
+            </div>
+
+            <div class="modal" id="taskDetailsModal">
+                <div class="modal-content modal-xl">
+
+                    <span class="close" id="closeDetailsModal">&times;</span>
+
+                    <!-- HEADER -->
+                    <div class="modal-header">
+                        <input id="detailsName" class="title-input"/>
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="task-details-layout">
+
+                        <!-- ================= LEFT ================= -->
+                        <div class="details-left">
+
+                            <div class="detail-group">
+                                <label>Status</label>
+                                <div class="detail-group">
+{{--                                    <label>Status</label>--}}
+
+                                    <div class="status-dropdown btn-group">
+                                        <button id="currentStatusBtn" type="button" class="btn status-btn">
+                                            Status
+                                        </button>
+
+                                        <button type="button"
+                                                class="btn dropdown-toggle dropdown-toggle-split"
+                                                data-bs-toggle="dropdown">
+                                        </button>
+
+                                        <ul id="statusDropdownMenu" class="dropdown-menu"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-group">
+                                <label>Progress</label>
+
+                                <div class="progress-inline">
+
+                                    <div class="subtasks-inline">
+                                        <i id="detailsSubtaskIcon"></i> Subtasks Count:
+                                        <span id="detailsSubtasks"></span>
+                                    </div>
+
+                                    <div class="progress">
+                                        <div id="detailsProgressBar" class="progress-bar"></div>
+                                    </div>
+
+                                    <span id="detailsProgressText"></span>
+
+                                </div>
+                            </div>
+
+                            <div class="detail-group">
+                                <label>Date Range</label>
+                                <input id="detailsDateRange" class="editable-input">
+                            </div>
+
+                            <div class="detail-group">
+                                <label>Assigned Users</label>
+                                <div id="detailsUsers" class="users"></div>
+                            </div>
+
+                            <div class="detail-group">
+                                <label>Description</label>
+                                <textarea id="detailsDescription" rows="6"></textarea>
+                            </div>
+
+                        </div>
+
+                        <!-- ================= RIGHT ================= -->
+                        <div class="details-right">
+
+                            <!-- TREE -->
+                            <div class="tree-section">
+                                <div class="section-title">Structure</div>
+                                <div id="detailsTree"></div>
+                            </div>
+
+                            <!-- LOG -->
+                            <div class="log-section">
+                                <div class="section-title">Activity</div>
+                                <div id="detailsLog"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -931,6 +1212,9 @@
             const end_time = $('#dateRange').data('end');
 
         });
+    </script>
+    <script>
+        window.allStatuses = @json($statuses);
     </script>
     <script>
         // DOM Elements
@@ -1170,6 +1454,196 @@
             taskElement.addEventListener('dragend', handleDragEnd);
 
             taskList.appendChild(taskElement);
+
+            const titleEl = taskElement.querySelector('.task-title');
+
+            titleEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openTaskDetails(task.id);
+            });
+        }
+
+        async function openTaskDetails(taskId) {
+            try {
+                const res = await fetch(`/board/layers/${taskId}`);
+                const data = await res.json();
+
+                renderTaskDetails(data);
+
+                document.getElementById('taskDetailsModal').style.display = 'block';
+
+            } catch (err) {
+                console.error('Failed to load task details', err);
+            }
+        }
+
+        document.getElementById('closeDetailsModal').addEventListener('click', () => {
+            document.getElementById('taskDetailsModal').style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('taskDetailsModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        function renderTaskDetails(data) {
+            const layer = data.layer;
+
+            // 🔥 IMPORTANT: store current id globally
+            window.currentLayerId = layer.id;
+
+            // ======================
+            // TITLE (input now)
+            // ======================
+            const titleEl = document.getElementById('detailsName');
+            if (titleEl) titleEl.value = layer.name;
+
+            // ======================
+            // STATUS (dropdown)
+            // ======================
+            const btn = document.getElementById('currentStatusBtn');
+            const menu = document.getElementById('statusDropdownMenu');
+
+            if (btn && menu && window.allStatuses) {
+
+                // set current
+                const current = window.allStatuses.find(s => s.id === layer.status_id);
+                btn.textContent = current?.label || 'Status';
+                btn.style.background = current?.color || '#ccc';
+
+                // build menu
+                menu.innerHTML = window.allStatuses.map(s => `
+        <li>
+            <a class="dropdown-item status-item"
+               data-id="${s.id}"
+               style="color:${s.color}">
+                ${s.label}
+            </a>
+        </li>
+    `).join('');
+
+                // click
+                menu.querySelectorAll('.status-item').forEach(el => {
+                    el.addEventListener('click', () => {
+                        updateLayerField('status_id', el.dataset.id);
+                        btn.textContent = el.textContent;
+                    });
+                });
+            }
+
+            // ======================
+            // SUBTASKS
+            // ======================
+            const subtasksEl = document.getElementById('detailsSubtasks');
+            if (subtasksEl) {
+                subtasksEl.textContent = `${layer.completed_tasks}/${layer.total_tasks}`;
+            }
+
+            const isComplete = layer.total_tasks > 0 && layer.completed_tasks === layer.total_tasks;
+
+            document.getElementById('detailsSubtaskIcon').className =
+                isComplete ? 'fas fa-check-square' : 'far fa-square';
+
+            document.getElementById('detailsSubtasks').textContent =
+                `${layer.completed_tasks}/${layer.total_tasks}`;
+
+            // ======================
+            // PROGRESS
+            // ======================
+            const progress = layer.progress_percent || 0;
+
+            const bar = document.getElementById('detailsProgressBar');
+            const text = document.getElementById('detailsProgressText');
+
+            if (bar) bar.style.width = progress + '%';
+            if (text) text.textContent = progress + '%';
+
+            // ======================
+            // DATE
+            // ======================
+            const dateEl = document.getElementById('detailsDateRange');
+            if (dateEl) {
+                dateEl.value = `${formatDate(layer.start_time)} → ${formatDate(layer.end_time)}`;
+            }
+
+            $('#detailsDateRange').daterangepicker({
+                timePicker: true,
+                timePicker24Hour: true,
+                autoUpdateInput: true,
+                startDate: moment(layer.start_time),
+                endDate: moment(layer.end_time),
+                locale: {
+                    format: 'MMM D, YYYY HH:mm'
+                }
+            }).on('apply.daterangepicker', function (ev, picker) {
+
+                updateLayerField('dates', {
+                    start: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
+                    end: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                });
+            });
+
+            // ======================
+            // DESCRIPTION
+            // ======================
+            const descEl = document.getElementById('detailsDescription');
+            if (descEl) descEl.value = layer.description || '';
+
+            // ======================
+            // USERS
+            // ======================
+            const usersEl = document.getElementById('detailsUsers');
+            if (usersEl) {
+                usersEl.innerHTML = layer.users.map(u => `
+    <div class="user-row">
+        <img src="https://i.pravatar.cc/32?u=${u.id}">
+        <span>${u.name}</span>
+    </div>
+`).join('');
+            }
+
+            // ======================
+            // TREE
+            // ======================
+            if (data.tree) {
+                renderTree(data.tree, layer.id);
+            }
+
+            // ======================
+            // LOG (static for now)
+            // ======================
+            const logEl = document.getElementById('detailsLog');
+            if (logEl) {
+                logEl.innerHTML = `
+            <div>✔ Created</div>
+            <div>✔ Status changed</div>
+            <div>✔ Assigned users</div>
+        `;
+            }
+        }
+
+        function renderTree(tree, currentId) {
+            const container = document.getElementById('detailsTree'); // create this div
+
+            const root = tree[0];
+
+            container.innerHTML = renderNode(root, currentId);
+        }
+
+        function renderNode(node, currentId) {
+            return `
+        <div class="tree-node ${node.id === currentId ? 'active' : ''}">
+            ${node.name}
+
+            ${node.children?.length ? `
+                <div class="tree-children">
+                    ${node.children.map(child => renderNode(child, currentId)).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
         }
 
         // Drag and Drop Handlers
