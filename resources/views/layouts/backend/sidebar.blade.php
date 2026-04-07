@@ -66,6 +66,13 @@
 			</ul>
 		</li>
 
+        <li>
+            <a href="{{ route('board') }}">
+                <div class="parent-icon"><i class="bx bx-user-circle"></i></div>
+                <div class="menu-title">Board</div>
+            </a>
+        </li>
+
 		<li>
             <a href="javascript:;" class="has-arrow">
                 <div class="parent-icon"><i class="bx bx-user-circle"></i></div>
