@@ -131,7 +131,7 @@
            COLUMN
         ========================= */
         .column {
-            min-width: 320px;
+            min-width: 310px;
             /*max-width: 280px;   !* critical *!*/
 
             flex: 0 0 280px; /* prevents expansion */
