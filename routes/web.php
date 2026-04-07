@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/projects/{id}/edit', [ReportController::class, 'editProject'])->name('project.edit');
     Route::post('/projects/update', [ReportController::class, 'updateProject'])->name('project.update');
     Route::delete('/projects/{id}', [ReportController::class, 'destroyProject'])->name('project.delete');
+    Route::post('project/update-dates', [ReportController::class, 'updateDates'])->name('project.updateDates');
     Route::post('/layers/reorder', [ReportController::class, 'reorderLayers'])->name('layers.reorder');
     Route::post('/project/child/store', [ReportController::class, 'storeProjectChild'])->name('project.child.store');
     Route::get('/project/child/edit/{id}', [ReportController::class, 'editProjectChild'])->name('project.child.edit');

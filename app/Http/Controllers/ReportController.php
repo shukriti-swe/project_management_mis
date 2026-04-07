@@ -106,42 +106,14 @@ class ReportController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-//    public function storeProjectChild(Request $request)
-//    {
-//        $request->validate([
-//            'name' => 'required|string|max:255',
-//            'project_id' => 'required',
-//            'status_id' => 'required',
-//        ]);
-//
-//        $lastPosition = Layer::where('project_id', $request->project_id)
-//                        ->where('parent_id', $request->parent_id)
-//                        ->max('position') ?? 0;
-//
-//        $layer = new Layer();
-//        $layer->name = $request->name;
-//        $layer->project_id = $request->project_id;
-//        $layer->parent_id = $request->parent_id;
-//        $layer->start_time = $request->start_time;
-//        $layer->end_time = $request->end_time;
-//        $layer->status_id = $request->status_id;
-//        $layer->position = $lastPosition + 1;
-//        $layer->save();
-//
-//        // Multiple Users Sync with Pivot Data
-//        if ($request->has('user_ids')) {
-//            $syncData = [];
-//            foreach ($request->user_ids as $userId) {
-//                $syncData[$userId] = [
-//                    'assigned_by' => auth()->id(),
-//                    'assigned_at' => now(),
-//                ];
-//            }
-//            $layer->users()->sync($syncData);
-//        }
-//
-//        return response()->json(['status' => 'success', 'message' => 'Layer added successfully!']);
-//    }
+    public function updateDates(Request $request) {
+        Project::find($request->project_id)->update([
+            'start_time' => $request->start_time,
+            'end_time'   => $request->end_time,
+        ]);
+        return response()->json(['status' => 'success']);
+    }
+
     public function storeProjectChild(Request $request)
     {
         try {
@@ -178,36 +150,6 @@ class ReportController extends Controller
         return response()->json($layer);
     }
 
-//    public function updateProjectChild(Request $request)
-//    {
-//        $request->validate([
-//            'name' => 'required|string|max:255',
-//            'status_id' => 'required',
-//        ]);
-//
-//        $layer = Layer::findOrFail($request->layer_id);
-//        $layer->name = $request->name;
-//        $layer->start_time = $request->start_time;
-//        $layer->end_time = $request->end_time;
-//        $layer->status_id = $request->status_id;
-//        $layer->save();
-//
-//        // Update Users
-//        if ($request->has('user_ids')) {
-//            $syncData = [];
-//            foreach ($request->user_ids as $userId) {
-//                $syncData[$userId] = [
-//                    'assigned_by' => auth()->id(),
-//                    'assigned_at' => now(),
-//                ];
-//            }
-//            $layer->users()->sync($syncData);
-//        } else {
-//            $layer->users()->detach(); // যদি সব ইউজার রিমুভ করে দেওয়া হয়
-//        }
-//
-//        return response()->json(['status' => 'success', 'message' => 'Layer updated successfully!']);
-//    }
     public function updateProjectChild(Request $request)
     {
         try {
