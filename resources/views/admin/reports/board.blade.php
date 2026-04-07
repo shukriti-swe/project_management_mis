@@ -252,6 +252,12 @@
             opacity: 0.5;
         }
 
+        .no-select {
+            user-select: none !important;
+            -webkit-user-select: none !important;
+            -ms-user-select: none !important;
+        }
+
         /* Title */
         .task-title {
             font-size: 13px;
@@ -2171,14 +2177,14 @@
         ========================= */
         board.addEventListener('mousedown', (e) => {
 
-            // ❌ disable if no overflow
             if (!board.classList.contains('is-draggable')) return;
 
-            // ❌ ignore task drag
             if (e.target.closest('.task-card')) return;
 
             isDown = true;
             board.classList.add('grabbing');
+
+            document.body.classList.add('no-select');
 
             startX = e.pageX - board.offsetLeft;
             scrollLeft = board.scrollLeft;
@@ -2187,11 +2193,13 @@
         board.addEventListener('mouseleave', () => {
             isDown = false;
             board.classList.remove('grabbing');
+            document.body.classList.remove('no-select');
         });
 
         board.addEventListener('mouseup', () => {
             isDown = false;
             board.classList.remove('grabbing');
+            document.body.classList.remove('no-select');
         });
 
         board.addEventListener('mousemove', (e) => {
