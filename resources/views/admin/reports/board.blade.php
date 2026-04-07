@@ -1987,6 +1987,8 @@
                     throw new Error(`Request failed: ${res.status}`);
                 }
 
+                showToast('Updated successfully', 'success');
+
                 // 🔁 optional refresh behaviors
                 if (refreshDetails) {
                     await openTaskDetails(layerId);
@@ -1999,6 +2001,7 @@
                 return await res.json(); // useful if backend returns updated layer
 
             } catch (e) {
+                showToast('Update Failed. Something went wrong', 'error');
                 console.error('Layer update failed:', e);
                 throw e; // allow caller to handle if needed
             }

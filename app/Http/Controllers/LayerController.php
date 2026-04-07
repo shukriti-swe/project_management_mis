@@ -298,57 +298,86 @@ class LayerController extends Controller
     /**
      * @throws Throwable
      */
+//    public function inlineUpdate(Request $request)
+//    {
+//        Log::info('Received inline update request with data: ' . json_encode($request->all()));
+//        $request->validate([
+//            'id' => 'required|exists:layers,id',
+//            'column' => 'required|string',
+//            'value' => 'nullable'
+//        ]);
+//
+//        $layer = Layer::findOrFail($request->id);
+//
+//        if ($request->column === 'assigned_user_ids') {
+//
+//            $syncData = [];
+//
+//            if (!empty($request->value)) {
+//                foreach ($request->value as $userId) {
+//                    $syncData[$userId] = [
+//                        'assigned_by' => auth()->id(),
+//                        'assigned_at' => now(),
+//                    ];
+//                }
+//            }
+//
+//            $layer->users()->sync($syncData);
+//
+//        } elseif ($request->column === 'status_id') {
+//
+//            $this->layerService->changeStatus($layer, $request->value);
+//
+//        } elseif ($request->column === 'parent_id') {
+//
+//            $this->layerService->updateLayer($layer, [
+//                'parent_id' => $request->value
+//            ]);
+//
+//        } else {
+//
+//            $layer->{$request->column} = $request->value ?: null;
+//            $layer->save();
+//
+//            // handle date propagation
+//            if (in_array($request->column, ['start_time', 'end_time'])) {
+//                if ($layer->parent) {
+//                    $this->statusService->calculate($layer->parent);
+//                }
+//            }
+//        }
+//
+//        return response()->json(['success' => true]);
+//    }
     public function inlineUpdate(Request $request)
     {
         $request->validate([
             'id' => 'required|exists:layers,id',
-            'column' => 'required|string',
+            'column' => 'required|string|in:assigned_user_ids,parent_id',
             'value' => 'nullable'
         ]);
 
         $layer = Layer::findOrFail($request->id);
 
+        $data = [];
+
         if ($request->column === 'assigned_user_ids') {
 
-            $syncData = [];
-
-            if (!empty($request->value)) {
-                foreach ($request->value as $userId) {
-                    $syncData[$userId] = [
-                        'assigned_by' => auth()->id(),
-                        'assigned_at' => now(),
-                    ];
-                }
-            }
-
-            $layer->users()->sync($syncData);
-
-        } elseif ($request->column === 'status_id') {
-
-            $this->layerService->changeStatus($layer, $request->value);
+            $data['users'] = $request->value ?? [];
 
         } elseif ($request->column === 'parent_id') {
 
-            $this->layerService->updateLayer($layer, [
-                'parent_id' => $request->value
-            ]);
-
-        } else {
-
-            $layer->{$request->column} = $request->value ?: null;
-            $layer->save();
-
-            // handle date propagation
-            if (in_array($request->column, ['start_time', 'end_time'])) {
-                if ($layer->parent) {
-                    $this->statusService->calculate($layer->parent);
-                }
-            }
+            $data['parent_id'] = $request->value;
         }
+
+        $this->layerService->updateLayer($layer, $data);
 
         return response()->json(['success' => true]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function updateLayerSchedule(Request $request, Layer $layer)
     {
         $validated = $request->validate([
@@ -356,11 +385,7 @@ class LayerController extends Controller
             'end_time' => 'required|date|after_or_equal:start_time',
         ]);
 
-        $layer->update($validated);
-
-        if ($layer->parent) {
-            $this->statusService->calculate($layer->parent);
-        }
+        $this->layerService->updateLayer($layer, $validated);
 
         return response()->json(['success' => true]);
     }
@@ -479,7 +504,6 @@ class LayerController extends Controller
 
     public function updateLayerJson(Request $request, Layer $layer)
     {
-        Log::info('Received request to update layer with data: ' . json_encode($request->all()));
         try {
 
             $data = $request->only([
@@ -501,6 +525,7 @@ class LayerController extends Controller
 
             return response()->json([
                 'success' => true,
+                'message' => 'Layer updated successfully',
                 'layer' => $layer->fresh(['status', 'users'])
             ]);
 
@@ -509,7 +534,7 @@ class LayerController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ], 500);
+            ], 422);
         }
     }
 }
