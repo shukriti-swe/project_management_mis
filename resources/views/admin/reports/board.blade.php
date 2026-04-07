@@ -919,6 +919,19 @@
 
             line-height: 1.4;
             max-height: calc(1.4em * 2);
+            cursor: pointer;
+        }
+
+        .tree-node-title-root{
+            color: #666666;
+            cursor: text;
+        }
+        .tree-node-title-root:hover{
+            text-decoration: none!important;
+        }
+
+        .tree-node-title:hover {
+            text-decoration: underline;
         }
 
         .tree-node.active {
@@ -976,6 +989,40 @@
             border-radius: 6px;
 
             background: #f8fafc;
+            position: relative;
+        }
+
+        #detailsUsers{
+            margin-top: 20px;
+        }
+
+        .user-remove {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+
+            width: 20px;
+            height: 20px;
+
+            border: none;
+            border-radius: 50%;
+
+            background: #535353;
+            color: #fff;
+
+            font-size: 14px; /* 🔥 slightly smaller */
+            cursor: pointer;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            line-height: 1; /* remove extra vertical spacing */
+            padding: 0;     /* remove default button padding */
+        }
+
+        .user-row:hover .user-remove {
+            display: flex;
         }
 
         .user-row img {
@@ -1014,7 +1061,7 @@
                     <div class="header-project">
                         <span class="label">PROJECT</span>
 
-                        <span id="currentProjectName" class="project-name">Modern Kanban Board</span>
+                        <span id="currentProjectName" class="project-name"></span>
 
                         <i class="fa-solid fa-rotate"></i> Change Project
                         <select id="projectSelect">
@@ -1184,6 +1231,7 @@
                             <!-- USERS -->
                             <div class="detail-group assigned-users-group">
                                 <label>Assigned Users</label>
+                                <select id="detailsUsersSelect" class="user-select2" multiple style="width:100%;"></select>
                                 <div id="detailsUsers"></div>
                             </div>
 
@@ -1231,6 +1279,10 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <script>
+        window.allStatuses = @json($statuses);
+        window.allUsers = @json($users);
+    </script>
+    <script>
         $(document).ready(function () {
             $('#projectSelect').select2({
                 placeholder: "Select project",
@@ -1247,6 +1299,9 @@
                 loadBoardData();
                 loadParentLayers();
             });
+
+            const initialText = $('#projectSelect option:selected').text();
+            $('#currentProjectName').text(initialText);
 
             $('#usersSelect').select2({
                 placeholder: "Assign users",
@@ -1301,9 +1356,6 @@
             const end_time = $('#dateRange').data('end');
 
         });
-    </script>
-    <script>
-        window.allStatuses = @json($statuses);
     </script>
     <script>
         // DOM Elements
@@ -1797,13 +1849,13 @@
                     refreshBoard: true
                 });
 
-                // 🔥 update local state
+                // update local state
                 window.currentLayer.description = data;
 
-                // 🔥 update editor state
+                // update editor state
                 window.descriptionEditorInstance.setData(data);
 
-                // 🔥 update UI
+                // update UI
                 viewEl.innerHTML = data || '<i>No description</i>';
 
                 viewEl.style.display = 'block';
@@ -1814,15 +1866,83 @@
             // ======================
             // USERS
             // ======================
+
             const usersEl = document.getElementById('detailsUsers');
+
             if (usersEl) {
                 usersEl.innerHTML = layer.users.map(u => `
-    <div class="user-row">
-        <img src="https://i.pravatar.cc/32?u=${u.id}">
-        <span>${u.name}</span>
-    </div>
-`).join('');
+        <div class="user-row" data-id="${u.id}">
+            <img src="https://i.pravatar.cc/32?u=${u.id}">
+            <span>${u.name}</span>
+            <button class="user-remove">&times;</button>
+        </div>
+    `).join('');
             }
+
+            // EMOVE USER (safe — DOM recreated each render)
+            usersEl.querySelectorAll('.user-remove').forEach(btn => {
+                btn.onclick = async function () {
+
+                    const userId = parseInt(this.closest('.user-row').dataset.id);
+
+                    const updatedUsers = window.currentLayer.users
+                        .filter(u => u.id !== userId)
+                        .map(u => u.id);
+
+                    await updateLayer(window.currentLayerId, {
+                        users: updatedUsers
+                    }, {
+                        refreshDetails: true,
+                        refreshBoard: true
+                    });
+                };
+            });
+
+
+            // ======================
+            // SELECT2 (FIXED)
+            // ======================
+
+            const select = $('#detailsUsersSelect');
+
+            // FULL RESET (critical)
+            if (select.hasClass("select2-hidden-accessible")) {
+                select.select2('destroy');
+            }
+
+            select.off('change');   // remove old listeners
+            select.empty();         // clear options
+
+
+            // populate options
+            window.allUsers.forEach(u => {
+                select.append(new Option(u.name, u.id));
+            });
+
+            // set selected (NO trigger change to avoid loop)
+            select.val(layer.users.map(u => u.id));
+
+
+            // init select2
+            select.select2({
+                placeholder: "Add users",
+                width: '100%'
+            });
+
+
+            // HANDLE CHANGE (clean, single binding)
+            select.on('change', async function () {
+
+                const selected = ($(this).val() || []).map(id => parseInt(id));
+
+                await updateLayer(window.currentLayerId, {
+                    users: selected
+                }, {
+                    refreshDetails: true,
+                    refreshBoard: true
+                });
+
+            });
 
             // ======================
             // TREE
@@ -1837,9 +1957,10 @@
             const logEl = document.getElementById('detailsLog');
             if (logEl) {
                 logEl.innerHTML = `
-            <div>✔ Created</div>
-            <div>✔ Status changed</div>
-            <div>✔ Assigned users</div>
+            <div>Assigned users by John Doe on 22 Jun, 2026</div>
+            <div>Status changed by Mark on 14 Jun, 2026</div>
+            <div>Title Updated by Mark on 14 Jun, 2026</div>
+            <div>Layer created by John Doe on 9 Feb, 2026</div>
         `;
             }
         }
@@ -1891,11 +2012,28 @@
             container.innerHTML = renderNode(root, currentId);
         }
 
+        const treeContainer = document.getElementById('detailsTree');
+
+        // 🔥 delegate instead of querySelectorAll (cleaner, no rebind issues)
+        treeContainer.onclick = async function (e) {
+
+            const el = e.target.closest('.tree-node-title');
+            if (!el) return;
+
+            const id = parseInt(el.dataset.id);
+
+            // ignore same node
+            if (id === window.currentLayerId) return;
+
+            // 🔥 load new layer into SAME modal
+            await openTaskDetails(id);
+        };
+
         function renderNode(node, currentId) {
             return `
         <div class="tree-node ${node.id === currentId ? 'active' : ''}">
 
-            <div class="tree-node-title">
+            <div class="tree-node-title ${node.id === currentId ? 'tree-node-title-root': ''}" data-id="${node.id}">
                 ${node.name}
             </div>
 
