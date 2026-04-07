@@ -99,7 +99,9 @@ class LayerService
     {
         return DB::transaction(function () use ($layer, $data) {
 
-            $users = $data['users'] ?? [];
+            $hasUsers = array_key_exists('users', $data);
+            $users = $data['users'] ?? null;
+
             unset($data['users']);
 
             $oldParent = $layer->parent;
@@ -111,6 +113,8 @@ class LayerService
 
             // remove status from mass update (handled separately)
             unset($data['status_id']);
+
+            $this->validateParentDateBounds($layer, $data);
 
             // -------------------------
             // 1. Handle parent change (STRUCTURE ONLY)
@@ -148,6 +152,16 @@ class LayerService
 
             } else {
                 $layer->update($data);
+
+                $dateChanged =
+                    array_key_exists('start_time', $data) ||
+                    array_key_exists('end_time', $data);
+
+                if ($dateChanged && !$statusChanged) {
+                    if ($layer->parent) {
+                        $this->statusService->bubbleUpDates($layer->parent);
+                    }
+                }
             }
 
             // -------------------------
@@ -174,22 +188,25 @@ class LayerService
             // -------------------------
             // 4. Sync users
             // -------------------------
-            $assigner = auth()->id();
-            $now = now();
+            if ($hasUsers) {
 
-            $syncData = [];
-            $existingAssignments = $layer->users->keyBy('id');
+                $assigner = auth()->id();
+                $now = now();
 
-            foreach ($users as $userId) {
-                $existing = $existingAssignments->get($userId);
+                $syncData = [];
+                $existingAssignments = $layer->users->keyBy('id');
 
-                $syncData[$userId] = [
-                    'assigned_by' => $assigner,
-                    'assigned_at' => $existing?->pivot->assigned_at ?? $now
-                ];
+                foreach ($users as $userId) {
+                    $existing = $existingAssignments->get($userId);
+
+                    $syncData[$userId] = [
+                        'assigned_by' => $assigner,
+                        'assigned_at' => $existing?->pivot->assigned_at ?? $now
+                    ];
+                }
+
+                $layer->users()->sync($syncData);
             }
-
-            $layer->users()->sync($syncData);
 
             return $layer;
         });
@@ -233,16 +250,45 @@ class LayerService
     }
 
     /**
-     * Resolve task progress from status
+     * @throws Exception
      */
-//    protected function resolveTaskProgress(?int $statusId): int
-//    {
-//        if (!$statusId) {
-//            return 0;
-//        }
-//
-//        $status = Status::select('id','category')->find($statusId);
-//
-//        return ($status?->category === 'done') ? 100 : 0;
-//    }
+    protected function validateParentDateBounds(Layer $layer, array $data): void
+    {
+        // Skip if no date change
+        if (
+            !array_key_exists('start_time', $data) &&
+            !array_key_exists('end_time', $data)
+        ) {
+            return;
+        }
+
+        if (!$layer->children()->exists()) {
+            return;
+        }
+
+        $newStart = $data['start_time'] ?? $layer->start_time;
+        $newEnd   = $data['end_time'] ?? $layer->end_time;
+
+        $stats = $layer->children()
+            ->selectRaw('
+            MIN(start_time) as min_start,
+            MAX(end_time) as max_end
+        ')
+            ->first();
+
+        if (!$stats) {
+            return;
+        }
+
+        $childMin = $stats->min_start;
+        $childMax = $stats->max_end;
+
+        if ($childMin && $newStart && $newStart > $childMin) {
+            throw new Exception('Parent start_time cannot be after child start_time.');
+        }
+
+        if ($childMax && $newEnd && $newEnd < $childMax) {
+            throw new Exception('Parent end_time cannot be before child end_time.');
+        }
+    }
 }

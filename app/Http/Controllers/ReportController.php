@@ -277,6 +277,9 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     public function updateDatesAjax(Request $request)
     {
         $request->validate([
@@ -286,9 +289,11 @@ class ReportController extends Controller
         ]);
 
         $layer = Layer::findOrFail($request->layer_id);
-        $layer->start_time = $request->start_time;
-        $layer->end_time = $request->end_time;
-        $layer->save();
+        $this->layerService->updateLayer($layer, [
+            'start_time' => $request->start_time,
+            'end_time'   => $request->end_time,
+            'users'      => $layer->users->pluck('id')->toArray(),
+        ]);
 
         // response::json এর বদলে response()->json ব্যবহার করুন
         return response()->json([
