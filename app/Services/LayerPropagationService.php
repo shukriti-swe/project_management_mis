@@ -59,6 +59,7 @@ class LayerPropagationService
     public function calculate(?Layer $parent): void
     {
         $this->bubbleUp($parent);
+        $this->bubbleUpDates($parent);
     }
 
     /**
@@ -99,17 +100,15 @@ class LayerPropagationService
         }
     }
 
-    protected function bubbleUpDates(?Layer $node): void
+    public function bubbleUpDates(?Layer $node): void
     {
         while ($node) {
 
             $stats = $node->children()
-                ->whereNotNull('start_time')
-                ->whereNotNull('end_time')
                 ->selectRaw('
-                MIN(layers.start_time) as min_start_time,
-                MAX(layers.end_time) as max_end_time
-            ')
+                    MIN(layers.start_time) as min_start_time,
+                    MAX(layers.end_time) as max_end_time
+                ')
                 ->first();
 
             if (!$stats) {
@@ -119,13 +118,21 @@ class LayerPropagationService
             $childMinStart = $stats->min_start_time;
             $childMaxEnd   = $stats->max_end_time;
 
-            $newStart = $node->start_time
-                ? min($node->start_time, $childMinStart)
-                : $childMinStart;
+            if ($childMinStart !== null) {
+                $newStart = $node->start_time
+                    ? min($node->start_time, $childMinStart)
+                    : $childMinStart;
+            } else {
+                $newStart = $node->start_time;
+            }
 
-            $newEnd = $node->end_time
-                ? max($node->end_time, $childMaxEnd)
-                : $childMaxEnd;
+            if ($childMaxEnd !== null) {
+                $newEnd = $node->end_time
+                    ? max($node->end_time, $childMaxEnd)
+                    : $childMaxEnd;
+            } else {
+                $newEnd = $node->end_time;
+            }
 
             if (
                 $node->start_time == $newStart &&

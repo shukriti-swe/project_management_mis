@@ -34,6 +34,10 @@ class LayerController extends Controller
             if (!$layer->children()->exists()) {
                 app(LayerPropagationService::class)
                     ->updateTaskStatus($layer, $layer->status_id);
+
+                if ($layer->parent) {
+                    $this->statusService->bubbleUpDates($layer->parent);
+                }
             }
         });
     }
@@ -333,6 +337,13 @@ class LayerController extends Controller
 
             $layer->{$request->column} = $request->value ?: null;
             $layer->save();
+
+            // handle date propagation
+            if (in_array($request->column, ['start_time', 'end_time'])) {
+                if ($layer->parent) {
+                    $this->statusService->calculate($layer->parent);
+                }
+            }
         }
 
         return response()->json(['success' => true]);
@@ -346,6 +357,10 @@ class LayerController extends Controller
         ]);
 
         $layer->update($validated);
+
+        if ($layer->parent) {
+            $this->statusService->calculate($layer->parent);
+        }
 
         return response()->json(['success' => true]);
     }

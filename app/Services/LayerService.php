@@ -148,6 +148,16 @@ class LayerService
 
             } else {
                 $layer->update($data);
+
+                $dateChanged =
+                    array_key_exists('start_time', $data) ||
+                    array_key_exists('end_time', $data);
+
+                if ($dateChanged && !$statusChanged) {
+                    if ($layer->parent) {
+                        $this->statusService->bubbleUpDates($layer->parent);
+                    }
+                }
             }
 
             // -------------------------
