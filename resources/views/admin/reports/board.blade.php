@@ -257,6 +257,16 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
+
+            display: -webkit-box;
+            -webkit-line-clamp: 2;       /* 🔥 limit to 2 lines */
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            line-height: 1.4;
+            max-height: calc(1.4em * 2); /* fallback safety */
         }
 
         .task-title:hover {
@@ -763,6 +773,7 @@
             padding-bottom: 10px;
             margin-bottom: 10px;
             padding-top: 0;
+            gap: 20px;
         }
 
         .close {
@@ -773,6 +784,7 @@
 
         .title-input-group{
             display: flex;
+            flex-grow: 1;
             align-items: center;
             justify-content: start;
             gap: 8px;
@@ -895,6 +907,18 @@
             padding-left: 10px;
             margin: 4px 0;
             font-size: 13px;
+        }
+
+        .tree-node-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            line-height: 1.4;
+            max-height: calc(1.4em * 2);
         }
 
         .tree-node.active {
@@ -1870,13 +1894,17 @@
         function renderNode(node, currentId) {
             return `
         <div class="tree-node ${node.id === currentId ? 'active' : ''}">
-            ${node.name}
+
+            <div class="tree-node-title">
+                ${node.name}
+            </div>
 
             ${node.children?.length ? `
                 <div class="tree-children">
                     ${node.children.map(child => renderNode(child, currentId)).join('')}
                 </div>
             ` : ''}
+
         </div>
     `;
         }
