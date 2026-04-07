@@ -6,38 +6,38 @@ use App\Models\Layer;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Status;
-use App\Models\LayerType;
-use App\Models\LayerUser;
 use App\Services\LayerService;
-use App\Services\LayerStatusUpdateService;
+use App\Services\LayerPropagationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
-use DB;
 use Carbon\Carbon;
 
 class ReportController extends Controller
 {
     public function __construct(
-        protected LayerService $layerService,
-        protected LayerStatusUpdateService $statusUpdate
-    ){}
+        protected LayerService            $layerService,
+        protected LayerPropagationService $statusUpdate
+    )
+    {
+    }
 
     protected array $affectedParents = [];
 
-    public function projectSammary(){
+    public function projectSammary()
+    {
         $projects = Project::withCount('layers')->orderBy('id', 'desc')->get();
         $users = User::all();
         $statuses = Status::all();
-        return view('admin.reports.project_sammary', compact('projects','users','statuses'));
+        return view('admin.reports.project_sammary', compact('projects', 'users', 'statuses'));
     }
 
-    public function projectReport($id) {
+    public function projectReport($id)
+    {
         $project = Project::with(['layers.users', 'layers.status'])->findOrFail($id);
-    
+
         return view('admin.reports.project_report', compact('project'));
     }
-
 
 
     // ============ Start project with child =======================
@@ -46,14 +46,14 @@ class ReportController extends Controller
     {
         $projects = Project::with([
             'user',
-            'layers' => function($query) {
+            'layers' => function ($query) {
                 $query->whereNull('parent_id')->orderBy('position');
-            }, 
+            },
             'layers.users',
             'layers.status'
         ])->get();
 
-        $statuses = Status::all(); 
+        $statuses = Status::all();
         $users = User::all();
         return view('admin.reports.project_layers', compact('projects', 'statuses', 'users'));
     }
@@ -81,15 +81,17 @@ class ReportController extends Controller
         ]);
     }
 
-    public function editProject($id) {
+    public function editProject($id)
+    {
         $project = Project::find($id);
         if (!$project) {
             return response()->json(['error' => 'Not Found'], 404);
         }
-        return response()->json($project); 
+        return response()->json($project);
     }
-    
-    public function updateProject(Request $request) {
+
+    public function updateProject(Request $request)
+    {
         $project = Project::findOrFail($request->project_id);
         $project->update([
             'title' => $request->title,
@@ -98,10 +100,11 @@ class ReportController extends Controller
         ]);
         return response()->json(['status' => 'success']);
     }
-    
-    public function destroyProject($id) {
+
+    public function destroyProject($id)
+    {
         $project = Project::findOrFail($id);
-        $project->layers()->delete(); 
+        $project->layers()->delete();
         $project->delete();
         return response()->json(['status' => 'success']);
     }
@@ -122,11 +125,24 @@ class ReportController extends Controller
                 'project_id' => 'required',
                 'status_id' => 'required',
                 'parent_id' => 'nullable|exists:layers,id',
+                'description' => 'nullable|string',
             ]);
 
+            Log::info('Received request to create layer with data: ' . json_encode($validated));
+
             $validated['users'] = $request->has('user_ids') ? $request->user_ids : [];
-            $validated['start_time'] = Carbon::parse($request->start_time)->startOfDay();
-            $validated['end_time']   = Carbon::parse($request->end_time)->endOfDay();
+            $start = Carbon::parse($request->start_time);
+            $end = Carbon::parse($request->end_time);
+
+            // Only force startOfDay if no specific time was provided (it's currently at 00:00:00)
+            $validated['start_time'] = $start->hour === 0 && $start->minute === 0
+                ? $start->startOfDay()
+                : $start;
+
+            // Only force endOfDay if no specific time was provided
+            $validated['end_time'] = $end->hour === 0 && $end->minute === 0
+                ? $end->endOfDay()
+                : $end;
 
             $lastPosition = Layer::where('project_id', $request->project_id)
                 ->where('parent_id', $request->parent_id)
@@ -160,7 +176,7 @@ class ReportController extends Controller
 
             $validated['users'] = $request->has('user_ids') ? $request->user_ids : [];
             $validated['start_time'] = Carbon::parse($request->start_time)->startOfDay();
-            $validated['end_time']   = Carbon::parse($request->end_time)->endOfDay();
+            $validated['end_time'] = Carbon::parse($request->end_time)->endOfDay();
 
             $layer = Layer::findOrFail($request->layer_id);
 
@@ -202,16 +218,15 @@ class ReportController extends Controller
         foreach ($layer->children as $child) {
             $this->recursiveDelete($child);
         }
-//        $layer->delete();
         $this->layerService->deleteLayer($layer);
     }
-    
+
     //drag and drop
     public function reorderLayers(Request $request)
     {
         $this->affectedParents = [];
         $hierarchy = $request->hierarchy;
-        
+
         foreach ($hierarchy as $index => $item) {
             $this->processLayerOrdering($item, null, $index + 1);
         }
@@ -238,7 +253,7 @@ class ReportController extends Controller
             if ($layer) {
                 $oldParentId = $layer->parent_id;
 
-                // ✅ Track affected parents ONLY (no calculation here)
+                // Track affected parents ONLY
                 if ($oldParentId != $parentId) {
                     if ($oldParentId) {
                         $this->affectedParents[] = $oldParentId;

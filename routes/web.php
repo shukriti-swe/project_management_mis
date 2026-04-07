@@ -94,6 +94,12 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('statuses', StatusController::class)->names('status')->except('show');
 
+    Route::get('/board', [LayerController::class, 'board'])->name('board');
+    Route::get('/board/data', [LayerController::class, 'boardData'])->name('board.data');
+    Route::get('/board/layers', [LayerController::class, 'parentLayers']);
+    Route::get('/board/layers/{layer}', [LayerController::class, 'layerDetailJson'])->name('board.layerDetailJson');
+    Route::patch('/board/layers/{layer}', [LayerController::class, 'updateLayerJson'])->name('board.layers.updateLayerJson');
+
 });
 
 require __DIR__ . '/auth.php';
