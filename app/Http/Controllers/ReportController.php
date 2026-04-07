@@ -109,6 +109,14 @@ class ReportController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+    public function updateDates(Request $request) {
+        Project::find($request->project_id)->update([
+            'start_time' => $request->start_time,
+            'end_time'   => $request->end_time,
+        ]);
+        return response()->json(['status' => 'success']);
+    }
+
     public function storeProjectChild(Request $request)
     {
         try {
