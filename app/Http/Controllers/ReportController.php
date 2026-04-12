@@ -168,6 +168,7 @@ class ReportController extends Controller
 
     public function updateProjectChild(Request $request)
     {
+        // dd($request->user_ids);
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',

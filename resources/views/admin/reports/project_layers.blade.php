@@ -71,7 +71,7 @@
         .table-header .c-start  { width: 110px; text-align: center; }
         .table-header .c-end    { width: 110px; text-align: center; }
         .table-header .c-status { width: 100px; text-align: center; }
-        .table-header .c-users  { width: 150px; }
+        .table-header .c-users  { width: 180px; }
         .table-header .c-action { width: 110px; text-align: right; padding-right: 16px !important; }
 
         .dd-handle .c-drag   { width: 35px;  min-width: 35px;  justify-content: center; }
@@ -80,7 +80,7 @@
         .dd-handle .c-start  { width: 110px; min-width: 110px; justify-content: center; font-size: 11px; color: #64748b; }
         .dd-handle .c-end    { width: 110px; min-width: 110px; justify-content: center; font-size: 11px; color: #64748b; }
         .dd-handle .c-status { width: 100px; min-width: 100px; justify-content: center; }
-        .dd-handle .c-users  { width: 150px; min-width: 150px; }
+        .dd-handle .c-users  { width: 180px; min-width: 180px; overflow: hidden; position: relative; cursor: default; }
         .dd-handle .c-action { width: 110px; min-width: 110px; justify-content: flex-end; padding-right: 16px !important; position: relative; z-index: 10; }
 
         /* ════ PROJECT ROW ════ */
@@ -141,6 +141,19 @@
             margin: 1px;
             display: inline-block;
         }
+
+        /* ════ USER MORE COUNT ════ */
+        .user-more-count {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+            margin-left: 3px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            padding: 1px 6px;
+            border-radius: 20px;
+        }
+        .dd-handle .c-users.has-tip { cursor: default; }
 
         /* ════ ACTION ICONS ════ */
         .c-action a {
@@ -213,6 +226,22 @@
         .filter-bar .form-select:focus {
             border-color: #93c5fd;
             box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        /* ════ FLOATING TOOLTIP ════ */
+        #user-float-tip {
+            position: fixed;
+            background: #1e293b;
+            color: #f1f5f9;
+            font-size: 11px;
+            padding: 7px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            z-index: 99999;
+            pointer-events: none;
+            display: none;
+            line-height: 1.9;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
     </style>
 
@@ -324,8 +353,15 @@
                                                 echo '<ol class="dd-list">';
                                                 foreach ($layers->sortBy('position') as $layer) {
                                                     $s_color      = $layer->status->color ?? '#6c757d';
-                                                    $u_tags       = $layer->users->map(fn($u) => "<span class='user-tag'>$u->name</span>")->implode('');
                                                     $hasChildAttr = ($layer->children->count() > 0) ? 'yes' : 'no';
+
+                                                    // ── User tags with tooltip ──
+                                                    $all_users  = $layer->users;
+                                                    $all_names  = $all_users->map(fn($u) => htmlspecialchars($u->name))->implode('|');
+                                                    $first      = $all_users->first();
+                                                    $extra      = $all_users->count() - 1;
+                                                    $u_tags     = $first ? "<span class='user-tag'>" . htmlspecialchars($first->name) . "</span>" : '';
+                                                    if ($extra > 0) $u_tags .= "<span class='user-more-count'>+$extra</span>";
 
                                                     $style = ($layer->end_time < now() && $layer->status->category != "done")
                                                         ? 'background:#fff5f5 !important; border-left: 3px solid #ef4444 !important;'
@@ -353,7 +389,7 @@
                                                             <div class="t-col c-status">
                                                                 <span class="badge rounded-pill" style="background:'.$s_color.'; font-size:9px; letter-spacing:0.3px;">'.($layer->status->label ?? 'N/A').'</span>
                                                             </div>
-                                                            <div class="t-col c-users">'.$u_tags.'</div>
+                                                            <div class="t-col c-users has-tip" data-names="'.$all_names.'">'.$u_tags.'</div>
                                                             <div class="t-col c-action">
                                                                 <a href="javascript:;" class="date-picker-btn text-info" data-id="'.$layer->id.'" title="Set Date">
                                                                     <i class="bx bx-calendar date-picker-btn" data-id="'.$layer->id.'"></i>
@@ -386,11 +422,13 @@
                         </div>
                     </div>{{-- end pm-wrap --}}
 
-                    </div>{{-- end pm-wrap --}}
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- Floating tooltip div --}}
+    <div id="user-float-tip"></div>
 
     {{-- Layer Modal --}}
     <div class="modal fade" id="layerModal" tabindex="-1" aria-hidden="true">
@@ -728,6 +766,21 @@
                         Swal.fire('Success', 'Changes saved!', 'success').then(() => location.reload());
                     }
                 });
+            });
+
+            // ১১. User tooltip on c-users column hover
+            let $tip = $('#user-float-tip');
+
+            $(document).on('mouseenter', '.dd-handle .c-users.has-tip', function () {
+                let names = $(this).data('names').toString().split('|').map(n => '● ' + n).join('\n');
+                $tip.css('white-space', 'pre').text(names).show();
+                let r = this.getBoundingClientRect();
+                $tip.css({
+                    top:  r.top - $tip.outerHeight() - 8,
+                    left: r.left + r.width / 2 - $tip.outerWidth() / 2
+                });
+            }).on('mouseleave', '.dd-handle .c-users.has-tip', function () {
+                $tip.hide();
             });
 
         });
