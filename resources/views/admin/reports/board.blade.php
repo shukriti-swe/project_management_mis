@@ -1832,7 +1832,11 @@
                 // FIRST TIME
                 if (!window.descriptionEditorInstance) {
 
-                    const editor = await ClassicEditor.create(editorEl);
+                    const editor = await ClassicEditor.create(editorEl, {
+                        ckfinder: {
+                            uploadUrl: "{{ route('ckeditor.upload').'?_token='.csrf_token() }}"
+                        }
+                    });
                     window.descriptionEditorInstance = editor;
 
                 }

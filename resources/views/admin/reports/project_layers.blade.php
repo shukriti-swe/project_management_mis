@@ -381,10 +381,10 @@
                                                                 <span class="ms-1" style="font-size:13px;">'.$layer->name.'</span>
                                                             </div>
                                                             <div class="t-col c-start">
-                                                                <span class="start-txt-'.$layer->id.'" style="font-size:11px; color:#475569;">'.($layer->start_time ? date('d M, Y', strtotime($layer->start_time)) : '---').'</span>
+                                                                <span class="start-txt-'.$layer->id.'" style="font-size:11px; color:#475569;">'.($layer->start_time ? date('d M, Y H:i', strtotime($layer->start_time)) : '---').'</span>
                                                             </div>
                                                             <div class="t-col c-end">
-                                                                <span class="end-txt-'.$layer->id.'" style="font-size:11px; color:#475569;">'.($layer->end_time ? date('d M, Y', strtotime($layer->end_time)) : '---').'</span>
+                                                                <span class="end-txt-'.$layer->id.'" style="font-size:11px; color:#475569;">'.($layer->end_time ? date('d M, Y H:i', strtotime($layer->end_time)) : '---').'</span>
                                                             </div>
                                                             <div class="t-col c-status">
                                                                 <span class="badge rounded-pill" style="background:'.$s_color.'; font-size:9px; letter-spacing:0.3px;">'.($layer->status->label ?? 'N/A').'</span>
@@ -723,7 +723,9 @@
                         startDate: startVal,
                         endDate: endVal,
                         opens: 'left',
-                        locale: { format: 'YYYY-MM-DD' }
+                        timePicker: true,
+                        timePicker24Hour: true,
+                        locale: { format: 'YYYY-MM-DD HH:mm' }
                     });
                     el.data('daterangepicker').show();
                     el.on('apply.daterangepicker', function (ev, picker) {
@@ -733,15 +735,15 @@
                             $.post("{{ route('project.updateDates') }}", {
                                 _token:     "{{ csrf_token() }}",
                                 project_id: projectId,
-                                start_time: picker.startDate.format('YYYY-MM-DD'),
-                                end_time:   picker.endDate.format('YYYY-MM-DD')
+                                start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
+                                end_time:   picker.endDate.format('YYYY-MM-DD HH:mm:ss')
                             }, function () { location.reload(); });
                         } else {
                             $.post("{{ route('project.child.updateDates') }}", {
                                 _token:     "{{ csrf_token() }}",
                                 layer_id:   id,
-                                start_time: picker.startDate.format('YYYY-MM-DD'),
-                                end_time:   picker.endDate.format('YYYY-MM-DD')
+                                start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
+                                end_time:   picker.endDate.format('YYYY-MM-DD HH:mm:ss')
                             }, function () { location.reload(); });
                         }
                     });

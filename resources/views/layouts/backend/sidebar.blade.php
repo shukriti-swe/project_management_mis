@@ -1,3 +1,38 @@
+<style>
+    .logout-form {
+        margin: 0;
+        padding: 2px 15px;
+    }
+
+    .logout-menu-btn {
+        color: #5f5f5f;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-align: left;
+    }
+    .logout-menu-btn:focus {
+        outline: none;
+    }
+
+    .logout-form:hover {
+        background-color: #f1f5f9;
+    }
+
+    .logout-icon {
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+    }
+
+    .logout-text {
+        font-size: 15px;
+    }
+</style>
 <!--sidebar wrapper -->
 <div class="sidebar-wrapper" data-simplebar="true">
 	<div class="sidebar-header">
@@ -117,12 +152,31 @@
 			</ul>
 		</li>
 
-		<li>
-			<a href="{{ route('logout') }}">
-				<div class="parent-icon"><i class="bx bx-user-circle"></i></div>
-				<div class="menu-title">Logout</div>
-			</a>
-		</li>
+{{--        <li>--}}
+{{--            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="padding: 2px 15px">--}}
+{{--                @csrf--}}
+{{--                <button type="submit" class="menu-link-btn" style="display: flex; align-items: center;cursor: pointer; gap: 10px;">--}}
+{{--                    <div class="parent-icon" style="font-size: 24px"><i class="bx bx-user-circle"></i></div>--}}
+{{--                    <div class="menu-title" style="font-size: 15px">Logout</div>--}}
+{{--                </button>--}}
+{{--            </form>--}}
+{{--        </li>--}}
+        <li>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="logout-form">
+                @csrf
+                <button type="submit" class="logout-menu-btn">
+                    <div class="logout-icon">
+                        <i class="bx bx-user-circle"></i>
+                    </div>
+                    <div class="logout-text">Logout</div>
+                </button>
+            </form>
+        </li>
+
+{{--        <a href="{{ route('logout') }}">--}}
+{{--            <div class="parent-icon"><i class="bx bx-user-circle"></i></div>--}}
+{{--            <div class="menu-title">Logout</div>--}}
+{{--        </a>--}}
 
 	</ul>
 </div>
