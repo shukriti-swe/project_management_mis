@@ -42,11 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/permissions/{permission}', [RoleController::class, 'deletePermission'])->name('permissions.delete');
     // });
 
-    Route::post('/ckeditor-upload', [ProfileController::class, 'ckeditorUpload'])->name('ckeditor.upload');
-
+    
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    Route::post('/ckeditor-upload', [AdminController::class, 'ckeditorUpload'])->name('ckeditor.upload');
 
     Route::any('/project-list', [AdminController::class, 'projectList'])->name('projectList');
     Route::any('/add-project', [AdminController::class, 'addProject'])->name('addProject');
