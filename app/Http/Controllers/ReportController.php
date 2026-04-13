@@ -42,20 +42,67 @@ class ReportController extends Controller
 
     // ============ Start project with child =======================
 
+//    public function projectWithLayers()
+//    {
+//        $projects = Project::with([
+//            'user',
+//            'layers' => function ($query) {
+//                $query->whereNull('parent_id')->orderBy('position');
+//            },
+//            'layers.users',
+//            'layers.status'
+//        ])->get();
+//
+//        $statuses = Status::all();
+//        $users = User::all();
+//        return view('admin.reports.project_layer', compact('projects', 'statuses', 'users'));
+//    }
     public function projectWithLayers()
     {
-        $projects = Project::with([
-            'user',
-            'layers' => function ($query) {
-                $query->whereNull('parent_id')->orderBy('position');
-            },
-            'layers.users',
-            'layers.status'
-        ])->get();
+        $projects = Project::with(['user', 'status'])->get();
+        $layers = Layer::with(['users', 'status'])->orderBy('position')->get();
 
-        $statuses = Status::all();
-        $users = User::all();
-        return view('admin.reports.project_layers', compact('projects', 'statuses', 'users'));
+        $rows = [];
+
+        // 🔹 Projects (root nodes)
+        foreach ($projects as $p) {
+            $rows[] = [
+                'id' => 'p' . $p->id,
+                'parentId' => null,
+                'type' => 'project',
+                'title' => $p->title,
+                'start_time' => $p->start_date,
+                'end_time' => $p->end_date,
+                'status' => $p->status?->label,
+                'status_color' => $p->status?->color,
+                'users' => $p->user ? [$p->user->name] : [],
+            ];
+        }
+
+        // 🔹 Layers (flat)
+        foreach ($layers as $l) {
+            $rows[] = [
+                'id' => $l->id,
+                'parentId' => $l->parent_id
+                    ? $l->parent_id
+                    : 'p' . $l->project_id,
+
+                'type' => 'layer',
+                'title' => $l->name,
+                'start_time' => $l->start_time,
+                'end_time' => $l->end_time,
+                'status' => $l->status?->label,
+                'status_color' => $l->status?->color,
+                'users' => $l->users->pluck('name')->toArray(),
+            ];
+        }
+
+        return view('admin.reports.project_layer', [
+            'rows' => $rows,
+            'statuses' => Status::all(),
+            'users' => User::all(),
+        ]);
+//        return response()->json($rows);
     }
 
     public function storeProject(Request $request)
@@ -109,10 +156,11 @@ class ReportController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    public function updateDates(Request $request) {
+    public function updateDates(Request $request)
+    {
         Project::find($request->project_id)->update([
             'start_time' => $request->start_time,
-            'end_time'   => $request->end_time,
+            'end_time' => $request->end_time,
         ]);
         return response()->json(['status' => 'success']);
     }
@@ -292,8 +340,8 @@ class ReportController extends Controller
         $layer = Layer::findOrFail($request->layer_id);
         $this->layerService->updateLayer($layer, [
             'start_time' => $request->start_time,
-            'end_time'   => $request->end_time,
-            'users'      => $layer->users->pluck('id')->toArray(),
+            'end_time' => $request->end_time,
+            'users' => $layer->users->pluck('id')->toArray(),
         ]);
 
         // response::json এর বদলে response()->json ব্যবহার করুন
