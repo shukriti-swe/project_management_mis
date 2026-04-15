@@ -1,7 +1,5 @@
 @extends('layouts.backend.app')
-
-@section('admin_content')
-
+@push('css')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.fancytree/dist/skin-lion/ui.fancytree.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
 
@@ -133,6 +131,553 @@
             color: #0891b2 !important;
         }
     </style>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --column-bg: #f1f5f9;
+            --card-bg: #ffffff;
+
+            --text: #111827;
+            --muted: #6b7280;
+
+            --border: #e5e7eb;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+            --primary: #3b82f6;
+            --success: #10b981;
+
+            --radius: 6px;
+        }
+        /* =========================
+           LARGE MODAL
+        ========================= */
+        .modal-xl {
+            width: 70vw;
+            height: 70vh;
+
+            max-width: none;
+            margin: 20px auto;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .modal-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            padding-top: 0;
+            gap: 20px;
+        }
+
+        .close {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--muted);
+        }
+
+        .title-input-group{
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+            justify-content: start;
+            gap: 8px;
+        }
+
+        /* Title input */
+        .title-input {
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+
+        .inline-update-btn{
+            padding: 12px 10px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            color: #FFFFFF;
+            background-color: var(--primary);
+        }
+        .inline-update-btn:focus{
+            outline: none;
+        }
+
+        /* =========================
+           LAYOUT
+        ========================= */
+        .task-details-layout {
+            display: flex;
+            height: 100%;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        /* LEFT PANEL (3 parts) */
+        .details-left {
+            flex: 3;
+            overflow-y: auto;
+            padding: 40px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        /* RIGHT PANEL (2 parts) */
+        .details-right {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* =========================
+           SECTIONS
+        ========================= */
+        .tree-section,
+        .log-section {
+            flex: 1;
+            overflow-y: auto;
+
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           DETAIL FIELDS
+        ========================= */
+        .detail-group {
+            margin-bottom: 20px;
+        }
+
+        .date-range-group{
+            max-width: 50%;
+        }
+
+        .assigned-users-group label{
+            margin-bottom: 20px!important;
+        }
+
+        .detail-group label {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Inputs */
+        .editable-input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        /* =========================
+           USERS
+        ========================= */
+        .users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        /* =========================
+           TREE
+        ========================= */
+        .tree-node {
+            padding-left: 10px;
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .tree-node-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            line-height: 1.4;
+            max-height: calc(1.4em * 2);
+            cursor: pointer;
+        }
+
+        .tree-node-title-root{
+            color: #666666;
+            cursor: text;
+        }
+        .tree-node-title-root:hover{
+            text-decoration: none!important;
+        }
+
+        .tree-node-title:hover {
+            text-decoration: underline;
+        }
+
+        .tree-node.active {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .tree-children {
+            margin-left: 12px;
+            border-left: 1px dashed #ddd;
+            padding-left: 8px;
+        }
+
+        /* =========================
+           LOG
+        ========================= */
+        #detailsLog div {
+            font-size: 12px;
+            padding: 4px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .progress-inline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .progress-inline .inline-group{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .subtasks-inline {
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            min-width: 60px;
+        }
+
+        .user-row {
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            margin-right: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 6px;
+            border-radius: 6px;
+
+            background: #f8fafc;
+            position: relative;
+        }
+
+        #detailsUsers{
+            margin-top: 20px;
+        }
+
+        .user-remove {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+
+            width: 20px;
+            height: 20px;
+
+            border: none;
+            border-radius: 50%;
+
+            background: #535353;
+            color: #fff;
+
+            font-size: 14px; /* 🔥 slightly smaller */
+            cursor: pointer;
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            line-height: 1; /* remove extra vertical spacing */
+            padding: 0;     /* remove default button padding */
+        }
+
+        .user-row:hover .user-remove {
+            display: flex;
+        }
+
+        .user-row img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+        }
+
+        /* DESCRIPTION */
+        .description-view {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* TREE */
+        .tree-node.active {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .status-btn{
+            cursor: default!important;
+        }
+
+        #currentStatusBtn:hover{
+            color: #FFF;
+        }
+    </style>
+    <style>
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: 30px;
+            padding: 2px 6px;
+            font-size: 13px;
+        }
+
+        /* =========================
+           BUTTONS
+        ========================= */
+        .btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            padding: 6px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Progress row improved */
+        .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Progress bar */
+        .progress {
+            flex: 1;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--success);
+        }
+
+        /* Percentage */
+        .progress-text {
+            font-size: 11px;
+            color: var(--muted);
+            min-width: 30px;
+            text-align: right;
+        }
+
+        /* =========================
+           MODAL
+        ========================= */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Bigger modal */
+        .modal-lg {
+            max-width: 520px;
+        }
+
+        /* Form layout */
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Improve select */
+        select {
+            appearance: none;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        /* Select2 override (important) */
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 4px;
+            font-size: 13px;
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: 32px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        /* Dropdown */
+        .select2-dropdown {
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        /* Reset plugin layout */
+        .daterangepicker {
+            font-size: 13px;
+        }
+
+        /* Fix buttons */
+        .daterangepicker .drp-buttons {
+            display: flex !important;
+            justify-content: end !important;
+            gap: 8px !important;
+            padding: 8px !important;
+        }
+
+        .daterangepicker .drp-selected {
+            /*color: red!important;*/
+            margin: auto 0;
+            font-weight: bold;
+        }
+
+        .daterangepicker .drp-buttons .btn {
+            all: unset; /* wipe your global .btn */
+
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Apply button */
+        .daterangepicker .applyBtn {
+            background: #3b82f6 !important;
+            color: #fff !important;
+
+        }
+
+        /* Cancel button */
+        .daterangepicker .cancelBtn {
+            margin-left: auto !important;
+            background: #e5e7eb !important;
+            color: #374151 !important;
+        }
+
+        /* Fix calendar spacing */
+        .daterangepicker .calendar-table {
+            border: none;
+        }
+
+        /* Fix inputs */
+        .daterangepicker input {
+            border: 1px solid #e5e7eb;
+            padding: 4px;
+        }
+
+        /* Selected tags */
+        .select2-selection__choice {
+            background: #e5e7eb !important;
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 2px 6px !important;
+            font-size: 12px;
+        }
+
+        .modal-content {
+            background: #fff;
+            margin: 80px auto;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+        @media (max-width: 768px) {
+            .board {
+                flex-direction: column;
+            }
+        }
+    </style>
+@endpush
+@section('admin_content')
 
     <div class="page-wrapper">
         <div class="page-content">
@@ -158,95 +703,199 @@
         </div>
     </div>
 
-    {{-- Layer Modal --}}
-    <div class="modal fade" id="layerModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <form id="layerForm">@csrf
-                    <input type="hidden" name="project_id" id="modal_project_id">
-                    <input type="hidden" name="parent_id" id="modal_parent_id">
-                    <input type="hidden" name="layer_id" id="modal_layer_id">
-                    <div class="modal-header bg-dark text-white py-2">
-                        <h6 class="modal-title">Layer Setup</h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="fw-bold small">Layer Name</label>
-                            <input type="text" name="name" id="modal_name" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="fw-bold small">Assign Users</label>
-                            <select name="user_ids[]" id="layer_users" class="form-control select2-multiple" multiple="multiple">
-                                @foreach($users as $u)
-                                    <option value="{{ $u->id }}">{{ $u->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="small fw-bold">Status</label>
-                                <select name="status_id" id="modal_status_id" class="form-select">
-                                    @foreach($statuses as $s)
-                                        <option value="{{ $s->id }}">{{ $s->label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <label class="small fw-bold">Start Date</label>
-                                <input type="date" name="start_time" id="modal_start_time" class="form-control">
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label class="small fw-bold">End Date</label>
-                                <input type="date" name="end_time" id="modal_end_time" class="form-control">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+{{--    --}}{{-- Layer Modal --}}
+{{--    <div class="modal fade" id="layerModal" tabindex="-1" aria-hidden="true">--}}
+{{--        <div class="modal-dialog modal-dialog-centered">--}}
+{{--            <div class="modal-content border-0 shadow">--}}
+{{--                <form id="layerForm">@csrf--}}
+{{--                    <input type="hidden" name="project_id" id="modal_project_id">--}}
+{{--                    <input type="hidden" name="parent_id" id="modal_parent_id">--}}
+{{--                    <input type="hidden" name="layer_id" id="modal_layer_id">--}}
+{{--                    <div class="modal-header bg-dark text-white py-2">--}}
+{{--                        <h6 class="modal-title">Layer Setup</h6>--}}
+{{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
+{{--                    </div>--}}
+{{--                    <div class="modal-body p-4">--}}
+{{--                        <div class="mb-3">--}}
+{{--                            <label class="fw-bold small">Layer Name</label>--}}
+{{--                            <input type="text" name="name" id="modal_name" class="form-control" required>--}}
+{{--                        </div>--}}
+{{--                        <div class="mb-3">--}}
+{{--                            <label class="fw-bold small">Assign Users</label>--}}
+{{--                            <select name="user_ids[]" id="layer_users" class="form-control select2-multiple" multiple="multiple">--}}
+{{--                                @foreach($users as $u)--}}
+{{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
+{{--                                @endforeach--}}
+{{--                            </select>--}}
+{{--                        </div>--}}
+{{--                        <div class="row">--}}
+{{--                            <div class="col-6 mb-3">--}}
+{{--                                <label class="small fw-bold">Status</label>--}}
+{{--                                <select name="status_id" id="modal_status_id" class="form-select">--}}
+{{--                                    @foreach($statuses as $s)--}}
+{{--                                        <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
+{{--                                    @endforeach--}}
+{{--                                </select>--}}
+{{--                            </div>--}}
+{{--                            <div class="col-6 mb-3">--}}
+{{--                                <label class="small fw-bold">Start Date</label>--}}
+{{--                                <input type="date" name="start_time" id="modal_start_time" class="form-control">--}}
+{{--                            </div>--}}
+{{--                            <div class="col-12 mb-3">--}}
+{{--                                <label class="small fw-bold">End Date</label>--}}
+{{--                                <input type="date" name="end_time" id="modal_end_time" class="form-control">--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                    <div class="modal-footer">--}}
+{{--                        <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>--}}
+{{--                    </div>--}}
+{{--                </form>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
 
-    {{-- Project Modal --}}
-    <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <form id="projectForm">@csrf
-                    <input type="hidden" name="project_id" id="edit_p_id">
-                    <div class="modal-header bg-primary text-white py-2">
-                        <h6 class="modal-title">New Project</h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="fw-bold small">Title</label>
-                            <input type="text" name="title" id="p_title" class="form-control" required>
+{{--    --}}{{-- Project Modal --}}
+{{--    <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">--}}
+{{--        <div class="modal-dialog modal-dialog-centered">--}}
+{{--            <div class="modal-content border-0 shadow">--}}
+{{--                <form id="projectForm">@csrf--}}
+{{--                    <input type="hidden" name="project_id" id="edit_p_id">--}}
+{{--                    <div class="modal-header bg-primary text-white py-2">--}}
+{{--                        <h6 class="modal-title">New Project</h6>--}}
+{{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
+{{--                    </div>--}}
+{{--                    <div class="modal-body p-4">--}}
+{{--                        <div class="mb-3">--}}
+{{--                            <label class="fw-bold small">Title</label>--}}
+{{--                            <input type="text" name="title" id="p_title" class="form-control" required>--}}
+{{--                        </div>--}}
+{{--                        <div class="mb-3">--}}
+{{--                            <label class="fw-bold small">Manager</label>--}}
+{{--                            <select name="user_id" id="p_user_id" class="form-select" required>--}}
+{{--                                <option value="">Select Manager</option>--}}
+{{--                                @foreach($users as $u)--}}
+{{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
+{{--                                @endforeach--}}
+{{--                            </select>--}}
+{{--                        </div>--}}
+{{--                        <div class="mb-3">--}}
+{{--                            <label class="fw-bold small">Status</label>--}}
+{{--                            <select name="status_id" id="p_status_id" class="form-select">--}}
+{{--                                @foreach($statuses as $s)--}}
+{{--                                    <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
+{{--                                @endforeach--}}
+{{--                            </select>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
+{{--                    <div class="modal-footer">--}}
+{{--                        <button type="submit" class="btn btn-primary" id="p_save_btn">Create Project</button>--}}
+{{--                    </div>--}}
+{{--                </form>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
+
+    <div class="modal" id="taskDetailsModal">
+        <div class="modal-content modal-xl">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+                <div class="title-input-group">
+                    <input id="detailsName" class="title-input"/>
+                    <button id="updateLayerNameBtn" class="inline-update-btn"><i class="fa fa-check"></i></button>
+                </div>
+                <span class="close" id="closeDetailsModal">&times;</span>
+            </div>
+
+            <!-- BODY -->
+            <div class="task-details-layout">
+
+                <!-- LEFT -->
+                <div class="details-left">
+
+                    <!-- STATUS -->
+                    <div class="detail-group">
+                        <label>Status</label>
+
+                        <div class="btn-group status-dropdown">
+                            <button id="currentStatusBtn" class="btn status-btn"></button>
+                            <button id="dropdown-toggle-split" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></button>
+                            <ul id="statusDropdownMenu" class="dropdown-menu"></ul>
                         </div>
-                        <div class="mb-3">
-                            <label class="fw-bold small">Manager</label>
-                            <select name="user_id" id="p_user_id" class="form-select" required>
-                                <option value="">Select Manager</option>
-                                @foreach($users as $u)
-                                    <option value="{{ $u->id }}">{{ $u->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="fw-bold small">Status</label>
-                            <select name="status_id" id="p_status_id" class="form-select">
-                                @foreach($statuses as $s)
-                                    <option value="{{ $s->id }}">{{ $s->label }}</option>
-                                @endforeach
-                            </select>
+                    </div>
+
+                    <!-- PROGRESS -->
+                    <div class="detail-group">
+
+                        <div class="progress-inline">
+
+                            <div class="inline-group">
+                                <i id="detailsSubtaskIcon"></i>
+                                <label>Subtasks: </label>
+                                <div class="subtasks-inline">
+                                    <span id="detailsSubtasks"></span>
+                                </div>
+                            </div>
+
+                            <div class="inline-group">
+                                <label>Progress</label>
+                                <div class="progress">
+                                    <div id="detailsProgressBar" class="progress-bar"></div>
+                                </div>
+                            </div>
+
+                            <span id="detailsProgressText"></span>
+
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" id="p_save_btn">Create Project</button>
+
+                    <!-- DATE -->
+                    <div class="detail-group date-range-group">
+                        <label>Date Range</label>
+                        <input id="detailsDateRange">
                     </div>
-                </form>
+
+                    <!-- USERS -->
+                    <div class="detail-group assigned-users-group">
+                        <label>Assigned Users</label>
+                        <select id="detailsUsersSelect" class="user-select2" multiple style="width:100%;"></select>
+                        <div id="detailsUsers"></div>
+                    </div>
+
+                    <!-- DESCRIPTION (FIXED) -->
+                    <div class="detail-group">
+                        <label>Description</label>
+
+                        <!-- VIEW -->
+                        <div id="detailsDescription" class="description-view"></div>
+
+                        <!-- EDIT (hidden initially) -->
+                        <textarea id="detailsDescriptionEditor" style="display:none;"></textarea>
+
+                        <!-- UPDATE BTN -->
+                        <button id="updateDescriptionBtn" class="inline-update-btn" style="display:none; margin-top: 10px; padding: 4px 10px;">
+                            Update
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="details-right">
+
+                    <div class="tree-section">
+                        <div class="section-title">Structure</div>
+                        <div id="detailsTree"></div>
+                    </div>
+
+                    <div class="log-section">
+                        <div class="section-title">Activity</div>
+                        <div id="detailsLog"></div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>
@@ -262,6 +911,8 @@
 
     <script>
         window.treeData = @json($tree);
+        window.allStatuses = @json($statuses);
+        window.allUsers = @json($users);
     </script>
 
     <script>
@@ -413,71 +1064,351 @@
 
 
             // Modal Handlers
-            $(document).on('click', '.open-add-modal', function () {
+            {{--$(document).on('click', '.open-add-modal', function () {--}}
 
-                $('#layerForm')[0].reset();
+            {{--    $('#layerForm')[0].reset();--}}
 
-                $('#modal_layer_id').val('');
-                $('#modal_project_id').val($(this).data('project'));
-                $('#modal_parent_id').val($(this).data('parent'));
+            {{--    $('#modal_layer_id').val('');--}}
+            {{--    $('#modal_project_id').val($(this).data('project'));--}}
+            {{--    $('#modal_parent_id').val($(this).data('parent'));--}}
 
-                $('#modal_name').val('');
-                $('#modal_start_time').val('');
-                $('#modal_end_time').val('');
+            {{--    $('#modal_name').val('');--}}
+            {{--    $('#modal_start_time').val('');--}}
+            {{--    $('#modal_end_time').val('');--}}
 
-                $('#layer_users').val(null).trigger('change');
+            {{--    $('#layer_users').val(null).trigger('change');--}}
 
-                new bootstrap.Modal(document.getElementById('layerModal')).show();
-            });
+            {{--    new bootstrap.Modal(document.getElementById('layerModal')).show();--}}
+            {{--});--}}
 
-            $(document).on('click', '.edit-layer', function () {
+            {{--$(document).on('click', '.edit-layer', function () {--}}
 
-                let id = $(this).data('id');
+            {{--    let id = $(this).data('id');--}}
 
-                let url = "{{ route('project.child.edit', ':id') }}".replace(':id', id);
+            {{--    let url = "{{ route('project.child.edit', ':id') }}".replace(':id', id);--}}
 
-                $.get(url, function (data) {
+            {{--    $.get(url, function (data) {--}}
 
-                    $('#modal_layer_id').val(data.id);
-                    $('#modal_project_id').val(data.project_id);
-                    $('#modal_parent_id').val(data.parent_id);
-                    $('#modal_name').val(data.name);
-                    $('#modal_status_id').val(data.status_id);
+            {{--        $('#modal_layer_id').val(data.id);--}}
+            {{--        $('#modal_project_id').val(data.project_id);--}}
+            {{--        $('#modal_parent_id').val(data.parent_id);--}}
+            {{--        $('#modal_name').val(data.name);--}}
+            {{--        $('#modal_status_id').val(data.status_id);--}}
 
-                    function formatDate(dateStr) {
-                        if (!dateStr) return '';
-                        return new Date(dateStr).toISOString().split('T')[0];
-                    }
+            {{--        function formatDate(dateStr) {--}}
+            {{--            if (!dateStr) return '';--}}
+            {{--            return new Date(dateStr).toISOString().split('T')[0];--}}
+            {{--        }--}}
 
-                    $('#modal_start_time').val(formatDate(data.start_time));
-                    $('#modal_end_time').val(formatDate(data.end_time));
+            {{--        $('#modal_start_time').val(formatDate(data.start_time));--}}
+            {{--        $('#modal_end_time').val(formatDate(data.end_time));--}}
 
-                    if (data.users) {
-                        $('#layer_users').val(data.users.map(u => u.id)).trigger('change');
-                    }
+            {{--        if (data.users) {--}}
+            {{--            $('#layer_users').val(data.users.map(u => u.id)).trigger('change');--}}
+            {{--        }--}}
 
-                    new bootstrap.Modal(document.getElementById('layerModal')).show();
-                });
-            });
+            {{--        new bootstrap.Modal(document.getElementById('layerModal')).show();--}}
+            {{--    });--}}
+            {{--});--}}
 
-            $(document).on('click', '.edit-project', function () {
+            {{--$(document).on('click', '.edit-project', function () {--}}
 
-                let id = $(this).data('id');
+            {{--    let id = $(this).data('id');--}}
 
-                let url = "{{ route('project.edit', ':id') }}".replace(':id', id);
+            {{--    let url = "{{ route('project.edit', ':id') }}".replace(':id', id);--}}
 
-                $.get(url, function (data) {
+            {{--    $.get(url, function (data) {--}}
 
-                    $('#edit_p_id').val(data.id);
-                    $('#p_title').val(data.title);
-                    $('#p_user_id').val(data.user_id);
-                    $('#p_status_id').val(data.status_id);
+            {{--        $('#edit_p_id').val(data.id);--}}
+            {{--        $('#p_title').val(data.title);--}}
+            {{--        $('#p_user_id').val(data.user_id);--}}
+            {{--        $('#p_status_id').val(data.status_id);--}}
 
-                    new bootstrap.Modal(document.getElementById('projectModal')).show();
-                });
-            });
+            {{--        new bootstrap.Modal(document.getElementById('projectModal')).show();--}}
+            {{--    });--}}
+            {{--});--}}
 
         });
+    </script>
+
+    <script>
+        $(document).on('click', '.fancytree-title', async function (e) {
+            e.stopPropagation();
+
+            const node = $.ui.fancytree.getNode(this);
+            if (!node) return;
+
+            const layerId = node.key;
+
+            try {
+                await openTaskDetails(layerId);
+            } catch (err) {
+                console.error('Failed to open layer modal', err);
+            }
+        });
+
+        document.getElementById('closeDetailsModal').addEventListener('click', () => {
+            document.getElementById('taskDetailsModal').style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('taskDetailsModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        async function openTaskDetails(taskId) {
+            try {
+                const res = await fetch(`/board/layers/${taskId}`);
+                const data = await res.json();
+
+                // console.log(data)
+
+                renderTaskDetails(data);
+
+                document.getElementById('taskDetailsModal').style.display = 'block';
+
+            } catch (err) {
+                console.error('Failed to load task details', err);
+            }
+        }
+
+        function renderTaskDetails(data) {
+            const layer = data.layer;
+
+            window.currentLayer = layer;
+            window.currentLayerId = layer.id;
+
+            // ======================
+            // TITLE
+            // ======================
+            const titleEl = document.getElementById('detailsName');
+            const updateBtn = document.getElementById('updateLayerNameBtn');
+
+            titleEl.value = layer.name;
+            titleEl.dataset.original = layer.name;
+            updateBtn.style.display = 'none';
+
+            titleEl.oninput = function () {
+                const current = this.value.trim();
+                const original = this.dataset.original;
+
+                updateBtn.style.display =
+                    (current && current !== original) ? 'inline-flex' : 'none';
+            };
+
+            updateBtn.onclick = async function () {
+                const name = titleEl.value.trim();
+                if (!name) return;
+
+                await updateLayer(layer.id, { name }, {
+                    refreshDetails: false,
+                    refreshBoard: true
+                });
+
+                titleEl.dataset.original = name;
+                updateBtn.style.display = 'none';
+            };
+
+            // ======================
+            // STATUS
+            // ======================
+            const btn = document.getElementById('currentStatusBtn');
+            const menu = document.getElementById('statusDropdownMenu');
+            const btnDropdown = document.getElementById('dropdown-toggle-split');
+
+            const current = window.allStatuses.find(s => s.id === layer.status_id);
+
+            btn.textContent = current?.label || 'Status';
+            btn.style.background = current?.color || '#999';
+            btnDropdown.style.background = current?.color || '#999';
+
+            menu.innerHTML = window.allStatuses.map(s => `
+        <li>
+            <a class="dropdown-item status-item"
+               data-id="${s.id}"
+               style="color:${s.color}">
+                ${s.label}
+            </a>
+        </li>
+    `).join('');
+
+            menu.querySelectorAll('.status-item').forEach(el => {
+                el.onclick = () => {
+                    const statusId = parseInt(el.dataset.id);
+                    updateStatus(layer.id, statusId);
+                };
+            });
+
+            // ======================
+            // DATE
+            // ======================
+            $('#detailsDateRange')
+                .off() // 🔥 prevent duplicate binding
+                .daterangepicker({
+                    timePicker: true,
+                    timePicker24Hour: true,
+                    startDate: moment(layer.start_time),
+                    endDate: moment(layer.end_time),
+                    locale: { format: 'MMM D, YYYY HH:mm' }
+                })
+                .on('apply.daterangepicker', async function (ev, picker) {
+
+                    await updateLayer(layer.id, {
+                        start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
+                        end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                    }, {
+                        refreshDetails: false,
+                        refreshBoard: true
+                    });
+                });
+
+            // ======================
+            // PROGRESS
+            // ======================
+            const progress = layer.progress_percent || 0;
+
+            document.getElementById('detailsProgressBar').style.width = progress + '%';
+            document.getElementById('detailsProgressText').textContent = progress + '%';
+
+            document.getElementById('detailsSubtasks').textContent =
+                `${layer.completed_tasks}/${layer.total_tasks}`;
+
+            document.getElementById('detailsSubtaskIcon').className =
+                (layer.total_tasks > 0 && layer.completed_tasks === layer.total_tasks)
+                    ? 'fas fa-check-square'
+                    : 'far fa-square';
+
+            // ======================
+            // USERS
+            // ======================
+            const usersEl = document.getElementById('detailsUsers');
+
+            usersEl.innerHTML = layer.users.map(u => `
+        <div class="user-row" data-id="${u.id}">
+            <img src="https://i.pravatar.cc/32?u=${u.id}">
+            <span>${u.name}</span>
+            <button class="user-remove">&times;</button>
+        </div>
+    `).join('');
+
+            usersEl.querySelectorAll('.user-remove').forEach(btn => {
+                btn.onclick = async function () {
+                    const userId = parseInt(this.closest('.user-row').dataset.id);
+
+                    const updated = layer.users
+                        .filter(u => u.id !== userId)
+                        .map(u => u.id);
+
+                    await updateLayer(layer.id, { users: updated });
+                };
+            });
+
+            // select2
+            const select = $('#detailsUsersSelect');
+
+            if (select.hasClass("select2-hidden-accessible")) {
+                select.select2('destroy');
+            }
+
+            select.off().empty();
+
+            window.allUsers.forEach(u => {
+                select.append(new Option(u.name, u.id));
+            });
+
+            select.val(layer.users.map(u => u.id));
+
+            select.select2({
+                placeholder: "Add users",
+                width: '100%'
+            });
+
+            select.on('change', async function () {
+                const selected = ($(this).val() || []).map(id => parseInt(id));
+
+                await updateLayer(layer.id, { users: selected });
+            });
+
+            // ======================
+            // DESCRIPTION
+            // ======================
+            const viewEl = document.getElementById('detailsDescription');
+            const editorEl = document.getElementById('detailsDescriptionEditor');
+            const btnUpdate = document.getElementById('updateDescriptionBtn');
+
+            viewEl.innerHTML = layer.description || '<i>No description</i>';
+            viewEl.style.display = 'block';
+            btnUpdate.style.display = 'none';
+
+            viewEl.onclick = async function () {
+
+                viewEl.style.display = 'none';
+                btnUpdate.style.display = 'inline-flex';
+
+                if (!window.descriptionEditorInstance) {
+                    window.descriptionEditorInstance = await ClassicEditor.create(editorEl);
+                }
+
+                window.descriptionEditorInstance.setData(layer.description || '');
+                window.descriptionEditorInstance.ui.view.element.style.display = 'block';
+            };
+
+            btnUpdate.onclick = async function () {
+
+                const data = window.descriptionEditorInstance.getData();
+
+                await updateLayer(layer.id, { description: data });
+
+                viewEl.innerHTML = data || '<i>No description</i>';
+                viewEl.style.display = 'block';
+                btnUpdate.style.display = 'none';
+                window.descriptionEditorInstance.ui.view.element.style.display = 'none';
+            };
+        }
+
+        async function updateLayer(layerId, payload, options = {}) {
+            const {
+                refreshDetails = true,
+                refreshBoard = false
+            } = options;
+
+            try {
+                const res = await fetch(`/board/layers/${layerId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Request failed: ${res.status}`);
+                }
+
+                showToast('Updated successfully', 'success');
+
+                // 🔁 optional refresh behaviors
+                if (refreshDetails) {
+                    await openTaskDetails(layerId);
+                }
+
+                // if (refreshBoard) {
+                //     await loadBoardData();
+                // }
+
+                return await res.json(); // useful if backend returns updated layer
+
+            } catch (e) {
+                showToast('Update Failed. Something went wrong', 'error');
+                console.error('Layer update failed:', e);
+                throw e; // allow caller to handle if needed
+            }
+        }
     </script>
 
 @endpush
