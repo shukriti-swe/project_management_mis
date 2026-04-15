@@ -2,6 +2,9 @@
 @push('css')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.fancytree/dist/skin-lion/ui.fancytree.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+          integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
 
     <style>
         table {
@@ -449,6 +452,18 @@
         }
     </style>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            background: var(--bg);
+            color: var(--text);
+        }
 
         header {
             display: flex;
@@ -904,7 +919,7 @@
 
 @push('js')
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{{--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>--}}
     <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
@@ -1138,6 +1153,10 @@
             const node = $.ui.fancytree.getNode(this);
             if (!node) return;
 
+            if (String(node.key).startsWith('p')){
+                return;
+            }
+
             const layerId = node.key;
 
             try {
@@ -1223,6 +1242,7 @@
             btn.textContent = current?.label || 'Status';
             btn.style.background = current?.color || '#999';
             btnDropdown.style.background = current?.color || '#999';
+            btnDropdown.style.filter = 'brightness(0.85)';
 
             menu.innerHTML = window.allStatuses.map(s => `
         <li>
@@ -1407,6 +1427,26 @@
                 showToast('Update Failed. Something went wrong', 'error');
                 console.error('Layer update failed:', e);
                 throw e; // allow caller to handle if needed
+            }
+        }
+
+        async function updateStatus(layer_id, status_id) {
+            try {
+                await fetch(`/update-layer-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({layer_id, status_id })
+                });
+
+                // reload board
+                // await loadBoardData();
+                await openTaskDetails(layer_id)
+
+            } catch (err) {
+                console.error('Failed to update status', err);
             }
         }
     </script>
