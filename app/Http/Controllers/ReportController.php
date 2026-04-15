@@ -62,47 +62,76 @@ class ReportController extends Controller
         $projects = Project::with(['user', 'status'])->get();
         $layers = Layer::with(['users', 'status'])->orderBy('position')->get();
 
-        $rows = [];
+        $nodes = [];
 
-        // 🔹 Projects (root nodes)
+        // 🔹 Step 1: create all nodes (map)
         foreach ($projects as $p) {
-            $rows[] = [
-                'id' => 'p' . $p->id,
-                'parentId' => null,
-                'type' => 'project',
+            $nodes['p' . $p->id] = [
+                'key' => 'p' . $p->id,
                 'title' => $p->title,
-                'start_time' => $p->start_date,
-                'end_time' => $p->end_date,
-                'status' => $p->status?->label,
-                'status_color' => $p->status?->color,
-                'users' => $p->user ? [$p->user->name] : [],
+                'data' => [
+                    'type' => 'project',
+                    'start_time' => $p->start_date,
+                    'end_time' => $p->end_date,
+                    'status' => $p->status?->label,
+                    'status_color' => $p->status?->color,
+                    'users' => $p->user ? [$p->user->name] : [],
+                ],
+                'children' => []
             ];
         }
 
-        // 🔹 Layers (flat)
         foreach ($layers as $l) {
-            $rows[] = [
-                'id' => $l->id,
-                'parentId' => $l->parent_id
-                    ? $l->parent_id
-                    : 'p' . $l->project_id,
-
-                'type' => 'layer',
+            $nodes[$l->id] = [
+                'key' => (string) $l->id,
                 'title' => $l->name,
-                'start_time' => $l->start_time,
-                'end_time' => $l->end_time,
-                'status' => $l->status?->label,
-                'status_color' => $l->status?->color,
-                'users' => $l->users->pluck('name')->toArray(),
+                'data' => [
+                    'type' => 'layer',
+                    'start_time' => $l->start_time,
+                    'end_time' => $l->end_time,
+                    'status' => $l->status?->label,
+                    'status_color' => $l->status?->color,
+                    'users' => $l->users->pluck('name')->toArray(),
+                ],
+                'parentId' => $l->parent_id
+                    ? (string) $l->parent_id
+                    : 'p' . $l->project_id,
+                'children' => []
             ];
         }
+
+        // 🔹 Step 2: build tree
+        $tree = [];
+
+        foreach ($nodes as $id => &$node) {
+            if (isset($node['parentId'])) {
+                $parentId = $node['parentId'];
+
+                if (isset($nodes[$parentId])) {
+                    $nodes[$parentId]['children'][] = &$node;
+                }
+            } else {
+                // projects (root)
+                $tree[] = &$node;
+            }
+        }
+
+        // 🔹 Step 3: cleanup parentId (not needed by fancytree)
+        $removeParent = function (&$nodes) use (&$removeParent) {
+            foreach ($nodes as &$n) {
+                unset($n['parentId']);
+                if (!empty($n['children'])) {
+                    $removeParent($n['children']);
+                }
+            }
+        };
+        $removeParent($tree);
 
         return view('admin.reports.project_layer', [
-            'rows' => $rows,
+            'tree' => $tree,
             'statuses' => Status::all(),
             'users' => User::all(),
         ]);
-//        return response()->json($rows);
     }
 
     public function storeProject(Request $request)
