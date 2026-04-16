@@ -721,99 +721,6 @@
         </div>
     </div>
 
-    {{--    --}}{{-- Layer Modal --}}
-    {{--    <div class="modal fade" id="layerModal" tabindex="-1" aria-hidden="true">--}}
-    {{--        <div class="modal-dialog modal-dialog-centered">--}}
-    {{--            <div class="modal-content border-0 shadow">--}}
-    {{--                <form id="layerForm">@csrf--}}
-    {{--                    <input type="hidden" name="project_id" id="modal_project_id">--}}
-    {{--                    <input type="hidden" name="parent_id" id="modal_parent_id">--}}
-    {{--                    <input type="hidden" name="layer_id" id="modal_layer_id">--}}
-    {{--                    <div class="modal-header bg-dark text-white py-2">--}}
-    {{--                        <h6 class="modal-title">Layer Setup</h6>--}}
-    {{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
-    {{--                    </div>--}}
-    {{--                    <div class="modal-body p-4">--}}
-    {{--                        <div class="mb-3">--}}
-    {{--                            <label class="fw-bold small">Layer Name</label>--}}
-    {{--                            <input type="text" name="name" id="modal_name" class="form-control" required>--}}
-    {{--                        </div>--}}
-    {{--                        <div class="mb-3">--}}
-    {{--                            <label class="fw-bold small">Assign Users</label>--}}
-    {{--                            <select name="user_ids[]" id="layer_users" class="form-control select2-multiple" multiple="multiple">--}}
-    {{--                                @foreach($users as $u)--}}
-    {{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
-    {{--                                @endforeach--}}
-    {{--                            </select>--}}
-    {{--                        </div>--}}
-    {{--                        <div class="row">--}}
-    {{--                            <div class="col-6 mb-3">--}}
-    {{--                                <label class="small fw-bold">Status</label>--}}
-    {{--                                <select name="status_id" id="modal_status_id" class="form-select">--}}
-    {{--                                    @foreach($statuses as $s)--}}
-    {{--                                        <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
-    {{--                                    @endforeach--}}
-    {{--                                </select>--}}
-    {{--                            </div>--}}
-    {{--                            <div class="col-6 mb-3">--}}
-    {{--                                <label class="small fw-bold">Start Date</label>--}}
-    {{--                                <input type="date" name="start_time" id="modal_start_time" class="form-control">--}}
-    {{--                            </div>--}}
-    {{--                            <div class="col-12 mb-3">--}}
-    {{--                                <label class="small fw-bold">End Date</label>--}}
-    {{--                                <input type="date" name="end_time" id="modal_end_time" class="form-control">--}}
-    {{--                            </div>--}}
-    {{--                        </div>--}}
-    {{--                    </div>--}}
-    {{--                    <div class="modal-footer">--}}
-    {{--                        <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>--}}
-    {{--                    </div>--}}
-    {{--                </form>--}}
-    {{--            </div>--}}
-    {{--        </div>--}}
-    {{--    </div>--}}
-
-    {{--    --}}{{-- Project Modal --}}
-    {{--    <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">--}}
-    {{--        <div class="modal-dialog modal-dialog-centered">--}}
-    {{--            <div class="modal-content border-0 shadow">--}}
-    {{--                <form id="projectForm">@csrf--}}
-    {{--                    <input type="hidden" name="project_id" id="edit_p_id">--}}
-    {{--                    <div class="modal-header bg-primary text-white py-2">--}}
-    {{--                        <h6 class="modal-title">New Project</h6>--}}
-    {{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
-    {{--                    </div>--}}
-    {{--                    <div class="modal-body p-4">--}}
-    {{--                        <div class="mb-3">--}}
-    {{--                            <label class="fw-bold small">Title</label>--}}
-    {{--                            <input type="text" name="title" id="p_title" class="form-control" required>--}}
-    {{--                        </div>--}}
-    {{--                        <div class="mb-3">--}}
-    {{--                            <label class="fw-bold small">Manager</label>--}}
-    {{--                            <select name="user_id" id="p_user_id" class="form-select" required>--}}
-    {{--                                <option value="">Select Manager</option>--}}
-    {{--                                @foreach($users as $u)--}}
-    {{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
-    {{--                                @endforeach--}}
-    {{--                            </select>--}}
-    {{--                        </div>--}}
-    {{--                        <div class="mb-3">--}}
-    {{--                            <label class="fw-bold small">Status</label>--}}
-    {{--                            <select name="status_id" id="p_status_id" class="form-select">--}}
-    {{--                                @foreach($statuses as $s)--}}
-    {{--                                    <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
-    {{--                                @endforeach--}}
-    {{--                            </select>--}}
-    {{--                        </div>--}}
-    {{--                    </div>--}}
-    {{--                    <div class="modal-footer">--}}
-    {{--                        <button type="submit" class="btn btn-primary" id="p_save_btn">Create Project</button>--}}
-    {{--                    </div>--}}
-    {{--                </form>--}}
-    {{--            </div>--}}
-    {{--        </div>--}}
-    {{--    </div>--}}
-
     <div class="modal" id="projectDetailsModal">
         <div class="modal-content modal-xl">
 
@@ -998,7 +905,6 @@
 @endsection
 
 @push('js')
-
     {{--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>--}}
     <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
@@ -1011,6 +917,20 @@
     </script>
 
     <script>
+        async function refreshTreeFunction() {
+            try {
+                const res = await fetch("{{ route('projectLayersTree') }}");
+                const treeData = await res.json();
+
+                const tree = $("#treeTable").fancytree("getTree");
+
+                tree.reload(treeData);
+
+            } catch (e) {
+                console.error('Failed to refresh tree', e);
+            }
+        }
+
         $(function () {
 
             $("#treeTable").fancytree({
@@ -1146,8 +1066,8 @@
                                 project_id: id,
                                 start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
                                 end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
-                            }, function () {
-                                location.reload();
+                            }, async function () {
+                                await refreshTreeFunction();
                             });
                         } else {
                             $.post("{{ route('project.child.updateDates') }}", {
@@ -1155,8 +1075,8 @@
                                 layer_id: id,
                                 start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
                                 end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
-                            }, function () {
-                                location.reload();
+                            }, async function () {
+                                await refreshTreeFunction();
                             });
                         }
                     });
@@ -1275,6 +1195,17 @@
             }
         });
 
+        document.addEventListener('click', function (e) {
+            const menu = document.getElementById('projectStatusDropdownMenu');
+            const toggle = document.getElementById('projectDropdownToggle');
+
+            if (!menu || !toggle) return;
+
+            if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
         async function openProjectDetails(projectId) {
             try {
                 const res = await fetch(`/board/projects/${projectId}`);
@@ -1335,9 +1266,10 @@
                 const title = titleEl.value.trim();
                 if (!title) return;
 
-                await updateProject(project.id, { title });
-
-                titleEl.dataset.original = title;
+                await updateProject(project.id, { title }, {
+                    refreshDetails: true,
+                    refreshTree: true
+                });
                 updateBtn.style.display = 'none';
             };
 
@@ -1369,14 +1301,16 @@
                 menu.classList.toggle('show');
             };
 
-            window.addEventListener('click', function handler(e) {
-                menu.classList.remove('show');
-            }, { once: true });
-
             menu.querySelectorAll('.project-status-item').forEach(el => {
                 el.onclick = async () => {
                     const statusId = parseInt(el.dataset.id);
-                    await updateProjectStatus(project.id, statusId);
+
+                    menu.classList.remove('show');
+
+                    await updateProject(project.id, { status_id: statusId }, {
+                        refreshDetails: true,
+                        refreshTree: true
+                    });
                 };
             });
 
@@ -1397,6 +1331,9 @@
                     await updateProject(project.id, {
                         start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
                         end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                    }, {
+                        refreshDetails: false,
+                        refreshTree: true
                     });
                 });
 
@@ -1414,6 +1351,9 @@
             select.onchange = async function () {
                 await updateProject(project.id, {
                     user_id: parseInt(this.value)
+                }, {
+                    refreshDetails: true,
+                    refreshTree: true
                 });
             };
 
@@ -1446,9 +1386,11 @@
 
                 const data = window.projectDescriptionEditorInstance.getData();
 
-                await updateProject(project.id, { description: data });
+                await updateProject(project.id, { description: data }, {
+                    refreshDetails: true,
+                    refreshTree: false
+                });
 
-                viewEl.innerHTML = data || '<i>No description</i>';
                 viewEl.style.display = 'block';
                 btnUpdate.style.display = 'none';
                 window.projectDescriptionEditorInstance.ui.view.element.style.display = 'none';
@@ -1496,7 +1438,7 @@
 
                 await updateLayer(layer.id, {name}, {
                     refreshDetails: false,
-                    refreshBoard: true
+                    refreshTree: true
                 });
 
                 titleEl.dataset.original = name;
@@ -1553,7 +1495,7 @@
                         end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
                     }, {
                         refreshDetails: false,
-                        refreshBoard: true
+                        refreshTree: true
                     });
                 });
 
@@ -1661,10 +1603,52 @@
             };
         }
 
+        async function updateProject(projectId, payload, options = {}) {
+
+            const {
+                refreshDetails = false,
+                refreshTree = false
+            } = options;
+
+            try {
+                const res = await fetch(`/projects/update/${projectId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Request failed: ${res.status}`);
+                }
+
+                showToast('Updated successfully', 'success');
+
+                if (refreshDetails) {
+                    await openProjectDetails(projectId);
+                }
+
+                if(refreshTree) {
+                    await refreshTreeFunction();
+                }
+
+                return await res.json();
+
+            } catch (e) {
+                showToast('Project update failed', 'error');
+                console.error('Project update failed:', e);
+                throw e;
+            }
+        }
+
         async function updateLayer(layerId, payload, options = {}) {
             const {
                 refreshDetails = true,
-                refreshBoard = false
+                refreshTree = false
             } = options;
 
             try {
@@ -1690,9 +1674,9 @@
                     await openTaskDetails(layerId);
                 }
 
-                // if (refreshBoard) {
-                //     await loadBoardData();
-                // }
+                if (refreshTree) {
+                    await refreshTreeFunction();
+                }
 
                 return await res.json(); // useful if backend returns updated layer
 
@@ -1715,7 +1699,7 @@
                 });
 
                 // reload board
-                // await loadBoardData();
+                await refreshTreeFunction();
                 await openTaskDetails(layer_id)
 
             } catch (err) {

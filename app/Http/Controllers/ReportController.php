@@ -64,7 +64,6 @@ class ReportController extends Controller
 
         $nodes = [];
 
-        // 🔹 Step 1: create all nodes (map)
         foreach ($projects as $p) {
             $nodes['p' . $p->id] = [
                 'key' => 'p' . $p->id,
@@ -103,7 +102,6 @@ class ReportController extends Controller
             ];
         }
 
-        // 🔹 Step 2: build tree
         $tree = [];
 
         foreach ($nodes as $id => &$node) {
@@ -119,7 +117,6 @@ class ReportController extends Controller
             }
         }
 
-        // 🔹 Step 3: cleanup parentId (not needed by fancytree)
         $removeParent = function (&$nodes) use (&$removeParent) {
             foreach ($nodes as &$n) {
                 unset($n['parentId']);
@@ -135,6 +132,63 @@ class ReportController extends Controller
             'statuses' => Status::all(),
             'users' => User::all(),
         ]);
+    }
+
+    public function projectLayersTree() {
+        $projects = Project::with(['user', 'status'])->get();
+        $layers = Layer::with(['users', 'status'])->orderBy('position')->get();
+
+        $nodes = [];
+
+        foreach ($projects as $p) {
+            $nodes['p' . $p->id] = [
+                'key' => 'p' . $p->id,
+                'title' => $p->title,
+                'data' => [
+                    'id' => $p->id,
+                    'type' => 'project',
+                    'start_time' => $p->start_date,
+                    'end_time' => $p->end_date,
+                    'status' => $p->status?->label,
+                    'status_color' => $p->status?->color,
+                    'users' => $p->user ? [$p->user->name] : [],
+                ],
+                'children' => []
+            ];
+        }
+
+        foreach ($layers as $l) {
+            $nodes['l' . $l->id] = [
+                'key' => 'l' . $l->id,
+                'title' => $l->name,
+                'data' => [
+                    'id' => $l->id,
+                    'type' => 'layer',
+                    'project_id' => $l->project_id,
+                    'start_time' => $l->start_time,
+                    'end_time' => $l->end_time,
+                    'status' => $l->status?->label,
+                    'status_color' => $l->status?->color,
+                    'users' => $l->users->pluck('name')->toArray(),
+                ],
+                'parentId' => $l->parent_id
+                    ? 'l' . $l->parent_id
+                    : 'p' . $l->project_id,
+                'children' => []
+            ];
+        }
+
+        $tree = [];
+
+        foreach ($nodes as $id => &$node) {
+            if (isset($node['parentId']) && isset($nodes[$node['parentId']])) {
+                $nodes[$node['parentId']]['children'][] = &$node;
+            } else {
+                $tree[] = &$node;
+            }
+        }
+
+        return response()->json($tree);
     }
 
     public function storeProject(Request $request)
@@ -169,15 +223,45 @@ class ReportController extends Controller
         return response()->json($project);
     }
 
-    public function updateProject(Request $request)
+    public function updateProject(Request $request, $id)
     {
-        $project = Project::findOrFail($request->project_id);
-        $project->update([
-            'title' => $request->title,
-            'user_id' => $request->user_id,
-            'status_id' => $request->status_id,
-        ]);
-        return response()->json(['status' => 'success']);
+        try {
+            $project = Project::findOrFail($id);
+
+            $data = $request->only([
+                'title',
+                'description',
+                'user_id',
+                'status_id',
+                'start_time',
+                'end_time'
+            ]);
+
+            // map fields
+            if (isset($data['start_time'])) {
+                $data['start_date'] = $data['start_time'];
+                unset($data['start_time']);
+            }
+
+            if (isset($data['end_time'])) {
+                $data['end_date'] = $data['end_time'];
+                unset($data['end_time']);
+            }
+
+            $project->update($data);
+
+            return response()->json([
+                'success' => true,
+                'project' => $project->fresh(['status', 'user'])
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 
     public function destroyProject($id)

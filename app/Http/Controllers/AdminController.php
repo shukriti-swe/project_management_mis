@@ -219,7 +219,11 @@ class AdminController extends Controller
         ]);
 
         return response()->json([
-            'project' => $project,
+            'project' => [
+                ...$project->toArray(),
+                'start_time' => $project->start_date,
+                'end_time' => $project->end_date,
+            ],
             'tree' => $tree
         ]);
     }
