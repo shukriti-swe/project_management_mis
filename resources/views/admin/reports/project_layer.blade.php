@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
           integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
         table {
@@ -15,6 +16,18 @@
             padding: 8px;
             border-bottom: 1px solid #eee;
             /*border-bottom: none!important;*/
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .table-header h1 {
+            font-size: 18px;
+            font-weight: 600;
         }
 
         /* Prevent row breaking */
@@ -701,6 +714,13 @@
         <div class="page-content">
             <div class="card">
                 <div class="card-body">
+                    <div class="table-header">
+                        <h1>Projects Table</h1>
+
+                        <button id="openAddProjectModal" class="btn">
+                            + Add Project
+                        </button>
+                    </div>
 
                     <table id="treeTable" class="table">
                         <thead>
@@ -902,6 +922,109 @@
         </div>
     </div>
 
+    <div class="modal" id="addProjectModal">
+        <div class="modal-content modal-lg">
+
+            <div class="modal-header">
+                <h2 class="modal-title">Create Project</h2>
+                <span class="close" id="closeAddProjectModal">&times;</span>
+            </div>
+
+            <form id="addProjectForm">
+
+                <!-- Title -->
+                <div class="form-group">
+                    <label>Project Title</label>
+                    <input type="text" id="addProjectTitle" required>
+                </div>
+
+                <!-- Status -->
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="addProjectStatus">
+                        @foreach($statuses as $status)
+                            <option value="{{$status->id}}">{{$status->label}}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Manager -->
+                <div class="form-group">
+                    <label>Manager</label>
+                    <select id="addProjectUser">
+                        @foreach($users as $user)
+                            <option value="{{$user->id}}">{{$user->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Date -->
+                <div class="form-group">
+                    <label>Date Range</label>
+                    <input type="text" id="addProjectDateRange" readonly>
+                </div>
+
+                <button type="submit" class="btn">
+                    Create Project
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="addLayerModal">
+        <div class="modal-content modal-lg">
+
+            <div class="modal-header">
+                <h2 class="modal-title">Create Layer</h2>
+                <span class="close" id="closeAddLayerModal">&times;</span>
+            </div>
+
+            <form id="addLayerForm">
+
+                <!-- Name -->
+                <div class="form-group">
+                    <label>Layer Name</label>
+                    <input type="text" id="addLayerName" required>
+                </div>
+
+                <input type="hidden" id="addLayerProjectId">
+                <input type="hidden" id="addLayerParentId">
+
+                <!-- Status -->
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="addLayerStatus">
+                        @foreach($statuses as $status)
+                            <option value="{{$status->id}}">{{$status->label}}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Users -->
+                <div class="form-group">
+                    <label>Assign Users</label>
+                    <select id="addLayerUsers" multiple>
+                        @foreach($users as $user)
+                            <option value="{{$user->id}}">{{$user->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Date -->
+                <div class="form-group">
+                    <label>Date Range</label>
+                    <input type="text" id="addLayerDateRange" readonly>
+                </div>
+
+                <button type="submit" class="btn">
+                    Create Layer
+                </button>
+
+            </form>
+        </div>
+    </div>
+
 @endsection
 
 @push('js')
@@ -909,6 +1032,7 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         window.treeData = @json($tree);
@@ -917,14 +1041,64 @@
     </script>
 
     <script>
+        {{--async function refreshTreeFunction() {--}}
+        {{--    try {--}}
+        {{--        const res = await fetch("{{ route('projectLayersTree') }}");--}}
+        {{--        const treeData = await res.json();--}}
+
+        {{--        // const tree = $("#treeTable").fancytree("getTree");--}}
+        {{--        const tree = $.ui.fancytree.getTree("#treeTable");--}}
+
+        {{--        const expandedKeys = [];--}}
+
+        {{--        tree.getRootNode().visit(function (node) {--}}
+        {{--            if (node.isExpanded()) {--}}
+        {{--                expandedKeys.push(node.key);--}}
+        {{--            }--}}
+        {{--        });--}}
+
+        {{--        const expandedSet = new Set(expandedKeys);--}}
+
+        {{--        // console.log(expandedSet);--}}
+
+        {{--        tree.reload(treeData);--}}
+
+        {{--        tree.getRootNode().visit(function (node) {--}}
+        {{--            if (expandedSet.has(node.key)) {--}}
+        {{--                node.setExpanded(true);--}}
+        {{--            }--}}
+        {{--        });--}}
+
+        {{--    } catch (e) {--}}
+        {{--        console.error('Failed to refresh tree', e);--}}
+        {{--    }--}}
+        {{--}--}}
         async function refreshTreeFunction() {
             try {
                 const res = await fetch("{{ route('projectLayersTree') }}");
                 const treeData = await res.json();
 
-                const tree = $("#treeTable").fancytree("getTree");
+                const tree = $.ui.fancytree.getTree("#treeTable");
+
+                const expandedKeys = [];
+
+                tree.getRootNode().visit(function (node) {
+                    if (node.isExpanded()) {
+                        expandedKeys.push(node.key);
+                    }
+                });
+
+                const expandedSet = new Set(expandedKeys);
 
                 tree.reload(treeData);
+
+                setTimeout(() => {
+                    tree.getRootNode().visit(function (node) {
+                        if (expandedSet.has(node.key)) {
+                            node.setExpanded(true);
+                        }
+                    });
+                }, 0);
 
             } catch (e) {
                 console.error('Failed to refresh tree', e);
@@ -949,16 +1123,39 @@
                     const d = node.data;
                     const cells = $(node.tr).find(">td");
 
-                    // existing
+                    const row = $(node.tr);
+                    row.removeAttr('style');
+
+                    let isOverdue = false;
+
+                    if (d.end_time) {
+                        const end = moment.utc(d.end_time).local();
+
+                        if (end.isValid()) {
+                            isOverdue = end.isBefore(moment(), 'minute');
+                        }
+                    }
+
+                    const statusCategory = (d.status_category || '').toLowerCase();
+
+                    const excluded = ['backlog', 'done', 'canceled'];
+
+                    if (isOverdue && !excluded.includes(statusCategory)) {
+                        row.attr(
+                            'style',
+                            'background-color: rgba(239,68,68,0.08) !important;'
+                        );
+                    }
+
                     cells.eq(1).text(
                         d.start_time
-                            ? moment(d.start_time).format('DD MMM, YY, hh:mmA')
+                            ? moment.utc(d.start_time).local().format('DD MMM, YY, hh:mmA')
                             : ''
                     );
 
                     cells.eq(2).text(
                         d.end_time
-                            ? moment(d.end_time).format('DD MMM, YY, hh:mmA')
+                            ? moment.utc(d.end_time).local().format('DD MMM, YY, hh:mmA')
                             : ''
                     );
                     cells.eq(3).text(d.status || '');
@@ -981,19 +1178,6 @@
                title="Add ${isProject ? 'Layer' : 'Child Layer'}">
                 <i class="bx bx-plus-circle"></i>
             </a>
-
-            ${
-                        isProject
-                            ? `<a href="javascript:;" class="edit-project ms-1 text-primary"
-                        data-key="${key}" data-id="${id}" title="Edit Project">
-                        <i class="bx bx-edit-alt"></i>
-                   </a>`
-                            : `<a href="javascript:;" class="edit-layer ms-1 text-muted"
-                        data-key="${key}" data-id="${id}" title="Edit Layer">
-                        <i class="bx bx-edit-alt"></i>
-                   </a>`
-                    }
-
             ${
                         isProject
                             ? `<a href="javascript:;" class="delete-project ms-1 text-danger"
@@ -1034,7 +1218,7 @@
                 let el = $(this);
                 let key = el.attr('data-key');
 
-                let node = $("#treeTable").fancytree("getTree").getNodeByKey(key);
+                let node = $.ui.fancytree.getTree("#treeTable").getNodeByKey(key);
                 let d = node.data;
 
                 let isProject = d.type === 'project';
@@ -1043,11 +1227,11 @@
                 if (!el.data('daterangepicker')) {
 
                     let startVal = d.start_time
-                        ? moment(d.start_time)
+                        ? moment.utc(d.start_time).local()
                         : moment();
 
                     let endVal = d.end_time
-                        ? moment(d.end_time)
+                        ? moment.utc(d.end_time).local()
                         : moment();
 
                     el.daterangepicker({
@@ -1064,8 +1248,8 @@
                             $.post("{{ route('project.updateDates') }}", {
                                 _token: "{{ csrf_token() }}",
                                 project_id: id,
-                                start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
-                                end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                                start_time: picker.startDate.utc().format('YYYY-MM-DD HH:mm:ss'),
+                                end_time: picker.endDate.utc().format('YYYY-MM-DD HH:mm:ss')
                             }, async function () {
                                 await refreshTreeFunction();
                             });
@@ -1073,8 +1257,8 @@
                             $.post("{{ route('project.child.updateDates') }}", {
                                 _token: "{{ csrf_token() }}",
                                 layer_id: id,
-                                start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
-                                end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                                start_time: picker.startDate.utc().format('YYYY-MM-DD HH:mm:ss'),
+                                end_time: picker.endDate.utc().format('YYYY-MM-DD HH:mm:ss')
                             }, async function () {
                                 await refreshTreeFunction();
                             });
@@ -1084,72 +1268,6 @@
                     el.data('daterangepicker').show();
                 }
             });
-
-
-            // Modal Handlers
-            {{--$(document).on('click', '.open-add-modal', function () {--}}
-
-            {{--    $('#layerForm')[0].reset();--}}
-
-            {{--    $('#modal_layer_id').val('');--}}
-            {{--    $('#modal_project_id').val($(this).data('project'));--}}
-            {{--    $('#modal_parent_id').val($(this).data('parent'));--}}
-
-            {{--    $('#modal_name').val('');--}}
-            {{--    $('#modal_start_time').val('');--}}
-            {{--    $('#modal_end_time').val('');--}}
-
-            {{--    $('#layer_users').val(null).trigger('change');--}}
-
-            {{--    new bootstrap.Modal(document.getElementById('layerModal')).show();--}}
-            {{--});--}}
-
-            {{--$(document).on('click', '.edit-layer', function () {--}}
-
-            {{--    let id = $(this).data('id');--}}
-
-            {{--    let url = "{{ route('project.child.edit', ':id') }}".replace(':id', id);--}}
-
-            {{--    $.get(url, function (data) {--}}
-
-            {{--        $('#modal_layer_id').val(data.id);--}}
-            {{--        $('#modal_project_id').val(data.project_id);--}}
-            {{--        $('#modal_parent_id').val(data.parent_id);--}}
-            {{--        $('#modal_name').val(data.name);--}}
-            {{--        $('#modal_status_id').val(data.status_id);--}}
-
-            {{--        function formatDate(dateStr) {--}}
-            {{--            if (!dateStr) return '';--}}
-            {{--            return new Date(dateStr).toISOString().split('T')[0];--}}
-            {{--        }--}}
-
-            {{--        $('#modal_start_time').val(formatDate(data.start_time));--}}
-            {{--        $('#modal_end_time').val(formatDate(data.end_time));--}}
-
-            {{--        if (data.users) {--}}
-            {{--            $('#layer_users').val(data.users.map(u => u.id)).trigger('change');--}}
-            {{--        }--}}
-
-            {{--        new bootstrap.Modal(document.getElementById('layerModal')).show();--}}
-            {{--    });--}}
-            {{--});--}}
-
-            {{--$(document).on('click', '.edit-project', function () {--}}
-
-            {{--    let id = $(this).data('id');--}}
-
-            {{--    let url = "{{ route('project.edit', ':id') }}".replace(':id', id);--}}
-
-            {{--    $.get(url, function (data) {--}}
-
-            {{--        $('#edit_p_id').val(data.id);--}}
-            {{--        $('#p_title').val(data.title);--}}
-            {{--        $('#p_user_id').val(data.user_id);--}}
-            {{--        $('#p_status_id').val(data.status_id);--}}
-
-            {{--        new bootstrap.Modal(document.getElementById('projectModal')).show();--}}
-            {{--    });--}}
-            {{--});--}}
 
         });
     </script>
@@ -1322,8 +1440,13 @@
                 .daterangepicker({
                     timePicker: true,
                     timePicker24Hour: true,
-                    startDate: project.start_time ? moment(project.start_time) : moment(),
-                    endDate: project.end_time ? moment(project.end_time) : moment(),
+                    startDate: project.start_time
+                        ? moment.utc(project.start_time).local()
+                        : moment(),
+
+                    endDate: project.end_time
+                        ? moment.utc(project.end_time).local()
+                        : moment(),
                     locale: { format: 'MMM D, YYYY HH:mm' }
                 })
                 .on('apply.daterangepicker', async function (ev, picker) {
@@ -1484,8 +1607,13 @@
                 .daterangepicker({
                     timePicker: true,
                     timePicker24Hour: true,
-                    startDate: moment(layer.start_time),
-                    endDate: moment(layer.end_time),
+                    startDate: layer.start_time
+                        ? moment.utc(layer.start_time).local()
+                        : moment().startOf('day'),
+
+                    endDate: layer.end_time
+                        ? moment.utc(layer.end_time).local()
+                        : moment().startOf('day'),
                     locale: {format: 'MMM D, YYYY HH:mm'}
                 })
                 .on('apply.daterangepicker', async function (ev, picker) {
@@ -1705,6 +1833,389 @@
             } catch (err) {
                 console.error('Failed to update status', err);
             }
+        }
+    </script>
+
+    <script>
+        $(document).on('click', '.delete-project', async function (e) {
+            e.stopPropagation();
+
+            const id = $(this).data('id');
+
+            const result = await Swal.fire({
+                title: 'Delete project?',
+                text: 'This will remove the project and related data.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it'
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await fetch(`/projects/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    }
+                });
+
+                if (!res.ok) throw new Error(res.status);
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted',
+                    text: 'Project deleted successfully',
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+
+                await refreshTreeFunction();
+
+            } catch (err) {
+                console.error(err);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: 'Could not delete project'
+                });
+            }
+        });
+
+        $(document).on('click', '.delete-layer', async function (e) {
+            e.stopPropagation();
+
+            const id = $(this).data('id');
+
+            const result = await Swal.fire({
+                title: 'Delete layer?',
+                text: 'This will remove the layer and its children.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it'
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await fetch(`/project/child/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    }
+                });
+
+                if (!res.ok) throw new Error(res.status);
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted',
+                    text: 'Layer deleted successfully',
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+
+                await refreshTreeFunction();
+
+            } catch (err) {
+                console.error(err);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: 'Could not delete layer'
+                });
+            }
+        });
+
+        $(document).on('click', '.open-add-modal', function (e) {
+            e.stopPropagation();
+
+            const projectId = $(this).data('project');
+            const parentKey = $(this).data('parent'); // l12 or empty
+
+            // store
+            window.addLayerContext = {
+                projectId,
+                parentKey
+            };
+
+            $('#addLayerProjectId').val(projectId);
+
+            let parentId = null;
+
+            if (parentKey && parentKey.startsWith('l')) {
+                parentId = parentKey.replace('l', '');
+            }
+
+            $('#addLayerParentId').val(parentId || '');
+
+            $('#addLayerStatus').val(window.allStatuses[0]?.id).trigger('change');
+
+            // open modal
+            $('#addLayerModal').show();
+        });
+
+        $('#addLayerUsers').select2({
+            placeholder: "Assign users",
+            width: '100%'
+        });
+
+        $('#addLayerStatus').select2({
+            placeholder: "Select status",
+            width: '100%'
+        });
+
+        $('#addLayerDateRange').daterangepicker({
+            autoUpdateInput: false,
+            timePicker: true,
+            timePicker24Hour: true,
+
+            startDate: moment().startOf('day'),  // ✅ 00:00
+            endDate: moment().startOf('day'),    // ✅ 00:00
+
+            locale: {
+                format: 'MMM D, YYYY HH:mm',
+                cancelLabel: 'Clear'
+            }
+        });
+
+        $('#addLayerDateRange').on('cancel.daterangepicker', function (ev, picker) {
+
+            // clear UI
+            $(this).val('');
+
+            // clear stored values
+            $(this).removeData('start').removeData('end');
+
+            // 🔥 CRITICAL FIX: reset picker state
+            picker.setStartDate(moment().startOf('day'));
+            picker.setEndDate(moment().startOf('day'));
+        });
+
+        $('#addLayerDateRange').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(
+                picker.startDate.format('MMM D, YYYY HH:mm') +
+                ' → ' +
+                picker.endDate.format('MMM D, YYYY HH:mm')
+            );
+
+            $(this).data('start', picker.startDate.format('YYYY-MM-DD HH:mm:ss'));
+            $(this).data('end', picker.endDate.format('YYYY-MM-DD HH:mm:ss'));
+        });
+
+        $('#closeAddLayerModal').on('click', function () {
+            $('#addLayerModal').hide();
+        });
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('addLayerModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        $('#addLayerForm').on('submit', async function (e) {
+            e.preventDefault();
+
+            const name = $('#addLayerName').val();
+            const project_id = $('#addLayerProjectId').val();
+            const parent_id = $('#addLayerParentId').val();
+            const status_id = $('#addLayerStatus').val();
+            const users = $('#addLayerUsers').val();
+
+            const start_time = $('#addLayerDateRange').data('start');
+            const end_time = $('#addLayerDateRange').data('end');
+
+            if (!name || !status_id || !project_id) {
+                alert('Required fields missing');
+                return;
+            }
+
+            try {
+                const res = await fetch("{{ route('project.child.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        name,
+                        project_id,
+                        parent_id,
+                        status_id,
+                        user_ids: users,
+                        start_time,
+                        end_time
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'Failed');
+                }
+
+                // ✅ CLOSE MODAL
+                $('#addLayerModal').hide();
+
+                // ✅ RESET FORM
+                resetAddLayerForm();
+
+                // ✅ REFRESH TREE (CRITICAL)
+                await refreshTreeFunction();
+
+            } catch (err) {
+                console.error(err);
+                alert('Failed to create layer');
+            }
+        });
+
+        function resetAddLayerForm() {
+
+            $('#addLayerForm')[0].reset();
+
+            $('#addLayerUsers').val(null).trigger('change');
+            $('#addLayerParentId').val('');
+            $('#addLayerStatus').val(null).trigger('change');
+
+            $('#addLayerDateRange').val('');
+            $('#addLayerDateRange').removeData('start').removeData('end');
+        }
+    </script>
+
+    <script>
+        $('#addProjectStatus').select2({
+            width: '100%'
+        });
+
+        $('#addProjectUser').select2({
+            width: '100%',
+            placeholder: 'Select manager'
+        });
+
+        $('#addProjectDateRange').daterangepicker({
+            autoUpdateInput: false,
+            timePicker: true,
+            timePicker24Hour: true,
+            startDate: moment().startOf('day'),
+            endDate: moment().startOf('day'),
+            locale: {
+                format: 'MMM D, YYYY HH:mm',
+                cancelLabel: 'Clear'
+            }
+        });
+
+        $('#addProjectDateRange').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(
+                picker.startDate.format('MMM D, YYYY HH:mm') +
+                ' → ' +
+                picker.endDate.format('MMM D, YYYY HH:mm')
+            );
+
+            $(this).data('start', picker.startDate.format('YYYY-MM-DD HH:mm:ss'));
+            $(this).data('end', picker.endDate.format('YYYY-MM-DD HH:mm:ss'));
+        });
+
+        $('#addProjectDateRange').on('cancel.daterangepicker', function (ev, picker) {
+            $(this).val('');
+            $(this).removeData('start').removeData('end');
+
+            picker.setStartDate(moment().startOf('day'));
+            picker.setEndDate(moment().startOf('day'));
+        });
+
+        $('#openAddProjectModal').on('click', function () {
+
+            // default selections
+            $('#addProjectStatus').val(window.allStatuses[0]?.id).trigger('change');
+            $('#addProjectUser').val(null).trigger('change');
+
+            $('#addProjectModal').show();
+        });
+
+        $('#closeAddProjectModal').on('click', function () {
+            $('#addProjectModal').hide();
+        });
+
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('addProjectModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        $('#addProjectForm').on('submit', async function (e) {
+            e.preventDefault();
+
+            const title = $('#addProjectTitle').val();
+            const status_id = $('#addProjectStatus').val();
+            const user_id = $('#addProjectUser').val();
+
+            const start_time = $('#addProjectDateRange').data('start') || null;
+            const end_time = $('#addProjectDateRange').data('end') || null;
+
+            if (!title || !status_id || !user_id) {
+                alert('Required fields missing');
+                return;
+            }
+
+            try {
+                const res = await fetch("{{ route('project.store') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document
+                            .querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        title,
+                        status_id,
+                        user_id,
+                        start_time,
+                        end_time
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'Failed');
+                }
+
+                $('#addProjectModal').hide();
+
+                resetAddProjectForm();
+
+                await refreshTreeFunction();
+
+            } catch (err) {
+                console.error(err);
+                alert('Failed to create project');
+            }
+        });
+
+        function resetAddProjectForm() {
+
+            $('#addProjectForm')[0].reset();
+
+            $('#addProjectStatus').val(null).trigger('change');
+            $('#addProjectUser').val(null).trigger('change');
+
+            $('#addProjectDateRange').val('');
+            $('#addProjectDateRange').removeData('start').removeData('end');
         }
     </script>
 

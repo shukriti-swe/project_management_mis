@@ -74,6 +74,7 @@ class ReportController extends Controller
                     'start_time' => $p->start_date,
                     'end_time' => $p->end_date,
                     'status' => $p->status?->label,
+                    'status_category' => $p->status?->category,
                     'status_color' => $p->status?->color,
                     'users' => $p->user ? [$p->user->name] : [],
                 ],
@@ -92,6 +93,7 @@ class ReportController extends Controller
                     'start_time' => $l->start_time,
                     'end_time' => $l->end_time,
                     'status' => $l->status?->label,
+                    'status_category' => $l->status?->category,
                     'status_color' => $l->status?->color,
                     'users' => $l->users->pluck('name')->toArray(),
                 ],
@@ -150,6 +152,7 @@ class ReportController extends Controller
                     'start_time' => $p->start_date,
                     'end_time' => $p->end_date,
                     'status' => $p->status?->label,
+                    'status_category' => $p->status?->category,
                     'status_color' => $p->status?->color,
                     'users' => $p->user ? [$p->user->name] : [],
                 ],
@@ -168,6 +171,7 @@ class ReportController extends Controller
                     'start_time' => $l->start_time,
                     'end_time' => $l->end_time,
                     'status' => $l->status?->label,
+                    'status_category' => $l->status?->category,
                     'status_color' => $l->status?->color,
                     'users' => $l->users->pluck('name')->toArray(),
                 ],
@@ -295,18 +299,26 @@ class ReportController extends Controller
             Log::info('Received request to create layer with data: ' . json_encode($validated));
 
             $validated['users'] = $request->has('user_ids') ? $request->user_ids : [];
-            $start = Carbon::parse($request->start_time);
-            $end = Carbon::parse($request->end_time);
+            $validated['start_time'] = null;
+            $validated['end_time'] = null;
 
-            // Only force startOfDay if no specific time was provided (it's currently at 00:00:00)
-            $validated['start_time'] = $start->hour === 0 && $start->minute === 0
-                ? $start->startOfDay()
-                : $start;
+            if ($request->filled('start_time')) {
+                $start = Carbon::parse($request->start_time);
 
-            // Only force endOfDay if no specific time was provided
-            $validated['end_time'] = $end->hour === 0 && $end->minute === 0
-                ? $end->endOfDay()
-                : $end;
+                $validated['start_time'] =
+                    ($start->hour === 0 && $start->minute === 0)
+                        ? $start->startOfDay()
+                        : $start;
+            }
+
+            if ($request->filled('end_time')) {
+                $end = Carbon::parse($request->end_time);
+
+                $validated['end_time'] =
+                    ($end->hour === 0 && $end->minute === 0)
+                        ? $end->endOfDay()
+                        : $end;
+            }
 
             $lastPosition = Layer::where('project_id', $request->project_id)
                 ->where('parent_id', $request->parent_id)
