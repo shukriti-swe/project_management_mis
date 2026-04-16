@@ -70,6 +70,7 @@ class ReportController extends Controller
                 'key' => 'p' . $p->id,
                 'title' => $p->title,
                 'data' => [
+                    'id' => $p->id,
                     'type' => 'project',
                     'start_time' => $p->start_date,
                     'end_time' => $p->end_date,
@@ -82,11 +83,13 @@ class ReportController extends Controller
         }
 
         foreach ($layers as $l) {
-            $nodes[$l->id] = [
-                'key' => (string) $l->id,
+            $nodes['l' . $l->id] = [
+                'key' => 'l' . $l->id,
                 'title' => $l->name,
                 'data' => [
+                    'id' => $l->id,
                     'type' => 'layer',
+                    'project_id' => $l->project_id,
                     'start_time' => $l->start_time,
                     'end_time' => $l->end_time,
                     'status' => $l->status?->label,
@@ -94,7 +97,7 @@ class ReportController extends Controller
                     'users' => $l->users->pluck('name')->toArray(),
                 ],
                 'parentId' => $l->parent_id
-                    ? (string) $l->parent_id
+                    ? 'l' . $l->parent_id
                     : 'p' . $l->project_id,
                 'children' => []
             ];

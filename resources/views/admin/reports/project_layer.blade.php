@@ -85,8 +85,8 @@
         /* Prevent icon/title wrapping */
         .fancytree-title {
             display: inline-block;
-            height: 40px;          /* match row */
-            line-height: 40px;     /* vertical centering */
+            height: 40px; /* match row */
+            line-height: 40px; /* vertical centering */
 
             flex: 1;
             min-width: 0;
@@ -153,6 +153,7 @@
 
             --radius: 6px;
         }
+
         /* =========================
            LARGE MODAL
         ========================= */
@@ -182,7 +183,7 @@
             color: var(--muted);
         }
 
-        .title-input-group{
+        .title-input-group {
             display: flex;
             flex-grow: 1;
             align-items: center;
@@ -199,14 +200,15 @@
             background: transparent;
         }
 
-        .inline-update-btn{
+        .inline-update-btn {
             padding: 12px 10px;
             border-radius: var(--radius);
             font-size: 14px;
             color: #FFFFFF;
             background-color: var(--primary);
         }
-        .inline-update-btn:focus{
+
+        .inline-update-btn:focus {
             outline: none;
         }
 
@@ -265,12 +267,12 @@
             margin-bottom: 20px;
         }
 
-        .date-range-group{
+        .date-range-group {
             max-width: 50%;
         }
 
-        .assigned-users-group label{
-            margin-bottom: 20px!important;
+        .assigned-users-group label {
+            margin-bottom: 20px !important;
         }
 
         .detail-group label {
@@ -322,12 +324,13 @@
             cursor: pointer;
         }
 
-        .tree-node-title-root{
+        .tree-node-title-root {
             color: #666666;
             cursor: text;
         }
-        .tree-node-title-root:hover{
-            text-decoration: none!important;
+
+        .tree-node-title-root:hover {
+            text-decoration: none !important;
         }
 
         .tree-node-title:hover {
@@ -361,7 +364,7 @@
             gap: 10px;
         }
 
-        .progress-inline .inline-group{
+        .progress-inline .inline-group {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -392,7 +395,7 @@
             position: relative;
         }
 
-        #detailsUsers{
+        #detailsUsers {
             margin-top: 20px;
         }
 
@@ -418,7 +421,7 @@
             justify-content: center;
 
             line-height: 1; /* remove extra vertical spacing */
-            padding: 0;     /* remove default button padding */
+            padding: 0; /* remove default button padding */
         }
 
         .user-row:hover .user-remove {
@@ -443,11 +446,11 @@
             color: var(--primary);
         }
 
-        .status-btn{
-            cursor: default!important;
+        .status-btn {
+            cursor: default !important;
         }
 
-        #currentStatusBtn:hover{
+        #currentStatusBtn:hover {
             color: #FFF;
         }
     </style>
@@ -718,98 +721,173 @@
         </div>
     </div>
 
-{{--    --}}{{-- Layer Modal --}}
-{{--    <div class="modal fade" id="layerModal" tabindex="-1" aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-dialog-centered">--}}
-{{--            <div class="modal-content border-0 shadow">--}}
-{{--                <form id="layerForm">@csrf--}}
-{{--                    <input type="hidden" name="project_id" id="modal_project_id">--}}
-{{--                    <input type="hidden" name="parent_id" id="modal_parent_id">--}}
-{{--                    <input type="hidden" name="layer_id" id="modal_layer_id">--}}
-{{--                    <div class="modal-header bg-dark text-white py-2">--}}
-{{--                        <h6 class="modal-title">Layer Setup</h6>--}}
-{{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
-{{--                    </div>--}}
-{{--                    <div class="modal-body p-4">--}}
-{{--                        <div class="mb-3">--}}
-{{--                            <label class="fw-bold small">Layer Name</label>--}}
-{{--                            <input type="text" name="name" id="modal_name" class="form-control" required>--}}
-{{--                        </div>--}}
-{{--                        <div class="mb-3">--}}
-{{--                            <label class="fw-bold small">Assign Users</label>--}}
-{{--                            <select name="user_ids[]" id="layer_users" class="form-control select2-multiple" multiple="multiple">--}}
-{{--                                @foreach($users as $u)--}}
-{{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
-{{--                                @endforeach--}}
-{{--                            </select>--}}
-{{--                        </div>--}}
-{{--                        <div class="row">--}}
-{{--                            <div class="col-6 mb-3">--}}
-{{--                                <label class="small fw-bold">Status</label>--}}
-{{--                                <select name="status_id" id="modal_status_id" class="form-select">--}}
-{{--                                    @foreach($statuses as $s)--}}
-{{--                                        <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
-{{--                                    @endforeach--}}
-{{--                                </select>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-6 mb-3">--}}
-{{--                                <label class="small fw-bold">Start Date</label>--}}
-{{--                                <input type="date" name="start_time" id="modal_start_time" class="form-control">--}}
-{{--                            </div>--}}
-{{--                            <div class="col-12 mb-3">--}}
-{{--                                <label class="small fw-bold">End Date</label>--}}
-{{--                                <input type="date" name="end_time" id="modal_end_time" class="form-control">--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                    <div class="modal-footer">--}}
-{{--                        <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>--}}
-{{--                    </div>--}}
-{{--                </form>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+    {{--    --}}{{-- Layer Modal --}}
+    {{--    <div class="modal fade" id="layerModal" tabindex="-1" aria-hidden="true">--}}
+    {{--        <div class="modal-dialog modal-dialog-centered">--}}
+    {{--            <div class="modal-content border-0 shadow">--}}
+    {{--                <form id="layerForm">@csrf--}}
+    {{--                    <input type="hidden" name="project_id" id="modal_project_id">--}}
+    {{--                    <input type="hidden" name="parent_id" id="modal_parent_id">--}}
+    {{--                    <input type="hidden" name="layer_id" id="modal_layer_id">--}}
+    {{--                    <div class="modal-header bg-dark text-white py-2">--}}
+    {{--                        <h6 class="modal-title">Layer Setup</h6>--}}
+    {{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
+    {{--                    </div>--}}
+    {{--                    <div class="modal-body p-4">--}}
+    {{--                        <div class="mb-3">--}}
+    {{--                            <label class="fw-bold small">Layer Name</label>--}}
+    {{--                            <input type="text" name="name" id="modal_name" class="form-control" required>--}}
+    {{--                        </div>--}}
+    {{--                        <div class="mb-3">--}}
+    {{--                            <label class="fw-bold small">Assign Users</label>--}}
+    {{--                            <select name="user_ids[]" id="layer_users" class="form-control select2-multiple" multiple="multiple">--}}
+    {{--                                @foreach($users as $u)--}}
+    {{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
+    {{--                                @endforeach--}}
+    {{--                            </select>--}}
+    {{--                        </div>--}}
+    {{--                        <div class="row">--}}
+    {{--                            <div class="col-6 mb-3">--}}
+    {{--                                <label class="small fw-bold">Status</label>--}}
+    {{--                                <select name="status_id" id="modal_status_id" class="form-select">--}}
+    {{--                                    @foreach($statuses as $s)--}}
+    {{--                                        <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
+    {{--                                    @endforeach--}}
+    {{--                                </select>--}}
+    {{--                            </div>--}}
+    {{--                            <div class="col-6 mb-3">--}}
+    {{--                                <label class="small fw-bold">Start Date</label>--}}
+    {{--                                <input type="date" name="start_time" id="modal_start_time" class="form-control">--}}
+    {{--                            </div>--}}
+    {{--                            <div class="col-12 mb-3">--}}
+    {{--                                <label class="small fw-bold">End Date</label>--}}
+    {{--                                <input type="date" name="end_time" id="modal_end_time" class="form-control">--}}
+    {{--                            </div>--}}
+    {{--                        </div>--}}
+    {{--                    </div>--}}
+    {{--                    <div class="modal-footer">--}}
+    {{--                        <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>--}}
+    {{--                    </div>--}}
+    {{--                </form>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
 
-{{--    --}}{{-- Project Modal --}}
-{{--    <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">--}}
-{{--        <div class="modal-dialog modal-dialog-centered">--}}
-{{--            <div class="modal-content border-0 shadow">--}}
-{{--                <form id="projectForm">@csrf--}}
-{{--                    <input type="hidden" name="project_id" id="edit_p_id">--}}
-{{--                    <div class="modal-header bg-primary text-white py-2">--}}
-{{--                        <h6 class="modal-title">New Project</h6>--}}
-{{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
-{{--                    </div>--}}
-{{--                    <div class="modal-body p-4">--}}
-{{--                        <div class="mb-3">--}}
-{{--                            <label class="fw-bold small">Title</label>--}}
-{{--                            <input type="text" name="title" id="p_title" class="form-control" required>--}}
-{{--                        </div>--}}
-{{--                        <div class="mb-3">--}}
-{{--                            <label class="fw-bold small">Manager</label>--}}
-{{--                            <select name="user_id" id="p_user_id" class="form-select" required>--}}
-{{--                                <option value="">Select Manager</option>--}}
-{{--                                @foreach($users as $u)--}}
-{{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
-{{--                                @endforeach--}}
-{{--                            </select>--}}
-{{--                        </div>--}}
-{{--                        <div class="mb-3">--}}
-{{--                            <label class="fw-bold small">Status</label>--}}
-{{--                            <select name="status_id" id="p_status_id" class="form-select">--}}
-{{--                                @foreach($statuses as $s)--}}
-{{--                                    <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
-{{--                                @endforeach--}}
-{{--                            </select>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                    <div class="modal-footer">--}}
-{{--                        <button type="submit" class="btn btn-primary" id="p_save_btn">Create Project</button>--}}
-{{--                    </div>--}}
-{{--                </form>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
+    {{--    --}}{{-- Project Modal --}}
+    {{--    <div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">--}}
+    {{--        <div class="modal-dialog modal-dialog-centered">--}}
+    {{--            <div class="modal-content border-0 shadow">--}}
+    {{--                <form id="projectForm">@csrf--}}
+    {{--                    <input type="hidden" name="project_id" id="edit_p_id">--}}
+    {{--                    <div class="modal-header bg-primary text-white py-2">--}}
+    {{--                        <h6 class="modal-title">New Project</h6>--}}
+    {{--                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>--}}
+    {{--                    </div>--}}
+    {{--                    <div class="modal-body p-4">--}}
+    {{--                        <div class="mb-3">--}}
+    {{--                            <label class="fw-bold small">Title</label>--}}
+    {{--                            <input type="text" name="title" id="p_title" class="form-control" required>--}}
+    {{--                        </div>--}}
+    {{--                        <div class="mb-3">--}}
+    {{--                            <label class="fw-bold small">Manager</label>--}}
+    {{--                            <select name="user_id" id="p_user_id" class="form-select" required>--}}
+    {{--                                <option value="">Select Manager</option>--}}
+    {{--                                @foreach($users as $u)--}}
+    {{--                                    <option value="{{ $u->id }}">{{ $u->name }}</option>--}}
+    {{--                                @endforeach--}}
+    {{--                            </select>--}}
+    {{--                        </div>--}}
+    {{--                        <div class="mb-3">--}}
+    {{--                            <label class="fw-bold small">Status</label>--}}
+    {{--                            <select name="status_id" id="p_status_id" class="form-select">--}}
+    {{--                                @foreach($statuses as $s)--}}
+    {{--                                    <option value="{{ $s->id }}">{{ $s->label }}</option>--}}
+    {{--                                @endforeach--}}
+    {{--                            </select>--}}
+    {{--                        </div>--}}
+    {{--                    </div>--}}
+    {{--                    <div class="modal-footer">--}}
+    {{--                        <button type="submit" class="btn btn-primary" id="p_save_btn">Create Project</button>--}}
+    {{--                    </div>--}}
+    {{--                </form>--}}
+    {{--            </div>--}}
+    {{--        </div>--}}
+    {{--    </div>--}}
+
+    <div class="modal" id="projectDetailsModal">
+        <div class="modal-content modal-xl">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+                <div class="title-input-group">
+                    <input id="projectDetailsName" class="title-input"/>
+                    <button id="updateProjectNameBtn" class="inline-update-btn">
+                        <i class="fa fa-check"></i>
+                    </button>
+                </div>
+                <span class="close" id="closeProjectDetailsModal">&times;</span>
+            </div>
+
+            <!-- BODY -->
+            <div class="task-details-layout">
+
+                <!-- LEFT -->
+                <div class="details-left">
+
+                    <!-- STATUS -->
+                    <div class="detail-group">
+                        <label>Status</label>
+
+                        <div class="btn-group status-dropdown">
+                            <button id="projectCurrentStatusBtn" class="btn status-btn"></button>
+                            <button id="projectDropdownToggle"
+                                    class="btn dropdown-toggle dropdown-toggle-split"></button>
+                            <ul id="projectStatusDropdownMenu" class="dropdown-menu"></ul>
+                        </div>
+                    </div>
+
+                    <!-- DATE -->
+                    <div class="detail-group date-range-group">
+                        <label>Date Range</label>
+                        <input id="projectDateRange">
+                    </div>
+
+                    <!-- MANAGER -->
+                    <div class="detail-group">
+                        <label>Manager</label>
+                        <select id="projectManagerSelect"></select>
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="detail-group">
+                        <label>Description</label>
+
+                        <div id="projectDescription" class="description-view"></div>
+
+                        <textarea id="projectDescriptionEditor" style="display:none;"></textarea>
+
+                        <button id="updateProjectDescriptionBtn"
+                                class="inline-update-btn"
+                                style="display:none; margin-top: 10px; padding: 4px 10px;">
+                            Update
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT -->
+                <div class="details-right">
+
+                    <div class="log-section">
+                        <div class="section-title">Activity</div>
+                        <div id="projectDetailsLog"></div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <div class="modal" id="taskDetailsModal">
         <div class="modal-content modal-xl">
@@ -835,7 +913,8 @@
 
                         <div class="btn-group status-dropdown">
                             <button id="currentStatusBtn" class="btn status-btn"></button>
-                            <button id="dropdown-toggle-split" class="btn dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></button>
+                            <button id="dropdown-toggle-split" class="btn dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown"></button>
                             <ul id="statusDropdownMenu" class="dropdown-menu"></ul>
                         </div>
                     </div>
@@ -889,7 +968,8 @@
                         <textarea id="detailsDescriptionEditor" style="display:none;"></textarea>
 
                         <!-- UPDATE BTN -->
-                        <button id="updateDescriptionBtn" class="inline-update-btn" style="display:none; margin-top: 10px; padding: 4px 10px;">
+                        <button id="updateDescriptionBtn" class="inline-update-btn"
+                                style="display:none; margin-top: 10px; padding: 4px 10px;">
                             Update
                         </button>
                     </div>
@@ -919,7 +999,7 @@
 
 @push('js')
 
-{{--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>--}}
+    {{--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>--}}
     <script src="https://cdn.jsdelivr.net/npm/jquery.fancytree/dist/jquery.fancytree-all-deps.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
@@ -966,17 +1046,18 @@
 
                     const isProject = d.type === 'project';
 
-                    const id = node.key;
+                    const id = d.id;
+                    const key = node.key;
 
                     cells.eq(5).html(`
         <div class="action-wrap">
-            <a href="javascript:;" class="date-picker-btn text-info" data-id="${id}" title="Set Date">
+            <a href="javascript:;" class="date-picker-btn text-info" data-key="${key}" title="Set Date">
                 <i class="bx bx-calendar"></i>
             </a>
 
             <a href="javascript:;" class="open-add-modal text-success ms-1"
-               data-project="${isProject ? id.replace('p', '') : d.project_id || ''}"
-               data-parent="${isProject ? '' : id}"
+               data-project="${isProject ? d.id : d.project_id || ''}"
+               data-parent="${isProject ? '' : node.key}"
                title="Add ${isProject ? 'Layer' : 'Child Layer'}">
                 <i class="bx bx-plus-circle"></i>
             </a>
@@ -984,11 +1065,11 @@
             ${
                         isProject
                             ? `<a href="javascript:;" class="edit-project ms-1 text-primary"
-                        data-id="${id.replace('p', '')}" title="Edit Project">
+                        data-key="${key}" data-id="${id}" title="Edit Project">
                         <i class="bx bx-edit-alt"></i>
                    </a>`
                             : `<a href="javascript:;" class="edit-layer ms-1 text-muted"
-                        data-id="${id}" title="Edit Layer">
+                        data-key="${key}" data-id="${id}" title="Edit Layer">
                         <i class="bx bx-edit-alt"></i>
                    </a>`
                     }
@@ -996,11 +1077,11 @@
             ${
                         isProject
                             ? `<a href="javascript:;" class="delete-project ms-1 text-danger"
-                        data-id="${id.replace('p', '')}" title="Delete Project">
+                        data-key="${key}" data-id="${id}" title="Delete Project">
                         <i class="bx bx-trash"></i>
                    </a>`
                             : `<a href="javascript:;" class="delete-layer ms-1 text-danger"
-                        data-id="${id}" title="Delete Layer">
+                        data-key="${key}" data-id="${id}" title="Delete Layer">
                         <i class="bx bx-trash"></i>
                    </a>`
                     }
@@ -1031,10 +1112,15 @@
             $(document).on('click', '.date-picker-btn', function (e) {
                 e.stopPropagation();
                 let el = $(this);
-                let id = el.attr('data-id');
+                let key = el.attr('data-key');
+
+                let node = $("#treeTable").fancytree("getTree").getNodeByKey(key);
+                let d = node.data;
+
+                let isProject = d.type === 'project';
+                let id = d.id;
+
                 if (!el.data('daterangepicker')) {
-                    let node = $("#treeTable").fancytree("getTree").getNodeByKey(id);
-                    let d = node.data;
 
                     let startVal = d.start_time
                         ? moment(d.start_time)
@@ -1050,26 +1136,28 @@
                         opens: 'left',
                         timePicker: true,
                         timePicker24Hour: true,
-                        locale: { format: 'YYYY-MM-DD HH:mm' }
+                        locale: {format: 'YYYY-MM-DD HH:mm'}
                     });
                     el.data('daterangepicker').show();
                     el.on('apply.daterangepicker', function (ev, picker) {
-                        let isProject = String(id).startsWith('p');
                         if (isProject) {
-                            let projectId = String(id).replace('p', '');
                             $.post("{{ route('project.updateDates') }}", {
-                                _token:     "{{ csrf_token() }}",
-                                project_id: projectId,
+                                _token: "{{ csrf_token() }}",
+                                project_id: id,
                                 start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
-                                end_time:   picker.endDate.format('YYYY-MM-DD HH:mm:ss')
-                            }, function () { location.reload(); });
+                                end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                            }, function () {
+                                location.reload();
+                            });
                         } else {
                             $.post("{{ route('project.child.updateDates') }}", {
-                                _token:     "{{ csrf_token() }}",
-                                layer_id:   id,
+                                _token: "{{ csrf_token() }}",
+                                layer_id: id,
                                 start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
-                                end_time:   picker.endDate.format('YYYY-MM-DD HH:mm:ss')
-                            }, function () { location.reload(); });
+                                end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                            }, function () {
+                                location.reload();
+                            });
                         }
                     });
                 } else {
@@ -1153,16 +1241,16 @@
             const node = $.ui.fancytree.getNode(this);
             if (!node) return;
 
-            if (String(node.key).startsWith('p')){
-                return;
-            }
-
-            const layerId = node.key;
+            const d = node.data;
 
             try {
-                await openTaskDetails(layerId);
+                if (d.type === 'project') {
+                    await openProjectDetails(d.id);   // or d.project_id depending on your data
+                } else {
+                    await openTaskDetails(d.id);
+                }
             } catch (err) {
-                console.error('Failed to open layer modal', err);
+                console.error('Failed to open details modal', err);
             }
         });
 
@@ -1170,12 +1258,40 @@
             document.getElementById('taskDetailsModal').style.display = 'none';
         });
 
+        document.getElementById('closeProjectDetailsModal').addEventListener('click', () => {
+            document.getElementById('projectDetailsModal').style.display = 'none';
+        });
+
         window.addEventListener('click', (e) => {
-            const modal = document.getElementById('taskDetailsModal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
+            const taskModal = document.getElementById('taskDetailsModal');
+            const projectModal = document.getElementById('projectDetailsModal');
+
+            if (e.target === taskModal) {
+                taskModal.style.display = 'none';
+            }
+
+            if (e.target === projectModal) {
+                projectModal.style.display = 'none';
             }
         });
+
+        async function openProjectDetails(projectId) {
+            try {
+                const res = await fetch(`/board/projects/${projectId}`);
+                const data = await res.json();
+
+                await renderProjectDetails(data.project);
+
+                // close other modal
+                document.getElementById('taskDetailsModal').style.display = 'none';
+
+                // open this modal
+                document.getElementById('projectDetailsModal').style.display = 'block';
+
+            } catch (err) {
+                console.error('Failed to load project details', err);
+            }
+        }
 
         async function openTaskDetails(taskId) {
             try {
@@ -1190,6 +1306,163 @@
 
             } catch (err) {
                 console.error('Failed to load task details', err);
+            }
+        }
+
+        async function renderProjectDetails(project) {
+
+            window.currentProjectId = project.id;
+
+            // ======================
+            // TITLE
+            // ======================
+            const titleEl = document.getElementById('projectDetailsName');
+            const updateBtn = document.getElementById('updateProjectNameBtn');
+
+            titleEl.value = project.title || '';
+            titleEl.dataset.original = project.title || '';
+            updateBtn.style.display = 'none';
+
+            titleEl.oninput = function () {
+                const current = this.value.trim();
+                const original = this.dataset.original;
+
+                updateBtn.style.display =
+                    (current && current !== original) ? 'inline-flex' : 'none';
+            };
+
+            updateBtn.onclick = async function () {
+                const title = titleEl.value.trim();
+                if (!title) return;
+
+                await updateProject(project.id, { title });
+
+                titleEl.dataset.original = title;
+                updateBtn.style.display = 'none';
+            };
+
+            // ======================
+            // STATUS
+            // ======================
+            const btn = document.getElementById('projectCurrentStatusBtn');
+            const menu = document.getElementById('projectStatusDropdownMenu');
+            const toggle = document.getElementById('projectDropdownToggle');
+
+            const current = window.allStatuses.find(s => s.id === project.status_id);
+
+            btn.textContent = current?.label || 'Status';
+            btn.style.background = current?.color || '#999';
+            toggle.style.background = current?.color || '#999';
+
+            menu.innerHTML = window.allStatuses.map(s => `
+        <li>
+            <a class="dropdown-item project-status-item"
+               data-id="${s.id}"
+               style="color:${s.color}">
+                ${s.label}
+            </a>
+        </li>
+    `).join('');
+
+            toggle.onclick = (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('show');
+            };
+
+            window.addEventListener('click', function handler(e) {
+                menu.classList.remove('show');
+            }, { once: true });
+
+            menu.querySelectorAll('.project-status-item').forEach(el => {
+                el.onclick = async () => {
+                    const statusId = parseInt(el.dataset.id);
+                    await updateProjectStatus(project.id, statusId);
+                };
+            });
+
+            // ======================
+            // DATE RANGE
+            // ======================
+            $('#projectDateRange')
+                .off()
+                .daterangepicker({
+                    timePicker: true,
+                    timePicker24Hour: true,
+                    startDate: project.start_time ? moment(project.start_time) : moment(),
+                    endDate: project.end_time ? moment(project.end_time) : moment(),
+                    locale: { format: 'MMM D, YYYY HH:mm' }
+                })
+                .on('apply.daterangepicker', async function (ev, picker) {
+
+                    await updateProject(project.id, {
+                        start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
+                        end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                    });
+                });
+
+            // ======================
+            // MANAGER
+            // ======================
+            const select = document.getElementById('projectManagerSelect');
+
+            select.innerHTML = window.allUsers.map(u => `
+        <option value="${u.id}">${u.name}</option>
+    `).join('');
+
+            select.value = project.user_id || '';
+
+            select.onchange = async function () {
+                await updateProject(project.id, {
+                    user_id: parseInt(this.value)
+                });
+            };
+
+            // ======================
+            // DESCRIPTION
+            // ======================
+            const viewEl = document.getElementById('projectDescription');
+            const editorEl = document.getElementById('projectDescriptionEditor');
+            const btnUpdate = document.getElementById('updateProjectDescriptionBtn');
+
+            viewEl.innerHTML = project.description || '<i>No description</i>';
+            viewEl.style.display = 'block';
+            btnUpdate.style.display = 'none';
+
+            viewEl.onclick = async function () {
+
+                viewEl.style.display = 'none';
+                btnUpdate.style.display = 'inline-flex';
+
+                if (!window.projectDescriptionEditorInstance) {
+                    window.projectDescriptionEditorInstance =
+                        await ClassicEditor.create(editorEl);
+                }
+
+                window.projectDescriptionEditorInstance.setData(project.description || '');
+                window.projectDescriptionEditorInstance.ui.view.element.style.display = 'block';
+            };
+
+            btnUpdate.onclick = async function () {
+
+                const data = window.projectDescriptionEditorInstance.getData();
+
+                await updateProject(project.id, { description: data });
+
+                viewEl.innerHTML = data || '<i>No description</i>';
+                viewEl.style.display = 'block';
+                btnUpdate.style.display = 'none';
+                window.projectDescriptionEditorInstance.ui.view.element.style.display = 'none';
+            };
+
+            // ======================
+            // ACTIVITY LOG (optional)
+            // ======================
+            const logEl = document.getElementById('projectDetailsLog');
+
+            if (logEl) {
+                logEl.innerHTML = (project.logs || []).map(l => `
+            <div>${l}</div>
+        `).join('');
             }
         }
 
@@ -1221,7 +1494,7 @@
                 const name = titleEl.value.trim();
                 if (!name) return;
 
-                await updateLayer(layer.id, { name }, {
+                await updateLayer(layer.id, {name}, {
                     refreshDetails: false,
                     refreshBoard: true
                 });
@@ -1271,7 +1544,7 @@
                     timePicker24Hour: true,
                     startDate: moment(layer.start_time),
                     endDate: moment(layer.end_time),
-                    locale: { format: 'MMM D, YYYY HH:mm' }
+                    locale: {format: 'MMM D, YYYY HH:mm'}
                 })
                 .on('apply.daterangepicker', async function (ev, picker) {
 
@@ -1321,7 +1594,7 @@
                         .filter(u => u.id !== userId)
                         .map(u => u.id);
 
-                    await updateLayer(layer.id, { users: updated });
+                    await updateLayer(layer.id, {users: updated});
                 };
             });
 
@@ -1348,7 +1621,7 @@
             select.on('change', async function () {
                 const selected = ($(this).val() || []).map(id => parseInt(id));
 
-                await updateLayer(layer.id, { users: selected });
+                await updateLayer(layer.id, {users: selected});
             });
 
             // ======================
@@ -1379,7 +1652,7 @@
 
                 const data = window.descriptionEditorInstance.getData();
 
-                await updateLayer(layer.id, { description: data });
+                await updateLayer(layer.id, {description: data});
 
                 viewEl.innerHTML = data || '<i>No description</i>';
                 viewEl.style.display = 'block';
@@ -1438,7 +1711,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: JSON.stringify({layer_id, status_id })
+                    body: JSON.stringify({layer_id, status_id})
                 });
 
                 // reload board

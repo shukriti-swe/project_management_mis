@@ -101,6 +101,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/board/layers/{layer}', [LayerController::class, 'layerDetailJson'])->name('board.layerDetailJson');
     Route::patch('/board/layers/{layer}', [LayerController::class, 'updateLayerJson'])->name('board.layers.updateLayerJson');
 
+    Route::get('/board/projects/{id}', [AdminController::class, 'projectDetailJson'])->name('board.projectDetailJson');
+
 });
 
 require __DIR__ . '/auth.php';

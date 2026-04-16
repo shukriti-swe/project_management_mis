@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Layer;
 use App\Models\Status;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -186,5 +187,41 @@ class AdminController extends Controller
 
             return response()->json(['fileName' => $fileName, 'uploaded'=> 1, 'url' => $url]);
         }
+
+        return response()->json(['uploaded' => 0, 'error' => ['message' => 'No file uploaded']]);
     }
+
+
+    // Ajax Returns
+    public function projectDetailJson($id)
+    {
+        $project = Project::with([
+            'status',
+            'user',
+        ])->findOrFail($id);
+
+        // build layers tree
+        $layersTree = Layer::with(['status', 'users'])
+            ->where('project_id', $project->id)
+            ->get()
+            ->toTree();
+
+        // transform → make project root
+        $tree = collect([
+            (object) [
+                'id' => $project->id,
+                'name' => $project->title,
+                'type' => 'project',
+                'status' => $project->status,
+                'users' => $project->user ? [$project->user] : [],
+                'children' => $layersTree
+            ]
+        ]);
+
+        return response()->json([
+            'project' => $project,
+            'tree' => $tree
+        ]);
+    }
+
 }
