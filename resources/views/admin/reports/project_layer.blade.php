@@ -1058,15 +1058,13 @@
 
                 const expandedSet = new Set(expandedKeys);
 
-                tree.reload(treeData);
+                await tree.reload(treeData);
 
-                setTimeout(() => {
-                    tree.getRootNode().visit(function (node) {
-                        if (expandedSet.has(node.key)) {
-                            node.setExpanded(true);
-                        }
-                    });
-                }, 0);
+                tree.getRootNode().visit(function (node) {
+                    if (expandedSet.has(node.key)) {
+                        node.setExpanded(true);
+                    }
+                });
 
             } catch (e) {
                 console.error('Failed to refresh tree', e);
@@ -1237,32 +1235,90 @@
 
                         const tree = $.ui.fancytree.getTree("#treeTable");
 
-                        const tempMove = () => {
-                            data.otherNode.moveTo(node, data.hitMode);
-                        };
-
-                        tempMove(); // UI preview
-
-                        function buildHierarchy(node) {
-
-                            // ❌ skip project nodes completely
+                        function cloneStructure(node) {
                             if (node.data.type === 'project') {
-                                return (node.children || []).map(buildHierarchy).flat();
+                                return {
+                                    type: 'project',
+                                    id: node.data.id,
+                                    children: (node.children || []).map(cloneStructure)
+                                };
                             }
 
                             return {
+                                type: 'layer',
                                 id: node.data.id,
-                                children: (node.children || [])
-                                    .map(child => buildHierarchy(child))
-                                    .flat()
+                                parent_id: node.parent?.data?.id || null,
+                                children: (node.children || []).map(cloneStructure)
                             };
                         }
 
-                        const hierarchy = tree.getRootNode().children
-                            .map(projectNode => {
-                                return (projectNode.children || []).map(buildHierarchy);
-                            })
-                            .flat();
+                        let structure = tree.getRootNode().children.map(cloneStructure);
+
+                        // 🔥 APPLY MOVE LOGIC ON CLONED STRUCTURE (NOT REAL TREE)
+
+                        const draggedId = data.otherNode.data.id;
+                        const targetId = node.data.id;
+                        const hitMode = data.hitMode;
+
+                        function removeNode(arr, id) {
+                            for (let i = 0; i < arr.length; i++) {
+                                if (arr[i].id === id) {
+                                    return arr.splice(i, 1)[0];
+                                }
+                                if (arr[i].children) {
+                                    const found = removeNode(arr[i].children, id);
+                                    if (found) return found;
+                                }
+                            }
+                        }
+
+                        function insertNode(arr, targetId, nodeToInsert, hitMode) {
+                            for (let i = 0; i < arr.length; i++) {
+                                const item = arr[i];
+
+                                if (item.id === targetId) {
+
+                                    if (hitMode === 'over') {
+                                        item.children = item.children || [];
+                                        item.children.push(nodeToInsert);
+                                    }
+
+                                    if (hitMode === 'before') {
+                                        arr.splice(i, 0, nodeToInsert);
+                                    }
+
+                                    if (hitMode === 'after') {
+                                        arr.splice(i + 1, 0, nodeToInsert);
+                                    }
+
+                                    return true;
+                                }
+
+                                if (item.children && insertNode(item.children, targetId, nodeToInsert, hitMode)) {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        const movedNode = removeNode(structure, draggedId);
+                        insertNode(structure, targetId, movedNode, hitMode);
+
+                        // 🔥 FLATTEN TO BACKEND FORMAT
+
+                        function flatten(nodes) {
+                            return nodes.flatMap(n => {
+                                if (n.type === 'project') {
+                                    return flatten(n.children || []);
+                                }
+
+                                return [{
+                                    id: n.id,
+                                    children: flatten(n.children || [])
+                                }];
+                            });
+                        }
+
+                        const hierarchy = flatten(structure);
 
                         try {
                             await fetch("{{ route('layers.reorder') }}", {
@@ -1273,15 +1329,13 @@
                                         .querySelector('meta[name="csrf-token"]')
                                         .getAttribute('content')
                                 },
-                                body: JSON.stringify({hierarchy})
+                                body: JSON.stringify({ hierarchy })
                             });
 
                             await refreshTreeFunction();
 
                         } catch (e) {
                             console.error('Reorder failed', e);
-
-                            // 🔥 rollback UI
                             await refreshTreeFunction();
                         }
                     }
