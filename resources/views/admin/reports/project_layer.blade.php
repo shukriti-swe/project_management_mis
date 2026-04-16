@@ -1041,38 +1041,6 @@
     </script>
 
     <script>
-        {{--async function refreshTreeFunction() {--}}
-        {{--    try {--}}
-        {{--        const res = await fetch("{{ route('projectLayersTree') }}");--}}
-        {{--        const treeData = await res.json();--}}
-
-        {{--        // const tree = $("#treeTable").fancytree("getTree");--}}
-        {{--        const tree = $.ui.fancytree.getTree("#treeTable");--}}
-
-        {{--        const expandedKeys = [];--}}
-
-        {{--        tree.getRootNode().visit(function (node) {--}}
-        {{--            if (node.isExpanded()) {--}}
-        {{--                expandedKeys.push(node.key);--}}
-        {{--            }--}}
-        {{--        });--}}
-
-        {{--        const expandedSet = new Set(expandedKeys);--}}
-
-        {{--        // console.log(expandedSet);--}}
-
-        {{--        tree.reload(treeData);--}}
-
-        {{--        tree.getRootNode().visit(function (node) {--}}
-        {{--            if (expandedSet.has(node.key)) {--}}
-        {{--                node.setExpanded(true);--}}
-        {{--            }--}}
-        {{--        });--}}
-
-        {{--    } catch (e) {--}}
-        {{--        console.error('Failed to refresh tree', e);--}}
-        {{--    }--}}
-        {{--}--}}
         async function refreshTreeFunction() {
             try {
                 const res = await fetch("{{ route('projectLayersTree') }}");
@@ -1149,15 +1117,24 @@
 
                     cells.eq(1).text(
                         d.start_time
-                            ? moment.utc(d.start_time).local().format('DD MMM, YY, hh:mmA')
+                            ? (
+                                d.type === 'project'
+                                    ? moment.utc(d.start_time).local().format('DD MMM, YY')
+                                    : moment.utc(d.start_time).local().format('DD MMM, YY, hh:mmA')
+                            )
                             : ''
                     );
 
                     cells.eq(2).text(
                         d.end_time
-                            ? moment.utc(d.end_time).local().format('DD MMM, YY, hh:mmA')
+                            ? (
+                                d.type === 'project'
+                                    ? moment.utc(d.end_time).local().format('DD MMM, YY')
+                                    : moment.utc(d.end_time).local().format('DD MMM, YY, hh:mmA')
+                            )
                             : ''
                     );
+
                     cells.eq(3).text(d.status || '');
                     cells.eq(4).text((d.users || []).join(', '));
 
@@ -1194,20 +1171,119 @@
                 },
 
                 dnd5: {
-                    dragStart: () => true,
-                    dragEnter: () => true,
+                    dragStart: (node, data) => {
+                        return node.data.type !== 'project';
+                    },
+                    dragEnter: function (node, data) {
 
-                    dragDrop: function (node, data) {
+                        const sourceNode = data.otherNode;
 
-                        data.otherNode.moveTo(node, data.hitMode);
+                        // prevent dropping into itself
+                        if (node === sourceNode) return false;
 
-                        console.log({
-                            moved: data.otherNode.key,
-                            target: node.key,
-                            mode: data.hitMode // before / after / over
-                        });
+                        // prevent dropping into own descendant
+                        if (node.isDescendantOf(sourceNode)) return false;
 
-                        // 👉 later: send to backend
+                        const source = sourceNode.data;
+                        const target = node.data;
+
+                        // block project drag
+                        if (source.type === 'project') return false;
+
+                        // block drop ON project
+                        if (target.type === 'project') return false;
+
+                        // block cross-project move
+                        if (source.project_id !== target.project_id) return false;
+
+                        return true;
+                    },
+
+                    {{--dragDrop: async function (node, data) {--}}
+
+                            {{--    data.otherNode.moveTo(node, data.hitMode);--}}
+
+                            {{--    const tree = $.ui.fancytree.getTree("#treeTable");--}}
+
+                            {{--    function buildHierarchy(node) {--}}
+                            {{--        return {--}}
+                            {{--            id: node.data.id,--}}
+                            {{--            children: (node.children || []).map(child => buildHierarchy(child))--}}
+                            {{--        };--}}
+                            {{--    }--}}
+
+                            {{--    const hierarchy = tree.getRootNode().children.map(n => buildHierarchy(n));--}}
+
+                            {{--    try {--}}
+                            {{--        await fetch("{{ route('layers.reorder') }}", {--}}
+                            {{--            method: "POST",--}}
+                            {{--            headers: {--}}
+                            {{--                "Content-Type": "application/json",--}}
+                            {{--                "X-CSRF-TOKEN": document--}}
+                            {{--                    .querySelector('meta[name="csrf-token"]')--}}
+                            {{--                    .getAttribute('content')--}}
+                            {{--            },--}}
+                            {{--            body: JSON.stringify({ hierarchy })--}}
+                            {{--        });--}}
+
+                            {{--        // ✅ refresh after save--}}
+                            {{--        await refreshTreeFunction();--}}
+
+                            {{--    } catch (e) {--}}
+                            {{--        console.error('Reorder failed', e);--}}
+                            {{--    }--}}
+                            {{--}--}}
+                    dragDrop: async function (node, data) {
+
+                        const tree = $.ui.fancytree.getTree("#treeTable");
+
+                        const tempMove = () => {
+                            data.otherNode.moveTo(node, data.hitMode);
+                        };
+
+                        tempMove(); // UI preview
+
+                        function buildHierarchy(node) {
+
+                            // ❌ skip project nodes completely
+                            if (node.data.type === 'project') {
+                                return (node.children || []).map(buildHierarchy).flat();
+                            }
+
+                            return {
+                                id: node.data.id,
+                                children: (node.children || [])
+                                    .map(child => buildHierarchy(child))
+                                    .flat()
+                            };
+                        }
+
+                        const hierarchy = tree.getRootNode().children
+                            .map(projectNode => {
+                                return (projectNode.children || []).map(buildHierarchy);
+                            })
+                            .flat();
+
+                        try {
+                            await fetch("{{ route('layers.reorder') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": document
+                                        .querySelector('meta[name="csrf-token"]')
+                                        .getAttribute('content')
+                                },
+                                body: JSON.stringify({hierarchy})
+                            });
+
+                            await refreshTreeFunction();
+
+                        } catch (e) {
+                            console.error('Reorder failed', e);
+
+                            // 🔥 rollback UI
+                            await refreshTreeFunction();
+                        }
                     }
                 }
 
@@ -1384,7 +1460,7 @@
                 const title = titleEl.value.trim();
                 if (!title) return;
 
-                await updateProject(project.id, { title }, {
+                await updateProject(project.id, {title}, {
                     refreshDetails: true,
                     refreshTree: true
                 });
@@ -1425,7 +1501,7 @@
 
                     menu.classList.remove('show');
 
-                    await updateProject(project.id, { status_id: statusId }, {
+                    await updateProject(project.id, {status_id: statusId}, {
                         refreshDetails: true,
                         refreshTree: true
                     });
@@ -1447,7 +1523,7 @@
                     endDate: project.end_time
                         ? moment.utc(project.end_time).local()
                         : moment(),
-                    locale: { format: 'MMM D, YYYY HH:mm' }
+                    locale: {format: 'MMM D, YYYY HH:mm'}
                 })
                 .on('apply.daterangepicker', async function (ev, picker) {
 
@@ -1509,7 +1585,7 @@
 
                 const data = window.projectDescriptionEditorInstance.getData();
 
-                await updateProject(project.id, { description: data }, {
+                await updateProject(project.id, {description: data}, {
                     refreshDetails: true,
                     refreshTree: false
                 });
@@ -1602,25 +1678,31 @@
             // ======================
             // DATE
             // ======================
-            $('#detailsDateRange')
-                .off() // 🔥 prevent duplicate binding
+            const el = $('#detailsDateRange');
+
+            if (el.data('daterangepicker')) {
+                el.data('daterangepicker').remove();
+                el.removeData('daterangepicker');
+            }
+
+            el.off() // 🔥 prevent duplicate binding
                 .daterangepicker({
                     timePicker: true,
                     timePicker24Hour: true,
                     startDate: layer.start_time
-                        ? moment.utc(layer.start_time).local()
+                        ? moment(layer.start_time)
                         : moment().startOf('day'),
 
                     endDate: layer.end_time
-                        ? moment.utc(layer.end_time).local()
+                        ? moment(layer.end_time)
                         : moment().startOf('day'),
                     locale: {format: 'MMM D, YYYY HH:mm'}
                 })
                 .on('apply.daterangepicker', async function (ev, picker) {
 
                     await updateLayer(layer.id, {
-                        start_time: picker.startDate.format('YYYY-MM-DD HH:mm:ss'),
-                        end_time: picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+                        start_time: picker.startDate.utc().format('YYYY-MM-DD HH:mm:ss'),
+                        end_time: picker.endDate.utc().format('YYYY-MM-DD HH:mm:ss')
                     }, {
                         refreshDetails: false,
                         refreshTree: true
@@ -1760,7 +1842,7 @@
                     await openProjectDetails(projectId);
                 }
 
-                if(refreshTree) {
+                if (refreshTree) {
                     await refreshTreeFunction();
                 }
 
