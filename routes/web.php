@@ -65,9 +65,10 @@ Route::middleware('auth')->group(function () {
 
     // Project layer table show
     Route::get('/project-with-layers', [ReportController::class, 'projectWithLayers'])->name('projectWithLayers');
+    Route::get('project-layer/tree', [ReportController::class, 'projectLayersTree'])->name('projectLayersTree');
     Route::post('/projects/store', [ReportController::class, 'storeProject'])->name('project.store');
     Route::get('/projects/{id}/edit', [ReportController::class, 'editProject'])->name('project.edit');
-    Route::post('/projects/update', [ReportController::class, 'updateProject'])->name('project.update');
+    Route::post('/projects/update/{id}', [ReportController::class, 'updateProject'])->name('project.update');
     Route::delete('/projects/{id}', [ReportController::class, 'destroyProject'])->name('project.delete');
     Route::post('project/update-dates', [ReportController::class, 'updateDates'])->name('project.updateDates');
     Route::post('/layers/reorder', [ReportController::class, 'reorderLayers'])->name('layers.reorder');
@@ -100,6 +101,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/board/layers', [LayerController::class, 'parentLayers']);
     Route::get('/board/layers/{layer}', [LayerController::class, 'layerDetailJson'])->name('board.layerDetailJson');
     Route::patch('/board/layers/{layer}', [LayerController::class, 'updateLayerJson'])->name('board.layers.updateLayerJson');
+
+    Route::get('/board/projects/{id}', [AdminController::class, 'projectDetailJson'])->name('board.projectDetailJson');
 
 });
 

@@ -42,20 +42,157 @@ class ReportController extends Controller
 
     // ============ Start project with child =======================
 
+//    public function projectWithLayers()
+//    {
+//        $projects = Project::with([
+//            'user',
+//            'layers' => function ($query) {
+//                $query->whereNull('parent_id')->orderBy('position');
+//            },
+//            'layers.users',
+//            'layers.status'
+//        ])->get();
+//
+//        $statuses = Status::all();
+//        $users = User::all();
+//        return view('admin.reports.project_layer', compact('projects', 'statuses', 'users'));
+//    }
     public function projectWithLayers()
     {
-        $projects = Project::with([
-            'user',
-            'layers' => function ($query) {
-                $query->whereNull('parent_id')->orderBy('position');
-            },
-            'layers.users',
-            'layers.status'
-        ])->get();
+        $projects = Project::with(['user', 'status'])->get();
+        $layers = Layer::with(['users', 'status'])->orderBy('position')->get();
 
-        $statuses = Status::all();
-        $users = User::all();
-        return view('admin.reports.project_layers', compact('projects', 'statuses', 'users'));
+        $nodes = [];
+
+        foreach ($projects as $p) {
+            $nodes['p' . $p->id] = [
+                'key' => 'p' . $p->id,
+                'title' => $p->title,
+                'data' => [
+                    'id' => $p->id,
+                    'type' => 'project',
+                    'start_time' => $p->start_date,
+                    'end_time' => $p->end_date,
+                    'status' => $p->status?->label,
+                    'status_category' => $p->status?->category,
+                    'status_color' => $p->status?->color,
+                    'users' => $p->user ? [$p->user->name] : [],
+                ],
+                'children' => []
+            ];
+        }
+
+        foreach ($layers as $l) {
+            $nodes['l' . $l->id] = [
+                'key' => 'l' . $l->id,
+                'title' => $l->name,
+                'data' => [
+                    'id' => $l->id,
+                    'type' => 'layer',
+                    'project_id' => $l->project_id,
+                    'start_time' => $l->start_time,
+                    'end_time' => $l->end_time,
+                    'status' => $l->status?->label,
+                    'status_category' => $l->status?->category,
+                    'status_color' => $l->status?->color,
+                    'users' => $l->users->pluck('name')->toArray(),
+                ],
+                'parentId' => $l->parent_id
+                    ? 'l' . $l->parent_id
+                    : 'p' . $l->project_id,
+                'children' => []
+            ];
+        }
+
+        $tree = [];
+
+        foreach ($nodes as $id => &$node) {
+            if (isset($node['parentId'])) {
+                $parentId = $node['parentId'];
+
+                if (isset($nodes[$parentId])) {
+                    $nodes[$parentId]['children'][] = &$node;
+                }
+            } else {
+                // projects (root)
+                $tree[] = &$node;
+            }
+        }
+
+        $removeParent = function (&$nodes) use (&$removeParent) {
+            foreach ($nodes as &$n) {
+                unset($n['parentId']);
+                if (!empty($n['children'])) {
+                    $removeParent($n['children']);
+                }
+            }
+        };
+        $removeParent($tree);
+
+        return view('admin.reports.project_layer', [
+            'tree' => $tree,
+            'statuses' => Status::all(),
+            'users' => User::all(),
+        ]);
+    }
+
+    public function projectLayersTree() {
+        $projects = Project::with(['user', 'status'])->get();
+        $layers = Layer::with(['users', 'status'])->orderBy('position')->get();
+
+        $nodes = [];
+
+        foreach ($projects as $p) {
+            $nodes['p' . $p->id] = [
+                'key' => 'p' . $p->id,
+                'title' => $p->title,
+                'data' => [
+                    'id' => $p->id,
+                    'type' => 'project',
+                    'start_time' => $p->start_date,
+                    'end_time' => $p->end_date,
+                    'status' => $p->status?->label,
+                    'status_category' => $p->status?->category,
+                    'status_color' => $p->status?->color,
+                    'users' => $p->user ? [$p->user->name] : [],
+                ],
+                'children' => []
+            ];
+        }
+
+        foreach ($layers as $l) {
+            $nodes['l' . $l->id] = [
+                'key' => 'l' . $l->id,
+                'title' => $l->name,
+                'data' => [
+                    'id' => $l->id,
+                    'type' => 'layer',
+                    'project_id' => $l->project_id,
+                    'start_time' => $l->start_time,
+                    'end_time' => $l->end_time,
+                    'status' => $l->status?->label,
+                    'status_category' => $l->status?->category,
+                    'status_color' => $l->status?->color,
+                    'users' => $l->users->pluck('name')->toArray(),
+                ],
+                'parentId' => $l->parent_id
+                    ? 'l' . $l->parent_id
+                    : 'p' . $l->project_id,
+                'children' => []
+            ];
+        }
+
+        $tree = [];
+
+        foreach ($nodes as $id => &$node) {
+            if (isset($node['parentId']) && isset($nodes[$node['parentId']])) {
+                $nodes[$node['parentId']]['children'][] = &$node;
+            } else {
+                $tree[] = &$node;
+            }
+        }
+
+        return response()->json($tree);
     }
 
     public function storeProject(Request $request)
@@ -90,15 +227,45 @@ class ReportController extends Controller
         return response()->json($project);
     }
 
-    public function updateProject(Request $request)
+    public function updateProject(Request $request, $id)
     {
-        $project = Project::findOrFail($request->project_id);
-        $project->update([
-            'title' => $request->title,
-            'user_id' => $request->user_id,
-            'status_id' => $request->status_id,
-        ]);
-        return response()->json(['status' => 'success']);
+        try {
+            $project = Project::findOrFail($id);
+
+            $data = $request->only([
+                'title',
+                'description',
+                'user_id',
+                'status_id',
+                'start_time',
+                'end_time'
+            ]);
+
+            // map fields
+            if (isset($data['start_time'])) {
+                $data['start_date'] = $data['start_time'];
+                unset($data['start_time']);
+            }
+
+            if (isset($data['end_time'])) {
+                $data['end_date'] = $data['end_time'];
+                unset($data['end_time']);
+            }
+
+            $project->update($data);
+
+            return response()->json([
+                'success' => true,
+                'project' => $project->fresh(['status', 'user'])
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 
     public function destroyProject($id)
@@ -109,10 +276,11 @@ class ReportController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    public function updateDates(Request $request) {
+    public function updateDates(Request $request)
+    {
         Project::find($request->project_id)->update([
-            'start_time' => $request->start_time,
-            'end_time'   => $request->end_time,
+            'start_date' => $request->start_time,
+            'end_date' => $request->end_time,
         ]);
         return response()->json(['status' => 'success']);
     }
@@ -131,18 +299,26 @@ class ReportController extends Controller
             Log::info('Received request to create layer with data: ' . json_encode($validated));
 
             $validated['users'] = $request->has('user_ids') ? $request->user_ids : [];
-            $start = Carbon::parse($request->start_time);
-            $end = Carbon::parse($request->end_time);
+            $validated['start_time'] = null;
+            $validated['end_time'] = null;
 
-            // Only force startOfDay if no specific time was provided (it's currently at 00:00:00)
-            $validated['start_time'] = $start->hour === 0 && $start->minute === 0
-                ? $start->startOfDay()
-                : $start;
+            if ($request->filled('start_time')) {
+                $start = Carbon::parse($request->start_time);
 
-            // Only force endOfDay if no specific time was provided
-            $validated['end_time'] = $end->hour === 0 && $end->minute === 0
-                ? $end->endOfDay()
-                : $end;
+                $validated['start_time'] =
+                    ($start->hour === 0 && $start->minute === 0)
+                        ? $start->startOfDay()
+                        : $start;
+            }
+
+            if ($request->filled('end_time')) {
+                $end = Carbon::parse($request->end_time);
+
+                $validated['end_time'] =
+                    ($end->hour === 0 && $end->minute === 0)
+                        ? $end->endOfDay()
+                        : $end;
+            }
 
             $lastPosition = Layer::where('project_id', $request->project_id)
                 ->where('parent_id', $request->parent_id)
@@ -292,8 +468,8 @@ class ReportController extends Controller
         $layer = Layer::findOrFail($request->layer_id);
         $this->layerService->updateLayer($layer, [
             'start_time' => $request->start_time,
-            'end_time'   => $request->end_time,
-            'users'      => $layer->users->pluck('id')->toArray(),
+            'end_time' => $request->end_time,
+            'users' => $layer->users->pluck('id')->toArray(),
         ]);
 
         // response::json এর বদলে response()->json ব্যবহার করুন
