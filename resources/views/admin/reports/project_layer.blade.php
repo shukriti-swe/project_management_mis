@@ -100,6 +100,7 @@
             display: inline-block;
             height: 40px; /* match row */
             line-height: 40px; /* vertical centering */
+            font-family: Inter, system-ui, -apple-system, sans-serif;
 
             flex: 1;
             min-width: 0;
@@ -107,6 +108,11 @@
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             white-space: nowrap !important;
+        }
+
+        .fancytree-title.is-project {
+            font-weight: 700;
+            color: #494949;
         }
 
         /* Optional: make columns visually cleaner */
@@ -1088,6 +1094,9 @@
                     const node = data.node;
                     const d = node.data;
                     const cells = $(node.tr).find(">td");
+
+                    const titleEl = $(node.tr).find('.fancytree-title');
+                    titleEl.toggleClass('is-project', d.type === 'project');
 
                     const row = $(node.tr);
                     row.removeAttr('style');
